@@ -5,10 +5,7 @@ import 'package:pokedex/features/pokemon/presentation/catalog/catalog_page.dart'
 final routerProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
     routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) => const CatalogPage(),
-      ),
+      GoRoute(path: '/', builder: (context, state) => const CatalogPage()),
     ],
   );
   ref.onDispose(router.dispose);
