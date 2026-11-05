@@ -20,6 +20,12 @@ class SyncMetadataLocalDataSource {
         .map((rows) => rows.firstOrNull);
   }
 
+  Stream<List<SyncMetadataRow>> watchAll(List<String> resourceKeys) {
+    return (_db.select(
+      _db.syncMetadataEntries,
+    )..where((m) => m.resourceKey.isIn(resourceKeys))).watch();
+  }
+
   Future<void> markStarted(String resourceKey) {
     return _db
         .into(_db.syncMetadataEntries)
