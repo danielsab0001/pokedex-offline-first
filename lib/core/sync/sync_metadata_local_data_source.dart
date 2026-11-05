@@ -72,6 +72,18 @@ class SyncMetadataLocalDataSource {
     });
   }
 
+  Future<void> markCompleted(String resourceKey) {
+    return _db
+        .into(_db.syncMetadataEntries)
+        .insertOnConflictUpdate(
+          SyncMetadataEntriesCompanion.insert(
+            resourceKey: resourceKey,
+            status: const Value(SyncStatus.completed),
+            lastAttemptAt: Value(DateTime.now()),
+          ),
+        );
+  }
+
   Future<void> markInterruptedOrphans() {
     return (_db.update(
       _db.syncMetadataEntries,
