@@ -59,6 +59,9 @@ String? checkImport(Layer layer, String importPath) {
           i.startsWith('package:pokedex/core/network/')) {
         return 'presentation no puede acceder a base de datos ni a GraphQL';
       }
+      if (i.contains('/data/')) {
+        return 'presentation no puede importar data; usa los providers de app/di';
+      }
     case Layer.data:
       if (i.contains('/presentation/')) {
         return 'data no puede importar presentation';
@@ -140,6 +143,30 @@ void main() {
       );
       expect(
         checkImport(Layer.presentation, 'package:flutter/material.dart'),
+        isNull,
+      );
+    });
+
+    test('presentation rechaza data y acepta domain y app/di', () {
+      expect(
+        checkImport(
+          Layer.presentation,
+          'package:pokedex/features/pokemon/data/pokemon_repository_impl.dart',
+        ),
+        isNotNull,
+      );
+      expect(
+        checkImport(
+          Layer.presentation,
+          'package:pokedex/features/pokemon/domain/pokemon.dart',
+        ),
+        isNull,
+      );
+      expect(
+        checkImport(
+          Layer.presentation,
+          'package:pokedex/app/di/providers.dart',
+        ),
         isNull,
       );
     });

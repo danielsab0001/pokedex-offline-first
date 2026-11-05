@@ -1,14 +1,31 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pokedex/app/di/providers.dart';
 import 'package:pokedex/app/router/app_router.dart';
 import 'package:pokedex/app/theme/app_theme.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
 
-class PokedexApp extends ConsumerWidget {
+class PokedexApp extends ConsumerStatefulWidget {
   const PokedexApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PokedexApp> createState() => _PokedexAppState();
+}
+
+class _PokedexAppState extends ConsumerState<PokedexApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Tras el primer frame: la interfaz aparece sin esperar a la red (OF-03).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(ref.read(catalogSyncProvider).start());
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
