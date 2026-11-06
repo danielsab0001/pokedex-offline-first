@@ -3,5 +3,5 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pokedex/app/app.dart';
 
 void main() {
-  runApp(const ProviderScope(child: PokedexApp()));
+  runApp(ProviderScope(retry: (_, _) => null, child: const PokedexApp()));
 }
