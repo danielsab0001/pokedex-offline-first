@@ -24,6 +24,7 @@ dependencies:
   cached_network_image: ^3.4.1
   intl: any
   http: ^1.6.0
+  flutter_cache_manager: ^3.5.0
 
 dev_dependencies:
   flutter_test:
