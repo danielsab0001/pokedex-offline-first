@@ -6,6 +6,46 @@
   },
   "catalogPlaceholder": "Catálogo en construcción",
   "@catalogPlaceholder": {
-    "description": "Texto provisional de la pantalla de catálogo."
-  }
+    "description": "Texto provisional; se elimina al terminar la pantalla de catálogo."
+  },
+  "retry": "Reintentar",
+  "catalogLoading": "Descargando el catálogo…",
+  "catalogEmptyTitle": "El catálogo está vacío",
+  "catalogEmptyMessage": "No se recibieron Pokémon. Inténtalo de nuevo más tarde.",
+  "catalogErrorTitle": "No se pudo descargar el catálogo",
+  "catalogErrorMessage": "Comprueba tu conexión a Internet e inténtalo de nuevo.",
+  "pokemonCardLabel": "{name}, número {number}, tipos: {types}",
+  "@pokemonCardLabel": {
+    "description": "Lectura de una tarjeta para lectores de pantalla.",
+    "placeholders": {
+      "name": {"type": "String"},
+      "number": {"type": "int"},
+      "types": {"type": "String"}
+    }
+  },
+  "pokemonCardLabelNoTypes": "{name}, número {number}",
+  "@pokemonCardLabelNoTypes": {
+    "placeholders": {
+      "name": {"type": "String"},
+      "number": {"type": "int"}
+    }
+  },
+  "typeNormal": "Normal",
+  "typeFighting": "Lucha",
+  "typeFlying": "Volador",
+  "typePoison": "Veneno",
+  "typeGround": "Tierra",
+  "typeRock": "Roca",
+  "typeBug": "Bicho",
+  "typeGhost": "Fantasma",
+  "typeSteel": "Acero",
+  "typeFire": "Fuego",
+  "typeWater": "Agua",
+  "typeGrass": "Planta",
+  "typeElectric": "Eléctrico",
+  "typePsychic": "Psíquico",
+  "typeIce": "Hielo",
+  "typeDragon": "Dragón",
+  "typeDark": "Siniestro",
+  "typeFairy": "Hada"
 }
