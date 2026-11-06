@@ -1,7 +1,16 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_image_urls.dart';
+
+typedef PokemonThumbnailBuilder = Widget Function(int pokemonId, double size);
+
+/// Punto de sustitución para los tests de widgets, que no deben bajar imágenes.
+final pokemonThumbnailBuilderProvider = Provider<PokemonThumbnailBuilder>(
+  (ref) =>
+      (pokemonId, size) => PokemonThumbnail(pokemonId: pokemonId, size: size),
+);
 
 // Los sprites son pequeños: caben todos en disco para verlos sin conexión.
 // Pasados 90 días sin usarse, la caché los limpia (PS-08).
