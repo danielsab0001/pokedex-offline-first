@@ -1,7 +1,6 @@
 {
   "@@locale": "en",
   "appTitle": "Pokédex",
-  "catalogPlaceholder": "Catalog under construction",
   "retry": "Retry",
   "catalogLoading": "Downloading the catalog…",
   "catalogEmptyTitle": "The catalog is empty",

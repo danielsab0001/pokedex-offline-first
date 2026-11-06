@@ -7,6 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pokedex/app/app.dart';
 import 'package:pokedex/app/di/providers.dart';
 import 'package:pokedex/features/pokemon/data/catalog_sync.dart';
+import 'package:pokedex/features/pokemon/presentation/catalog/catalog_providers.dart';
+import 'package:pokedex/features/pokemon/presentation/catalog/catalog_state.dart';
 
 class FakeCatalogSync implements CatalogSync {
   FakeCatalogSync({this.onStart});
@@ -44,11 +46,17 @@ Future<FakeCatalogSync> _pumpApp(
   final sync = FakeCatalogSync(onStart: onStart);
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [catalogSyncProvider.overrideWithValue(sync)],
+      overrides: [
+        catalogSyncProvider.overrideWithValue(sync),
+        // El catálogo real abriría la base de datos; aquí solo se prueba el arranque.
+        catalogStateProvider.overrideWithValue(const CatalogLoading()),
+      ],
       child: const PokedexApp(),
     ),
   );
-  await tester.pumpAndSettle();
+  // Sin pumpAndSettle: el indicador de carga anima sin parar.
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 100));
   return sync;
 }
 
@@ -57,14 +65,14 @@ void main() {
     await _pumpApp(tester, const Locale('es'));
 
     expect(find.text('Pokédex'), findsOneWidget);
-    expect(find.text('Catálogo en construcción'), findsOneWidget);
+    expect(find.text('Descargando el catálogo…'), findsOneWidget);
   });
 
   testWidgets('arranca en inglés', (tester) async {
     await _pumpApp(tester, const Locale('en'));
 
     expect(find.text('Pokédex'), findsOneWidget);
-    expect(find.text('Catalog under construction'), findsOneWidget);
+    expect(find.text('Downloading the catalog…'), findsOneWidget);
   });
 
   testWidgets('lanza la sincronización una sola vez al arrancar', (
@@ -89,7 +97,7 @@ void main() {
       );
 
       expect(sync.startCalls, 1);
-      expect(find.text('Catálogo en construcción'), findsOneWidget);
+      expect(find.text('Descargando el catálogo…'), findsOneWidget);
     },
   );
 }

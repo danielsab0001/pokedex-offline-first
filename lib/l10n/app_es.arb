@@ -4,10 +4,6 @@
   "@appTitle": {
     "description": "Nombre de la aplicación."
   },
-  "catalogPlaceholder": "Catálogo en construcción",
-  "@catalogPlaceholder": {
-    "description": "Texto provisional; se elimina al terminar la pantalla de catálogo."
-  },
   "retry": "Reintentar",
   "catalogLoading": "Descargando el catálogo…",
   "catalogEmptyTitle": "El catálogo está vacío",
