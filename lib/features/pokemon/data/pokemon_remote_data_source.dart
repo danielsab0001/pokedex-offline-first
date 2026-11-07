@@ -5,22 +5,43 @@ import 'package:graphql/client.dart';
 import 'package:http/http.dart' as http;
 import 'package:pokedex/core/error/failure.dart';
 import 'package:pokedex/core/network/graphql_client.dart';
+import 'package:pokedex/core/network/service_health.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_queries.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_species_dto.dart';
 
 const catalogPageSize = 100;
 
 class PokemonRemoteDataSource {
-  PokemonRemoteDataSource(this._client, {this.timeout = requestTimeout});
+  PokemonRemoteDataSource(
+    this._client, {
+    this.timeout = requestTimeout,
+    this.health,
+  });
 
   final GraphQLClient _client;
   final Duration timeout;
+  final ServiceHealth? health;
   final _document = gql(catalogPageQuery);
 
   /// Pide las especies con id mayor que [afterId] (paginación por cursor).
+  /// Cada llamada deja constancia del resultado en [health] (IND-02).
   Future<RemoteCatalogPage> fetchCatalogPage({
     required int afterId,
     int pageSize = catalogPageSize,
+  }) async {
+    try {
+      final page = await _request(afterId: afterId, pageSize: pageSize);
+      health?.reportSuccess();
+      return page;
+    } on Failure catch (failure) {
+      health?.reportFailure(failure);
+      rethrow;
+    }
+  }
+
+  Future<RemoteCatalogPage> _request({
+    required int afterId,
+    required int pageSize,
   }) async {
     final QueryResult result;
     try {
