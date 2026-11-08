@@ -9,6 +9,9 @@ import 'package:pokedex/app/di/providers.dart';
 import 'package:pokedex/features/pokemon/data/catalog_sync.dart';
 import 'package:pokedex/features/pokemon/presentation/catalog/catalog_providers.dart';
 import 'package:pokedex/features/pokemon/presentation/catalog/catalog_state.dart';
+import 'package:pokedex/app/sync/reconnect_trigger.dart';
+import 'package:pokedex/features/connectivity/domain/connectivity_models.dart';
+import 'package:pokedex/features/connectivity/presentation/connectivity_providers.dart';
 
 class FakeCatalogSync implements CatalogSync {
   FakeCatalogSync({this.onStart});
@@ -50,6 +53,16 @@ Future<FakeCatalogSync> _pumpApp(
         catalogSyncProvider.overrideWithValue(sync),
         // El catálogo real abriría la base de datos; aquí solo se prueba el arranque.
         catalogStateProvider.overrideWithValue(const CatalogLoading()),
+        reconnectTriggerProvider.overrideWithValue(
+          ReconnectTrigger(const Stream<bool>.empty(), () {}),
+        ),
+        connectivityIndicatorProvider.overrideWithValue(
+          const ConnectivityIndicator(
+            kind: IndicatorKind.online,
+            availability: ServiceAvailability.online,
+            activity: SyncActivity.idle,
+          ),
+        ),
       ],
       child: const PokedexApp(),
     ),

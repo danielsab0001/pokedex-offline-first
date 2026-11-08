@@ -31,3 +31,24 @@ IndicatorKind resolveIndicatorKind({
     ServiceAvailability.online => IndicatorKind.online,
   };
 }
+
+ConnectivityIndicator buildConnectivityIndicator({
+  required bool hasNetwork,
+  required ApiReachability api,
+  required SyncActivity activity,
+  DateTime? lastSuccessAt,
+  int localCount = 0,
+  int? remoteTotal,
+  String? lastError,
+}) {
+  final availability = resolveAvailability(hasNetwork: hasNetwork, api: api);
+  return ConnectivityIndicator(
+    kind: resolveIndicatorKind(availability: availability, activity: activity),
+    availability: availability,
+    activity: activity,
+    lastSuccessAt: lastSuccessAt,
+    localCount: localCount,
+    remoteTotal: remoteTotal,
+    lastError: lastError,
+  );
+}

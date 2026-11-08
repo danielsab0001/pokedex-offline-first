@@ -43,5 +43,42 @@
   "typeIce": "Hielo",
   "typeDragon": "Dragón",
   "typeDark": "Siniestro",
-  "typeFairy": "Hada"
+  "typeFairy": "Hada",
+    "connectivityOffline": "Sin conexión",
+    "connectivityServiceUnavailable": "Sin servicio",
+    "connectivitySyncing": "Sincronizando",
+    "connectivityVerifying": "Verificando",
+    "connectivityOnline": "En línea",
+    "connectivityChipLabel": "Estado de conexión: {status}. Toca para ver detalles.",
+    "@connectivityChipLabel": {
+      "placeholders": {
+        "status": {"type": "String"}
+      }
+    },
+    "connectivitySheetTitle": "Estado de la conexión",
+    "connectivityExplainOffline": "Sin conexión: no hay acceso a Internet. Puedes seguir usando los datos guardados.",
+    "connectivityExplainServiceUnavailable": "Servicio no disponible: hay red, pero PokeAPI no responde. Puedes seguir usando los datos guardados.",
+    "connectivityExplainSyncing": "Sincronizando: se está actualizando el catálogo. Puedes seguir navegando.",
+    "connectivityExplainVerifying": "Verificando: se está comprobando si PokeAPI responde.",
+    "connectivityExplainOnline": "En línea: PokeAPI responde correctamente.",
+    "connectivityDataSourceLabel": "Origen de los datos",
+    "connectivityDataSourceValue": "Guardados en este dispositivo",
+    "connectivityLastSyncLabel": "Última sincronización",
+    "connectivityNeverSynced": "Todavía no se ha sincronizado",
+    "connectivityCatalogLabel": "Catálogo",
+    "connectivityCatalogProgress": "{count} de {total} Pokémon",
+    "@connectivityCatalogProgress": {
+      "placeholders": {
+        "count": {"type": "int"},
+        "total": {"type": "int"}
+      }
+    },
+    "connectivityCatalogCount": "{count} Pokémon",
+    "@connectivityCatalogCount": {
+      "placeholders": {
+        "count": {"type": "int"}
+      }
+    },
+    "connectivityLastErrorLabel": "Último error",
+    "connectivitySyncNow": "Sincronizar ahora"
 }

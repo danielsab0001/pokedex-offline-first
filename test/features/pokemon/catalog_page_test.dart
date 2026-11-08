@@ -11,6 +11,9 @@ import 'package:pokedex/features/pokemon/presentation/catalog/catalog_state.dart
 import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_card.dart';
 import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_thumbnail.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
+import 'package:pokedex/features/connectivity/domain/connectivity_models.dart';
+import 'package:pokedex/features/connectivity/presentation/connectivity_chip.dart';
+import 'package:pokedex/features/connectivity/presentation/connectivity_providers.dart';
 
 const _grassPoison = [
   PokemonType(id: 12, slug: 'grass', slot: 1),
@@ -81,6 +84,13 @@ Widget appFor({
       // Los tests no descargan imágenes.
       pokemonThumbnailBuilderProvider.overrideWithValue(
         (id, size) => SizedBox.square(dimension: size),
+      ),
+      connectivityIndicatorProvider.overrideWithValue(
+        const ConnectivityIndicator(
+          kind: IndicatorKind.online,
+          availability: ServiceAvailability.online,
+          activity: SyncActivity.idle,
+        ),
       ),
     ],
     child: MaterialApp(
@@ -247,5 +257,15 @@ void main() {
 
     expect(size.height, greaterThanOrEqualTo(48));
     expect(size.width, greaterThanOrEqualTo(48));
+  });
+
+  testWidgets('la pantalla muestra el indicador de conexión (IND-01)', (
+    tester,
+  ) async {
+    await tester.pumpWidget(appFor(repository: FakePokemonRepository()));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ConnectivityChip), findsOneWidget);
+    expect(find.text('En línea'), findsOneWidget);
   });
 }

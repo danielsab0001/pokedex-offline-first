@@ -9,6 +9,7 @@ import 'package:pokedex/features/pokemon/presentation/catalog/catalog_state.dart
 import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_card.dart';
 import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_thumbnail.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
+import 'package:pokedex/features/connectivity/presentation/connectivity_chip.dart';
 
 const _thumbnailSize = 72.0;
 
@@ -24,7 +25,10 @@ class CatalogPage extends ConsumerWidget {
     final state = ref.watch(catalogStateProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.appTitle)),
+      appBar: AppBar(
+        title: Text(l10n.appTitle),
+        actions: const [ConnectivityChip(), SizedBox(width: 8)],
+      ),
       body: switch (state) {
         CatalogLoading() => _LoadingView(message: l10n.catalogLoading),
         CatalogContent content => _CatalogList(content: content),

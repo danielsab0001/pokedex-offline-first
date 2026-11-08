@@ -21,6 +21,7 @@ class _PokedexAppState extends ConsumerState<PokedexApp> {
     // Tras el primer frame: la interfaz aparece sin esperar a la red (OF-03).
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(ref.read(catalogSyncProvider).start());
+      ref.read(reconnectTriggerProvider).start();
     });
   }
 
