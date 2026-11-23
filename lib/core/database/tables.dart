@@ -91,3 +91,12 @@ class UserPreferences extends Table {
   @override
   Set<Column> get primaryKey => {key};
 }
+
+@DataClassName('ApiCallRow')
+class ApiCalls extends Table {
+  @override
+  String get tableName => 'api_call';
+
+  IntColumn get id => integer().autoIncrement()();
+  DateTimeColumn get calledAt => dateTime()();
+}

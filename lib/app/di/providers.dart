@@ -2,10 +2,13 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:graphql/client.dart';
+import 'package:http/http.dart' as http;
 import 'package:pokedex/app/sync/reconnect_trigger.dart';
 import 'package:pokedex/core/database/app_database.dart';
+import 'package:pokedex/core/network/counting_http_client.dart';
 import 'package:pokedex/core/network/graphql_client.dart';
 import 'package:pokedex/core/network/service_health.dart';
+import 'package:pokedex/core/sync/api_call_log.dart';
 import 'package:pokedex/core/sync/api_gate.dart';
 import 'package:pokedex/core/sync/sync_metadata_local_data_source.dart';
 import 'package:pokedex/features/connectivity/data/connectivity_repository_impl.dart';
@@ -23,8 +26,22 @@ final appDatabaseProvider = Provider<AppDatabase>((ref) {
   return db;
 });
 
+final apiCallLogProvider = Provider<ApiCallLog>(
+  (ref) => ApiCallLog(ref.watch(appDatabaseProvider)),
+);
+
+/// Cliente HTTP real: cada petición que sale a la red queda contada.
+final httpClientProvider = Provider<http.Client>((ref) {
+  final client = CountingHttpClient(
+    http.Client(),
+    ref.watch(apiCallLogProvider).record,
+  );
+  ref.onDispose(client.close);
+  return client;
+});
+
 final graphQlClientProvider = Provider<GraphQLClient>(
-  (ref) => createPokeApiClient(),
+  (ref) => createPokeApiClient(httpClient: ref.watch(httpClientProvider)),
 );
 
 final serviceHealthProvider = Provider<ServiceHealth>((ref) {

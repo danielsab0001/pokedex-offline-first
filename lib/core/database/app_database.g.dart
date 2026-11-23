@@ -1863,6 +1863,200 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreferenceRow> {
   }
 }
 
+class $ApiCallsTable extends ApiCalls
+    with TableInfo<$ApiCallsTable, ApiCallRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ApiCallsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _calledAtMeta = const VerificationMeta(
+    'calledAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> calledAt = GeneratedColumn<DateTime>(
+    'called_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, calledAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'api_call';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ApiCallRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('called_at')) {
+      context.handle(
+        _calledAtMeta,
+        calledAt.isAcceptableOrUnknown(data['called_at']!, _calledAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_calledAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ApiCallRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ApiCallRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      calledAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}called_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ApiCallsTable createAlias(String alias) {
+    return $ApiCallsTable(attachedDatabase, alias);
+  }
+}
+
+class ApiCallRow extends DataClass implements Insertable<ApiCallRow> {
+  final int id;
+  final DateTime calledAt;
+  const ApiCallRow({required this.id, required this.calledAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['called_at'] = Variable<DateTime>(calledAt);
+    return map;
+  }
+
+  ApiCallsCompanion toCompanion(bool nullToAbsent) {
+    return ApiCallsCompanion(id: Value(id), calledAt: Value(calledAt));
+  }
+
+  factory ApiCallRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ApiCallRow(
+      id: serializer.fromJson<int>(json['id']),
+      calledAt: serializer.fromJson<DateTime>(json['calledAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'calledAt': serializer.toJson<DateTime>(calledAt),
+    };
+  }
+
+  ApiCallRow copyWith({int? id, DateTime? calledAt}) =>
+      ApiCallRow(id: id ?? this.id, calledAt: calledAt ?? this.calledAt);
+  ApiCallRow copyWithCompanion(ApiCallsCompanion data) {
+    return ApiCallRow(
+      id: data.id.present ? data.id.value : this.id,
+      calledAt: data.calledAt.present ? data.calledAt.value : this.calledAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ApiCallRow(')
+          ..write('id: $id, ')
+          ..write('calledAt: $calledAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, calledAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ApiCallRow &&
+          other.id == this.id &&
+          other.calledAt == this.calledAt);
+}
+
+class ApiCallsCompanion extends UpdateCompanion<ApiCallRow> {
+  final Value<int> id;
+  final Value<DateTime> calledAt;
+  const ApiCallsCompanion({
+    this.id = const Value.absent(),
+    this.calledAt = const Value.absent(),
+  });
+  ApiCallsCompanion.insert({
+    this.id = const Value.absent(),
+    required DateTime calledAt,
+  }) : calledAt = Value(calledAt);
+  static Insertable<ApiCallRow> custom({
+    Expression<int>? id,
+    Expression<DateTime>? calledAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (calledAt != null) 'called_at': calledAt,
+    });
+  }
+
+  ApiCallsCompanion copyWith({Value<int>? id, Value<DateTime>? calledAt}) {
+    return ApiCallsCompanion(
+      id: id ?? this.id,
+      calledAt: calledAt ?? this.calledAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (calledAt.present) {
+      map['called_at'] = Variable<DateTime>(calledAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ApiCallsCompanion(')
+          ..write('id: $id, ')
+          ..write('calledAt: $calledAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1875,6 +2069,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $UserPreferencesTable userPreferences = $UserPreferencesTable(
     this,
   );
+  late final $ApiCallsTable apiCalls = $ApiCallsTable(this);
   late final Index idxPokemonNameEn = Index(
     'idx_pokemon_name_en',
     'CREATE INDEX idx_pokemon_name_en ON pokemon (name_en)',
@@ -1898,6 +2093,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     favorites,
     syncMetadataEntries,
     userPreferences,
+    apiCalls,
     idxPokemonNameEn,
     idxPokemonGeneration,
     idxPokemonTypeByType,
@@ -3427,6 +3623,139 @@ typedef $$UserPreferencesTableProcessedTableManager =
       UserPreferenceRow,
       PrefetchHooks Function()
     >;
+typedef $$ApiCallsTableCreateCompanionBuilder = ApiCallsCompanion Function({
+  Value<int> id,
+  required DateTime calledAt,
+});
+typedef $$ApiCallsTableUpdateCompanionBuilder = ApiCallsCompanion Function({
+  Value<int> id,
+  Value<DateTime> calledAt,
+});
+
+class $$ApiCallsTableFilterComposer
+    extends Composer<_$AppDatabase, $ApiCallsTable> {
+  $$ApiCallsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get calledAt => $composableBuilder(
+    column: $table.calledAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ApiCallsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ApiCallsTable> {
+  $$ApiCallsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get calledAt => $composableBuilder(
+    column: $table.calledAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ApiCallsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ApiCallsTable> {
+  $$ApiCallsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get calledAt =>
+      $composableBuilder(column: $table.calledAt, builder: (column) => column);
+}
+
+class $$ApiCallsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ApiCallsTable,
+          ApiCallRow,
+          $$ApiCallsTableFilterComposer,
+          $$ApiCallsTableOrderingComposer,
+          $$ApiCallsTableAnnotationComposer,
+          $$ApiCallsTableCreateCompanionBuilder,
+          $$ApiCallsTableUpdateCompanionBuilder,
+          (
+            ApiCallRow,
+            BaseReferences<_$AppDatabase, $ApiCallsTable, ApiCallRow>,
+          ),
+          ApiCallRow,
+          PrefetchHooks Function()
+        > {
+  $$ApiCallsTableTableManager(_$AppDatabase db, $ApiCallsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ApiCallsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ApiCallsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ApiCallsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<DateTime> calledAt = const Value.absent(),
+          }) => ApiCallsCompanion(id: id, calledAt: calledAt),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required DateTime calledAt,
+          }) => ApiCallsCompanion.insert(id: id, calledAt: calledAt),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ApiCallsTable, ApiCallRow>(table),
+                  BaseReferences<_$AppDatabase, $ApiCallsTable, ApiCallRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ApiCallsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ApiCallsTable,
+      ApiCallRow,
+      $$ApiCallsTableFilterComposer,
+      $$ApiCallsTableOrderingComposer,
+      $$ApiCallsTableAnnotationComposer,
+      $$ApiCallsTableCreateCompanionBuilder,
+      $$ApiCallsTableUpdateCompanionBuilder,
+      (ApiCallRow, BaseReferences<_$AppDatabase, $ApiCallsTable, ApiCallRow>),
+      ApiCallRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3443,4 +3772,6 @@ class $AppDatabaseManager {
       $$SyncMetadataEntriesTableTableManager(_db, _db.syncMetadataEntries);
   $$UserPreferencesTableTableManager get userPreferences =>
       $$UserPreferencesTableTableManager(_db, _db.userPreferences);
+  $$ApiCallsTableTableManager get apiCalls =>
+      $$ApiCallsTableTableManager(_db, _db.apiCalls);
 }

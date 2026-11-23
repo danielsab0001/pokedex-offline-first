@@ -10,15 +10,23 @@ void main() {
 
   setUpAll(() => verifier = SchemaVerifier(GeneratedHelper()));
 
-  test('migrar de v1 a v2 deja el esquema esperado', () async {
+  test('migrar de v1 a v3 deja el esquema esperado', () async {
     final connection = await verifier.startAt(1);
     final db = AppDatabase(connection);
     addTearDown(db.close);
 
-    await verifier.migrateAndValidate(db, 2);
+    await verifier.migrateAndValidate(db, 3);
   });
 
-  test('migrar de v1 a v2 conserva favoritos y metadatos', () async {
+  test('migrar de v2 a v3 deja el esquema esperado', () async {
+    final connection = await verifier.startAt(2);
+    final db = AppDatabase(connection);
+    addTearDown(db.close);
+
+    await verifier.migrateAndValidate(db, 3);
+  });
+
+  test('migrar de v1 a v3 conserva favoritos y metadatos', () async {
     final schema = await verifier.schemaAt(1);
     final oldDb = v1.DatabaseAtV1(schema.newConnection());
     await oldDb.customStatement(
@@ -32,12 +40,13 @@ void main() {
 
     final db = AppDatabase(schema.newConnection());
     addTearDown(db.close);
-    await verifier.migrateAndValidate(db, 2);
+    await verifier.migrateAndValidate(db, 3);
 
     final favorite = await db.select(db.favorites).getSingle();
     final meta = await db.select(db.syncMetadataEntries).getSingle();
     expect(favorite.pokemonId, 25);
     expect(meta.catalogTotalCount, 1025);
     expect(meta.retryAt, isNull);
+    expect(await db.select(db.apiCalls).get(), isEmpty);
   });
 }

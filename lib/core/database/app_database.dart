@@ -12,6 +12,7 @@ part 'app_database.g.dart';
     Favorites,
     SyncMetadataEntries,
     UserPreferences,
+    ApiCalls,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -21,7 +22,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.defaults() : super(driftDatabase(name: 'pokedex'));
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -29,6 +30,9 @@ class AppDatabase extends _$AppDatabase {
     onUpgrade: (m, from, to) async {
       if (from < 2) {
         await m.addColumn(syncMetadataEntries, syncMetadataEntries.retryAt);
+      }
+      if (from < 3) {
+        await m.createTable(apiCalls);
       }
     },
     beforeOpen: (details) async {
