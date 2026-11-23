@@ -4,7 +4,7 @@ enum CatalogSyncStatus { notStarted, syncing, completed, failed, interrupted }
 class CatalogSyncInfo {
   const CatalogSyncInfo({
     required this.status,
-    this.remoteTotal,
+    this.catalogTotalCount,
     this.lastSuccessAt,
     this.failureCount = 0,
     this.lastError,
@@ -15,7 +15,7 @@ class CatalogSyncInfo {
   );
 
   final CatalogSyncStatus status;
-  final int? remoteTotal;
+  final int? catalogTotalCount;
   final DateTime? lastSuccessAt;
   final int failureCount;
   final String? lastError;

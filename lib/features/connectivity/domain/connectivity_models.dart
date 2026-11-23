@@ -18,7 +18,7 @@ class ConnectivityIndicator {
     required this.activity,
     this.lastSuccessAt,
     this.localCount = 0,
-    this.remoteTotal,
+    this.catalogTotalCount,
     this.lastError,
   });
 
@@ -31,7 +31,7 @@ class ConnectivityIndicator {
 
   /// Pokémon guardados en este dispositivo y total conocido en PokeAPI.
   final int localCount;
-  final int? remoteTotal;
+  final int? catalogTotalCount;
 
   final String? lastError;
 }

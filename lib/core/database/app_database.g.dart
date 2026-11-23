@@ -1041,11 +1041,11 @@ class $SyncMetadataEntriesTable extends SyncMetadataEntries
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
-  static const VerificationMeta _remoteTotalMeta = const VerificationMeta(
-    'remoteTotal',
+  static const VerificationMeta _catalogTotalCountMeta = const VerificationMeta(
+    'catalogTotalCount',
   );
   @override
-  late final GeneratedColumn<int> remoteTotal = GeneratedColumn<int>(
+  late final GeneratedColumn<int> catalogTotalCount = GeneratedColumn<int>(
     'remote_total',
     aliasedName,
     true,
@@ -1104,7 +1104,7 @@ class $SyncMetadataEntriesTable extends SyncMetadataEntries
     resourceKey,
     status,
     cursor,
-    remoteTotal,
+    catalogTotalCount,
     lastSuccessAt,
     lastAttemptAt,
     failureCount,
@@ -1147,10 +1147,10 @@ class $SyncMetadataEntriesTable extends SyncMetadataEntries
     }
     if (data.containsKey('remote_total')) {
       context.handle(
-        _remoteTotalMeta,
-        remoteTotal.isAcceptableOrUnknown(
+        _catalogTotalCountMeta,
+        catalogTotalCount.isAcceptableOrUnknown(
           data['remote_total']!,
-          _remoteTotalMeta,
+          _catalogTotalCountMeta,
         ),
       );
     }
@@ -1208,7 +1208,7 @@ class $SyncMetadataEntriesTable extends SyncMetadataEntries
         DriftSqlType.int,
         data['${effectivePrefix}cursor'],
       )!,
-      remoteTotal: attachedDatabase.typeMapping.read(
+      catalogTotalCount: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}remote_total'],
       ),
@@ -1241,7 +1241,7 @@ class SyncMetadataRow extends DataClass implements Insertable<SyncMetadataRow> {
   final String resourceKey;
   final String status;
   final int cursor;
-  final int? remoteTotal;
+  final int? catalogTotalCount;
   final DateTime? lastSuccessAt;
   final DateTime? lastAttemptAt;
   final int failureCount;
@@ -1250,7 +1250,7 @@ class SyncMetadataRow extends DataClass implements Insertable<SyncMetadataRow> {
     required this.resourceKey,
     required this.status,
     required this.cursor,
-    this.remoteTotal,
+    this.catalogTotalCount,
     this.lastSuccessAt,
     this.lastAttemptAt,
     required this.failureCount,
@@ -1262,8 +1262,8 @@ class SyncMetadataRow extends DataClass implements Insertable<SyncMetadataRow> {
     map['resource_key'] = Variable<String>(resourceKey);
     map['status'] = Variable<String>(status);
     map['cursor'] = Variable<int>(cursor);
-    if (!nullToAbsent || remoteTotal != null) {
-      map['remote_total'] = Variable<int>(remoteTotal);
+    if (!nullToAbsent || catalogTotalCount != null) {
+      map['remote_total'] = Variable<int>(catalogTotalCount);
     }
     if (!nullToAbsent || lastSuccessAt != null) {
       map['last_success_at'] = Variable<DateTime>(lastSuccessAt);
@@ -1283,9 +1283,9 @@ class SyncMetadataRow extends DataClass implements Insertable<SyncMetadataRow> {
       resourceKey: Value(resourceKey),
       status: Value(status),
       cursor: Value(cursor),
-      remoteTotal: remoteTotal == null && nullToAbsent
+      catalogTotalCount: catalogTotalCount == null && nullToAbsent
           ? const Value.absent()
-          : Value(remoteTotal),
+          : Value(catalogTotalCount),
       lastSuccessAt: lastSuccessAt == null && nullToAbsent
           ? const Value.absent()
           : Value(lastSuccessAt),
@@ -1308,7 +1308,7 @@ class SyncMetadataRow extends DataClass implements Insertable<SyncMetadataRow> {
       resourceKey: serializer.fromJson<String>(json['resourceKey']),
       status: serializer.fromJson<String>(json['status']),
       cursor: serializer.fromJson<int>(json['cursor']),
-      remoteTotal: serializer.fromJson<int?>(json['remoteTotal']),
+      catalogTotalCount: serializer.fromJson<int?>(json['catalogTotalCount']),
       lastSuccessAt: serializer.fromJson<DateTime?>(json['lastSuccessAt']),
       lastAttemptAt: serializer.fromJson<DateTime?>(json['lastAttemptAt']),
       failureCount: serializer.fromJson<int>(json['failureCount']),
@@ -1322,7 +1322,7 @@ class SyncMetadataRow extends DataClass implements Insertable<SyncMetadataRow> {
       'resourceKey': serializer.toJson<String>(resourceKey),
       'status': serializer.toJson<String>(status),
       'cursor': serializer.toJson<int>(cursor),
-      'remoteTotal': serializer.toJson<int?>(remoteTotal),
+      'catalogTotalCount': serializer.toJson<int?>(catalogTotalCount),
       'lastSuccessAt': serializer.toJson<DateTime?>(lastSuccessAt),
       'lastAttemptAt': serializer.toJson<DateTime?>(lastAttemptAt),
       'failureCount': serializer.toJson<int>(failureCount),
@@ -1334,7 +1334,7 @@ class SyncMetadataRow extends DataClass implements Insertable<SyncMetadataRow> {
     String? resourceKey,
     String? status,
     int? cursor,
-    Value<int?> remoteTotal = const Value.absent(),
+    Value<int?> catalogTotalCount = const Value.absent(),
     Value<DateTime?> lastSuccessAt = const Value.absent(),
     Value<DateTime?> lastAttemptAt = const Value.absent(),
     int? failureCount,
@@ -1343,7 +1343,9 @@ class SyncMetadataRow extends DataClass implements Insertable<SyncMetadataRow> {
     resourceKey: resourceKey ?? this.resourceKey,
     status: status ?? this.status,
     cursor: cursor ?? this.cursor,
-    remoteTotal: remoteTotal.present ? remoteTotal.value : this.remoteTotal,
+    catalogTotalCount: catalogTotalCount.present
+        ? catalogTotalCount.value
+        : this.catalogTotalCount,
     lastSuccessAt: lastSuccessAt.present
         ? lastSuccessAt.value
         : this.lastSuccessAt,
@@ -1360,9 +1362,9 @@ class SyncMetadataRow extends DataClass implements Insertable<SyncMetadataRow> {
           : this.resourceKey,
       status: data.status.present ? data.status.value : this.status,
       cursor: data.cursor.present ? data.cursor.value : this.cursor,
-      remoteTotal: data.remoteTotal.present
-          ? data.remoteTotal.value
-          : this.remoteTotal,
+      catalogTotalCount: data.catalogTotalCount.present
+          ? data.catalogTotalCount.value
+          : this.catalogTotalCount,
       lastSuccessAt: data.lastSuccessAt.present
           ? data.lastSuccessAt.value
           : this.lastSuccessAt,
@@ -1382,7 +1384,7 @@ class SyncMetadataRow extends DataClass implements Insertable<SyncMetadataRow> {
           ..write('resourceKey: $resourceKey, ')
           ..write('status: $status, ')
           ..write('cursor: $cursor, ')
-          ..write('remoteTotal: $remoteTotal, ')
+          ..write('catalogTotalCount: $catalogTotalCount, ')
           ..write('lastSuccessAt: $lastSuccessAt, ')
           ..write('lastAttemptAt: $lastAttemptAt, ')
           ..write('failureCount: $failureCount, ')
@@ -1396,7 +1398,7 @@ class SyncMetadataRow extends DataClass implements Insertable<SyncMetadataRow> {
     resourceKey,
     status,
     cursor,
-    remoteTotal,
+    catalogTotalCount,
     lastSuccessAt,
     lastAttemptAt,
     failureCount,
@@ -1409,7 +1411,7 @@ class SyncMetadataRow extends DataClass implements Insertable<SyncMetadataRow> {
           other.resourceKey == this.resourceKey &&
           other.status == this.status &&
           other.cursor == this.cursor &&
-          other.remoteTotal == this.remoteTotal &&
+          other.catalogTotalCount == this.catalogTotalCount &&
           other.lastSuccessAt == this.lastSuccessAt &&
           other.lastAttemptAt == this.lastAttemptAt &&
           other.failureCount == this.failureCount &&
@@ -1420,7 +1422,7 @@ class SyncMetadataEntriesCompanion extends UpdateCompanion<SyncMetadataRow> {
   final Value<String> resourceKey;
   final Value<String> status;
   final Value<int> cursor;
-  final Value<int?> remoteTotal;
+  final Value<int?> catalogTotalCount;
   final Value<DateTime?> lastSuccessAt;
   final Value<DateTime?> lastAttemptAt;
   final Value<int> failureCount;
@@ -1430,7 +1432,7 @@ class SyncMetadataEntriesCompanion extends UpdateCompanion<SyncMetadataRow> {
     this.resourceKey = const Value.absent(),
     this.status = const Value.absent(),
     this.cursor = const Value.absent(),
-    this.remoteTotal = const Value.absent(),
+    this.catalogTotalCount = const Value.absent(),
     this.lastSuccessAt = const Value.absent(),
     this.lastAttemptAt = const Value.absent(),
     this.failureCount = const Value.absent(),
@@ -1441,7 +1443,7 @@ class SyncMetadataEntriesCompanion extends UpdateCompanion<SyncMetadataRow> {
     required String resourceKey,
     this.status = const Value.absent(),
     this.cursor = const Value.absent(),
-    this.remoteTotal = const Value.absent(),
+    this.catalogTotalCount = const Value.absent(),
     this.lastSuccessAt = const Value.absent(),
     this.lastAttemptAt = const Value.absent(),
     this.failureCount = const Value.absent(),
@@ -1452,7 +1454,7 @@ class SyncMetadataEntriesCompanion extends UpdateCompanion<SyncMetadataRow> {
     Expression<String>? resourceKey,
     Expression<String>? status,
     Expression<int>? cursor,
-    Expression<int>? remoteTotal,
+    Expression<int>? catalogTotalCount,
     Expression<DateTime>? lastSuccessAt,
     Expression<DateTime>? lastAttemptAt,
     Expression<int>? failureCount,
@@ -1463,7 +1465,7 @@ class SyncMetadataEntriesCompanion extends UpdateCompanion<SyncMetadataRow> {
       if (resourceKey != null) 'resource_key': resourceKey,
       if (status != null) 'status': status,
       if (cursor != null) 'cursor': cursor,
-      if (remoteTotal != null) 'remote_total': remoteTotal,
+      if (catalogTotalCount != null) 'remote_total': catalogTotalCount,
       if (lastSuccessAt != null) 'last_success_at': lastSuccessAt,
       if (lastAttemptAt != null) 'last_attempt_at': lastAttemptAt,
       if (failureCount != null) 'failure_count': failureCount,
@@ -1476,7 +1478,7 @@ class SyncMetadataEntriesCompanion extends UpdateCompanion<SyncMetadataRow> {
     Value<String>? resourceKey,
     Value<String>? status,
     Value<int>? cursor,
-    Value<int?>? remoteTotal,
+    Value<int?>? catalogTotalCount,
     Value<DateTime?>? lastSuccessAt,
     Value<DateTime?>? lastAttemptAt,
     Value<int>? failureCount,
@@ -1487,7 +1489,7 @@ class SyncMetadataEntriesCompanion extends UpdateCompanion<SyncMetadataRow> {
       resourceKey: resourceKey ?? this.resourceKey,
       status: status ?? this.status,
       cursor: cursor ?? this.cursor,
-      remoteTotal: remoteTotal ?? this.remoteTotal,
+      catalogTotalCount: catalogTotalCount ?? this.catalogTotalCount,
       lastSuccessAt: lastSuccessAt ?? this.lastSuccessAt,
       lastAttemptAt: lastAttemptAt ?? this.lastAttemptAt,
       failureCount: failureCount ?? this.failureCount,
@@ -1508,8 +1510,8 @@ class SyncMetadataEntriesCompanion extends UpdateCompanion<SyncMetadataRow> {
     if (cursor.present) {
       map['cursor'] = Variable<int>(cursor.value);
     }
-    if (remoteTotal.present) {
-      map['remote_total'] = Variable<int>(remoteTotal.value);
+    if (catalogTotalCount.present) {
+      map['remote_total'] = Variable<int>(catalogTotalCount.value);
     }
     if (lastSuccessAt.present) {
       map['last_success_at'] = Variable<DateTime>(lastSuccessAt.value);
@@ -1535,7 +1537,7 @@ class SyncMetadataEntriesCompanion extends UpdateCompanion<SyncMetadataRow> {
           ..write('resourceKey: $resourceKey, ')
           ..write('status: $status, ')
           ..write('cursor: $cursor, ')
-          ..write('remoteTotal: $remoteTotal, ')
+          ..write('catalogTotalCount: $catalogTotalCount, ')
           ..write('lastSuccessAt: $lastSuccessAt, ')
           ..write('lastAttemptAt: $lastAttemptAt, ')
           ..write('failureCount: $failureCount, ')
@@ -2891,7 +2893,7 @@ typedef $$SyncMetadataEntriesTableCreateCompanionBuilder =
       required String resourceKey,
       Value<String> status,
       Value<int> cursor,
-      Value<int?> remoteTotal,
+      Value<int?> catalogTotalCount,
       Value<DateTime?> lastSuccessAt,
       Value<DateTime?> lastAttemptAt,
       Value<int> failureCount,
@@ -2903,7 +2905,7 @@ typedef $$SyncMetadataEntriesTableUpdateCompanionBuilder =
       Value<String> resourceKey,
       Value<String> status,
       Value<int> cursor,
-      Value<int?> remoteTotal,
+      Value<int?> catalogTotalCount,
       Value<DateTime?> lastSuccessAt,
       Value<DateTime?> lastAttemptAt,
       Value<int> failureCount,
@@ -2935,8 +2937,8 @@ class $$SyncMetadataEntriesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get remoteTotal => $composableBuilder(
-    column: $table.remoteTotal,
+  ColumnFilters<int> get catalogTotalCount => $composableBuilder(
+    column: $table.catalogTotalCount,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2985,8 +2987,8 @@ class $$SyncMetadataEntriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get remoteTotal => $composableBuilder(
-    column: $table.remoteTotal,
+  ColumnOrderings<int> get catalogTotalCount => $composableBuilder(
+    column: $table.catalogTotalCount,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -3031,8 +3033,8 @@ class $$SyncMetadataEntriesTableAnnotationComposer
   GeneratedColumn<int> get cursor =>
       $composableBuilder(column: $table.cursor, builder: (column) => column);
 
-  GeneratedColumn<int> get remoteTotal => $composableBuilder(
-    column: $table.remoteTotal,
+  GeneratedColumn<int> get catalogTotalCount => $composableBuilder(
+    column: $table.catalogTotalCount,
     builder: (column) => column,
   );
 
@@ -3101,7 +3103,7 @@ class $$SyncMetadataEntriesTableTableManager
                 Value<String> resourceKey = const Value.absent(),
                 Value<String> status = const Value.absent(),
                 Value<int> cursor = const Value.absent(),
-                Value<int?> remoteTotal = const Value.absent(),
+                Value<int?> catalogTotalCount = const Value.absent(),
                 Value<DateTime?> lastSuccessAt = const Value.absent(),
                 Value<DateTime?> lastAttemptAt = const Value.absent(),
                 Value<int> failureCount = const Value.absent(),
@@ -3111,7 +3113,7 @@ class $$SyncMetadataEntriesTableTableManager
                 resourceKey: resourceKey,
                 status: status,
                 cursor: cursor,
-                remoteTotal: remoteTotal,
+                catalogTotalCount: catalogTotalCount,
                 lastSuccessAt: lastSuccessAt,
                 lastAttemptAt: lastAttemptAt,
                 failureCount: failureCount,
@@ -3123,7 +3125,7 @@ class $$SyncMetadataEntriesTableTableManager
                 required String resourceKey,
                 Value<String> status = const Value.absent(),
                 Value<int> cursor = const Value.absent(),
-                Value<int?> remoteTotal = const Value.absent(),
+                Value<int?> catalogTotalCount = const Value.absent(),
                 Value<DateTime?> lastSuccessAt = const Value.absent(),
                 Value<DateTime?> lastAttemptAt = const Value.absent(),
                 Value<int> failureCount = const Value.absent(),
@@ -3133,7 +3135,7 @@ class $$SyncMetadataEntriesTableTableManager
                 resourceKey: resourceKey,
                 status: status,
                 cursor: cursor,
-                remoteTotal: remoteTotal,
+                catalogTotalCount: catalogTotalCount,
                 lastSuccessAt: lastSuccessAt,
                 lastAttemptAt: lastAttemptAt,
                 failureCount: failureCount,

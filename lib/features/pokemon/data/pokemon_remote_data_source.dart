@@ -24,13 +24,19 @@ class PokemonRemoteDataSource {
   final _document = gql(catalogPageQuery);
 
   /// Pide las especies con id mayor que [afterId] (paginación por cursor).
+  /// Con [includeTotal] pide además el total de especies de PokeAPI.
   /// Cada llamada deja constancia del resultado en [health] (IND-02).
   Future<RemoteCatalogPage> fetchCatalogPage({
     required int afterId,
     int pageSize = catalogPageSize,
+    bool includeTotal = false,
   }) async {
     try {
-      final page = await _request(afterId: afterId, pageSize: pageSize);
+      final page = await _request(
+        afterId: afterId,
+        pageSize: pageSize,
+        includeTotal: includeTotal,
+      );
       health?.reportSuccess();
       return page;
     } on Failure catch (failure) {
@@ -42,6 +48,7 @@ class PokemonRemoteDataSource {
   Future<RemoteCatalogPage> _request({
     required int afterId,
     required int pageSize,
+    required bool includeTotal,
   }) async {
     final QueryResult result;
     try {
@@ -49,7 +56,11 @@ class PokemonRemoteDataSource {
           .query(
             QueryOptions(
               document: _document,
-              variables: {'afterId': afterId, 'limit': pageSize},
+              variables: {
+                'afterId': afterId,
+                'limit': pageSize,
+                'includeTotal': includeTotal,
+              },
               fetchPolicy: FetchPolicy.noCache,
             ),
           )
@@ -71,7 +82,11 @@ class PokemonRemoteDataSource {
     }
 
     try {
-      return RemoteCatalogPage.fromJson(data);
+      final page = RemoteCatalogPage.fromJson(data);
+      if (includeTotal && page.catalogTotalCount == null) {
+        throw const InvalidResponseFailure('Se pidió el total y no llegó');
+      }
+      return page;
     } on Failure {
       rethrow;
     } catch (e) {

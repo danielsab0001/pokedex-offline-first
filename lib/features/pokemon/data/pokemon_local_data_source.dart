@@ -45,7 +45,7 @@ class PokemonLocalDataSource {
     List<PokemonRecord> page, {
     required String resourceKey,
     required int nextCursor,
-    int? remoteTotal,
+    int? catalogTotalCount,
   }) {
     final syncedAt = DateTime.now();
 
@@ -63,8 +63,7 @@ class PokemonLocalDataSource {
       }
 
       for (final item in page) {
-        // Upsert con todas las columnas presentes: pisa cualquier alteración
-        // local, incluido un nombre en español que ya no exista en remoto.
+        // Upsert con todas las columnas presentes
         await _db
             .into(_db.pokemons)
             .insertOnConflictUpdate(
@@ -96,7 +95,7 @@ class PokemonLocalDataSource {
       await _syncMetadata.recordPageSaved(
         resourceKey,
         cursor: nextCursor,
-        remoteTotal: remoteTotal,
+        catalogTotalCount: catalogTotalCount,
       );
     });
   }

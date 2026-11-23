@@ -35,7 +35,6 @@ final catalogStateProvider = Provider<CatalogState>((ref) {
   final pokemons = ref.watch(_catalogPokemonsProvider);
   final syncInfo = ref.watch(_catalogSyncInfoProvider);
 
-  // Un fallo al leer la base local no es un fallo de red: se muestra como error.
   if (pokemons.hasError) return const CatalogError();
 
   return resolveCatalogState(

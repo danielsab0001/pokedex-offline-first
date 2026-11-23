@@ -66,7 +66,8 @@ class SyncMetadataEntries extends Table {
   TextColumn get resourceKey => text()();
   TextColumn get status => text().withDefault(const Constant('idle'))();
   IntColumn get cursor => integer().withDefault(const Constant(0))();
-  IntColumn get remoteTotal => integer().nullable()();
+  IntColumn get catalogTotalCount =>
+      integer().named('remote_total').nullable()();
   DateTimeColumn get lastSuccessAt => dateTime().nullable()();
   DateTimeColumn get lastAttemptAt => dateTime().nullable()();
   IntColumn get failureCount => integer().withDefault(const Constant(0))();

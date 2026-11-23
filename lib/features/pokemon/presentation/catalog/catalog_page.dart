@@ -51,14 +51,11 @@ class CatalogPage extends ConsumerWidget {
   }
 }
 
-/// No espera el resultado: el estado de la sincronización llega por la base.
 void _retry(WidgetRef ref) {
   unawaited(ref.read(pokemonRepositoryProvider).refresh());
 }
 
 void _loadMore(WidgetRef ref) {
-  // Se lee el estado actual y no el de la última construcción, para no pedir
-  // dos veces seguidas mientras todavía llegan los datos nuevos.
   final state = ref.read(catalogStateProvider);
   if (state is CatalogContent && state.hasMore) {
     ref.read(catalogLimitProvider.notifier).loadMore();
@@ -111,7 +108,6 @@ class _CatalogList extends ConsumerWidget {
         },
         child: Center(
           child: ConstrainedBox(
-            // En pantallas anchas la lista no se estira de borde a borde.
             constraints: const BoxConstraints(maxWidth: 720),
             child: ListView.builder(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),

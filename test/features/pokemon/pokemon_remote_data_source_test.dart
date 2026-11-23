@@ -48,12 +48,13 @@ http.Response jsonResponse(Object body, {int status = 200}) {
   );
 }
 
-http.Response page(List<Map<String, dynamic>> items, {int total = 1025}) {
+http.Response page(List<Map<String, dynamic>> items, {int? total = 1025}) {
   return jsonResponse({
     'data': {
-      'pokemonspecies_aggregate': {
-        'aggregate': {'count': total},
-      },
+      if (total != null)
+        'pokemonspecies_aggregate': {
+          'aggregate': {'count': total},
+        },
       'pokemonspecies': items,
     },
   });
@@ -73,10 +74,13 @@ void main() {
       (_) async => page([species(1), species(2)], total: 1025),
     );
 
-    final result = await source.fetchCatalogPage(afterId: 0);
+    final result = await source.fetchCatalogPage(
+      afterId: 0,
+      includeTotal: true,
+    );
     final records = result.toRecords();
 
-    expect(result.total, 1025);
+    expect(result.catalogTotalCount, 1025);
     expect(result.lastId, 2);
     expect(records.map((r) => r.id), [1, 2]);
     expect(records.first.nameEn, 'Mon');
@@ -95,7 +99,41 @@ void main() {
 
     await source.fetchCatalogPage(afterId: 100, pageSize: 50);
 
-    expect(variables, {'afterId': 100, 'limit': 50});
+    expect(variables, {'afterId': 100, 'limit': 50, 'includeTotal': false});
+  });
+
+  test('includeTotal viaja como variable cuando se pide', () async {
+    Map<String, dynamic>? variables;
+    final source = sourceWith((request) async {
+      final body = jsonDecode(request.body) as Map<String, dynamic>;
+      variables = body['variables'] as Map<String, dynamic>;
+      return page([species(1)]);
+    });
+
+    await source.fetchCatalogPage(afterId: 0, includeTotal: true);
+
+    expect(variables!['includeTotal'], true);
+  });
+
+  test(
+    'sin el total en la respuesta, la página es válida y el total nulo',
+    () async {
+      final source = sourceWith((_) async => page([species(1)], total: null));
+
+      final result = await source.fetchCatalogPage(afterId: 0);
+
+      expect(result.catalogTotalCount, isNull);
+      expect(result.items, hasLength(1));
+    },
+  );
+
+  test('si se pidió el total y no llega, es respuesta inválida', () async {
+    final source = sourceWith((_) async => page([species(1)], total: null));
+
+    await expectLater(
+      source.fetchCatalogPage(afterId: 0, includeTotal: true),
+      throwsA(isA<InvalidResponseFailure>()),
+    );
   });
 
   test('si falta el nombre en inglés usa el slug de la especie', () async {

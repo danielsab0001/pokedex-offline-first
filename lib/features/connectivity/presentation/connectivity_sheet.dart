@@ -30,7 +30,7 @@ class ConnectivitySheet extends ConsumerWidget {
     final colors = indicatorColors(theme.colorScheme, indicator.kind);
     final syncing = indicator.activity == SyncActivity.syncing;
 
-    final total = indicator.remoteTotal;
+    final total = indicator.catalogTotalCount;
     final catalogText = total == null
         ? l10n.connectivityCatalogCount(indicator.localCount)
         : l10n.connectivityCatalogProgress(indicator.localCount, total);

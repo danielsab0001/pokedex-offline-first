@@ -37,7 +37,7 @@ void main() {
     page,
     resourceKey: _key,
     nextCursor: page.last.id,
-    remoteTotal: 1025,
+    catalogTotalCount: 1025,
   );
 
   setUp(() {
@@ -154,7 +154,7 @@ void main() {
 
     final meta = (await sync.read(_key))!;
     expect(meta.cursor, 2);
-    expect(meta.remoteTotal, 1025);
+    expect(meta.catalogTotalCount, 1025);
     expect(meta.failureCount, 0);
     expect(meta.lastSuccessAt, isNotNull);
   });
@@ -168,5 +168,26 @@ void main() {
     await save([pokemon(1)]);
 
     expect(await favorites.watchFavoriteIds().first, containsAll([1, 999]));
+  });
+
+  test('una página sin total avanza el cursor y conserva el total', () async {
+    await save([pokemon(1), pokemon(2)]);
+
+    await source.savePage([pokemon(3)], resourceKey: _key, nextCursor: 3);
+
+    final meta = (await sync.read(_key))!;
+    expect(meta.cursor, 3);
+    expect(meta.catalogTotalCount, 1025);
+  });
+
+  test('la columna sigue llamándose remote_total en SQLite', () async {
+    final columns = await db
+        .customSelect('PRAGMA table_info(sync_metadata)')
+        .get();
+
+    expect(
+      columns.map((c) => c.read<String>('name')),
+      contains('remote_total'),
+    );
   });
 }

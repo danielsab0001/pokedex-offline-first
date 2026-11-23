@@ -4,8 +4,8 @@ const englishLanguageId = 9;
 
 /// Una página del catálogo más el total de especies, en una sola petición.
 const catalogPageQuery = r'''
-query CatalogPage($afterId: Int!, $limit: Int!) {
-  pokemonspecies_aggregate {
+query CatalogPage($afterId: Int!, $limit: Int!, $includeTotal: Boolean!) {
+  pokemonspecies_aggregate @include(if: $includeTotal) {
     aggregate {
       count
     }

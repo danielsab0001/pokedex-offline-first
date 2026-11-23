@@ -61,12 +61,17 @@ class FakePokeApi {
   /// Si lanza, simula un fallo de conexión.
   FutureOr<http.Response?> Function(int call)? intercept;
 
+  /// Valor de includeTotal de cada petición recibida, en orden.
+  final includeTotalFlags = <bool>[];
+
   Future<http.Response> handle(http.Request request) async {
     final body = jsonDecode(request.body) as Map<String, dynamic>;
     final variables = body['variables'] as Map<String, dynamic>;
     final afterId = variables['afterId'] as int;
     final limit = variables['limit'] as int;
+    final includeTotal = variables['includeTotal'] as bool;
     cursors.add(afterId);
+    includeTotalFlags.add(includeTotal);
 
     final custom = await intercept?.call(cursors.length);
     if (custom != null) return custom;
@@ -74,9 +79,10 @@ class FakePokeApi {
     final last = afterId + limit < total ? afterId + limit : total;
     return jsonResponse({
       'data': {
-        'pokemonspecies_aggregate': {
-          'aggregate': {'count': total},
-        },
+        if (includeTotal)
+          'pokemonspecies_aggregate': {
+            'aggregate': {'count': total},
+          },
         'pokemonspecies': [
           for (var id = afterId + 1; id <= last; id++) species(id),
         ],
@@ -122,9 +128,38 @@ void main() {
       expect(api.cursors, [0, 10, 20]);
       expect(index.status, SyncStatus.completed);
       expect(index.cursor, 25);
-      expect(index.remoteTotal, 25);
+      expect(index.catalogTotalCount, 25);
+      expect(api.includeTotalFlags, [true, false, false]);
     },
   );
+
+  test('al reanudar no se vuelve a pedir el total ni se pierde', () async {
+    api.intercept = (call) {
+      if (call == 2) throw http.ClientException('sin red');
+      return null;
+    };
+    await buildSync().start();
+    expect((await meta.read(CatalogSync.indexKey))!.catalogTotalCount, 25);
+
+    api.intercept = null;
+    await buildSync().start();
+
+    expect(api.includeTotalFlags, [true, false, false, false]);
+    expect((await meta.read(CatalogSync.indexKey))!.catalogTotalCount, 25);
+  });
+
+  test('la verificación pide el total solo al empezar cada vuelta', () async {
+    final sync = buildSync();
+    await sync.start();
+    api.includeTotalFlags.clear();
+
+    await sync.verifyNextPage();
+    await sync.verifyNextPage();
+    await sync.verifyNextPage();
+    await sync.verifyNextPage();
+
+    expect(api.includeTotalFlags, [true, false, false, true]);
+  });
 
   test(
     'verificar varias veces seguidas no duplica registros (PA-13)',

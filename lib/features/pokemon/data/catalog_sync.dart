@@ -8,9 +8,6 @@ import 'package:pokedex/features/pokemon/data/pokemon_remote_data_source.dart';
 typedef _PageResult = ({bool isLast, int nextCursor});
 
 /// Trae el catálogo de PokeAPI y lo guarda en la base local, página a página.
-/// Dos políticas con el mismo mecanismo:
-/// - índice: descarga completa y reanudable desde el cursor guardado.
-/// - verificación: una página rotativa por disparo, para detectar cambios.
 class CatalogSync {
   CatalogSync(
     this._remote,
@@ -83,9 +80,12 @@ class CatalogSync {
     required int cursor,
     required bool resetCursorWhenDone,
   }) async {
+    // El total es el mismo para todas las páginas: basta pedirlo al empezar
+    // un recorrido (cursor 0).
     final page = await _remote.fetchCatalogPage(
       afterId: cursor,
       pageSize: pageSize,
+      includeTotal: cursor == 0,
     );
 
     final isLast = page.items.length < pageSize;
@@ -97,7 +97,7 @@ class CatalogSync {
       page.toRecords(),
       resourceKey: key,
       nextCursor: nextCursor,
-      remoteTotal: page.total,
+      catalogTotalCount: page.catalogTotalCount,
     );
     return (isLast: isLast, nextCursor: nextCursor);
   }

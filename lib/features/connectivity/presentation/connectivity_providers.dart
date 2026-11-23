@@ -34,7 +34,7 @@ final connectivityIndicatorProvider = Provider<ConnectivityIndicator>((ref) {
     activity: _activityOf(sync?.status),
     lastSuccessAt: sync?.lastSuccessAt,
     localCount: localCount ?? 0,
-    remoteTotal: sync?.remoteTotal,
+    catalogTotalCount: sync?.catalogTotalCount,
     lastError: sync?.lastError,
   );
 });

@@ -133,7 +133,7 @@ void main() {
       final info = await repo.watchSyncInfo().first;
 
       expect(info.status, CatalogSyncStatus.completed);
-      expect(info.remoteTotal, 3);
+      expect(info.catalogTotalCount, 3);
       expect(info.lastSuccessAt, isNotNull);
       expect(info.failureCount, 0);
     },

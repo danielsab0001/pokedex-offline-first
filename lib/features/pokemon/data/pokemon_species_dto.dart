@@ -4,12 +4,17 @@ import 'package:pokedex/features/pokemon/data/pokemon_record.dart';
 
 /// Una página ya validada de la respuesta de PokeAPI.
 class RemoteCatalogPage {
-  const RemoteCatalogPage({required this.items, required this.total});
+  const RemoteCatalogPage({required this.items, this.catalogTotalCount});
 
   factory RemoteCatalogPage.fromJson(Map<String, dynamic> json) {
-    final count = _map(_map(json, 'pokemonspecies_aggregate'), 'aggregate');
+    final aggregate = json['pokemonspecies_aggregate'];
     return RemoteCatalogPage(
-      total: _int(count, 'count'),
+      catalogTotalCount: aggregate == null
+          ? null
+          : _int(
+              _map(_asMap(aggregate, 'pokemonspecies_aggregate'), 'aggregate'),
+              'count',
+            ),
       items: [
         for (final item in _list(json, 'pokemonspecies'))
           PokemonSpeciesDto.fromJson(_asMap(item, 'pokemonspecies')),
@@ -18,7 +23,9 @@ class RemoteCatalogPage {
   }
 
   final List<PokemonSpeciesDto> items;
-  final int total;
+
+  /// Total de especies en PokeAPI; null si la petición no lo pidió.
+  final int? catalogTotalCount;
 
   /// Cursor para pedir la página siguiente; null si la página vino vacía.
   int? get lastId => items.isEmpty ? null : items.last.id;

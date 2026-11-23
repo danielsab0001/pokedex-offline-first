@@ -110,7 +110,7 @@ ConnectivityIndicator indicator(
   SyncActivity activity = SyncActivity.idle,
   DateTime? lastSuccessAt,
   int localCount = 0,
-  int? remoteTotal,
+  int? catalogTotalCount,
   String? lastError,
 }) {
   final availability = switch (kind) {
@@ -125,7 +125,7 @@ ConnectivityIndicator indicator(
     activity: activity,
     lastSuccessAt: lastSuccessAt,
     localCount: localCount,
-    remoteTotal: remoteTotal,
+    catalogTotalCount: catalogTotalCount,
     lastError: lastError,
   );
 }
@@ -177,7 +177,7 @@ void main() {
         activity: SyncActivity.syncing,
         lastSuccessAt: at,
         localCount: 40,
-        remoteTotal: 1025,
+        catalogTotalCount: 1025,
         lastError: 'x',
       );
 
@@ -185,7 +185,7 @@ void main() {
       expect(result.kind, IndicatorKind.syncing);
       expect(result.lastSuccessAt, at);
       expect(result.localCount, 40);
-      expect(result.remoteTotal, 1025);
+      expect(result.catalogTotalCount, 1025);
       expect(result.lastError, 'x');
     });
 
@@ -286,7 +286,7 @@ void main() {
         ..localCount = 300
         ..syncInfo = CatalogSyncInfo(
           status: CatalogSyncStatus.completed,
-          remoteTotal: 1025,
+          catalogTotalCount: 1025,
           lastSuccessAt: at,
         );
       final container = containerWith(FakeConnectivityRepository(), pokemon);
@@ -294,7 +294,7 @@ void main() {
 
       final result = container.read(connectivityIndicatorProvider);
       expect(result.localCount, 300);
-      expect(result.remoteTotal, 1025);
+      expect(result.catalogTotalCount, 1025);
       expect(result.lastSuccessAt, at);
     });
 
@@ -426,7 +426,7 @@ void main() {
           IndicatorKind.syncing,
           activity: SyncActivity.syncing,
           localCount: 3,
-          remoteTotal: 10,
+          catalogTotalCount: 10,
         );
         await tester.pumpWidget(hostFor(value));
         await tester.pump();
@@ -445,7 +445,7 @@ void main() {
         IndicatorKind.syncing,
         activity: SyncActivity.syncing,
         localCount: 10,
-        remoteTotal: 10,
+        catalogTotalCount: 10,
       );
       await tester.pumpWidget(hostFor(value));
       await tester.pump();

@@ -85,7 +85,7 @@ class PokemonRepositoryImpl implements PokemonRepository {
 
     return CatalogSyncInfo(
       status: status,
-      remoteTotal: index?.remoteTotal ?? verify?.remoteTotal,
+      catalogTotalCount: verify?.catalogTotalCount ?? index?.catalogTotalCount,
       lastSuccessAt: lastSuccesses.isEmpty
           ? null
           : lastSuccesses.reduce((a, b) => a.isAfter(b) ? a : b),

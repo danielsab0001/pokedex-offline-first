@@ -41,7 +41,7 @@ class SyncMetadataLocalDataSource {
   Future<void> recordPageSaved(
     String resourceKey, {
     required int cursor,
-    int? remoteTotal,
+    int? catalogTotalCount,
   }) {
     final now = DateTime.now();
     return _db
@@ -50,9 +50,9 @@ class SyncMetadataLocalDataSource {
           SyncMetadataEntriesCompanion.insert(
             resourceKey: resourceKey,
             cursor: Value(cursor),
-            remoteTotal: remoteTotal == null
+            catalogTotalCount: catalogTotalCount == null
                 ? const Value.absent()
-                : Value(remoteTotal),
+                : Value(catalogTotalCount),
             lastSuccessAt: Value(now),
             lastAttemptAt: Value(now),
             failureCount: const Value(0),

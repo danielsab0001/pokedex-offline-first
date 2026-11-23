@@ -38,7 +38,7 @@ ConnectivityIndicator buildConnectivityIndicator({
   required SyncActivity activity,
   DateTime? lastSuccessAt,
   int localCount = 0,
-  int? remoteTotal,
+  int? catalogTotalCount,
   String? lastError,
 }) {
   final availability = resolveAvailability(hasNetwork: hasNetwork, api: api);
@@ -48,7 +48,7 @@ ConnectivityIndicator buildConnectivityIndicator({
     activity: activity,
     lastSuccessAt: lastSuccessAt,
     localCount: localCount,
-    remoteTotal: remoteTotal,
+    catalogTotalCount: catalogTotalCount,
     lastError: lastError,
   );
 }

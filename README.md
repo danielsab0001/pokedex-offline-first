@@ -407,8 +407,7 @@ exige el enunciado (§17.6), declaro cómo:
   mayor parte del código, de las pruebas y de los borradores de la documentación,
   y explicó cada pieza.
 - Yo ejecuté cada paso en mi equipo, corrí el análisis y las pruebas, probé la
-  aplicación en un teléfono real, corregí los errores que fueron apareciendo junto
-  con el asistente, y aprobé las decisiones antes de aplicarlas.
+  aplicación en un teléfono real, corregí los errores que fueron apareciendo, y aprobé las decisiones antes de aplicarlas.
 - Los datos del esquema de PokeAPI (nombres de campos, total de especies, ids de
   idioma) los verifiqué en su consola GraphQL y no se tomaron de memoria.
 - No se incorporó código de terceros aparte de las dependencias declaradas en
