@@ -72,6 +72,7 @@ class SyncMetadataEntries extends Table {
   DateTimeColumn get lastAttemptAt => dateTime().nullable()();
   IntColumn get failureCount => integer().withDefault(const Constant(0))();
   TextColumn get lastError => text().nullable()();
+  DateTimeColumn get retryAt => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {resourceKey};

@@ -6,6 +6,7 @@ import 'package:pokedex/app/sync/reconnect_trigger.dart';
 import 'package:pokedex/core/database/app_database.dart';
 import 'package:pokedex/core/network/graphql_client.dart';
 import 'package:pokedex/core/network/service_health.dart';
+import 'package:pokedex/core/sync/api_gate.dart';
 import 'package:pokedex/core/sync/sync_metadata_local_data_source.dart';
 import 'package:pokedex/features/connectivity/data/connectivity_repository_impl.dart';
 import 'package:pokedex/features/connectivity/data/network_monitor.dart';
@@ -37,6 +38,13 @@ final syncMetadataLocalDataSourceProvider =
       (ref) => SyncMetadataLocalDataSource(ref.watch(appDatabaseProvider)),
     );
 
+final apiGateProvider = Provider<ApiGate>(
+  (ref) => ApiGate(
+    ref.watch(syncMetadataLocalDataSourceProvider),
+    health: ref.watch(serviceHealthProvider),
+  ),
+);
+
 final pokemonLocalDataSourceProvider = Provider<PokemonLocalDataSource>(
   (ref) => PokemonLocalDataSource(
     ref.watch(appDatabaseProvider),
@@ -56,6 +64,7 @@ final catalogSyncProvider = Provider<CatalogSync>(
     ref.watch(pokemonRemoteDataSourceProvider),
     ref.watch(pokemonLocalDataSourceProvider),
     ref.watch(syncMetadataLocalDataSourceProvider),
+    ref.watch(apiGateProvider),
   ),
 );
 

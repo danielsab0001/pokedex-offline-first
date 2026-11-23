@@ -7,6 +7,7 @@ analyzer:
     - ios/**
     - '**/*.g.dart'
     - lib/l10n/app_localizations*.dart
+    - test/generated_migrations/**
 
 linter:
   rules:

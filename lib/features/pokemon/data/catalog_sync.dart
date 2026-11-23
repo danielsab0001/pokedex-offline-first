@@ -4,6 +4,7 @@ import 'package:pokedex/core/sync/sync_metadata_local_data_source.dart';
 import 'package:pokedex/core/sync/sync_status.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_local_data_source.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_remote_data_source.dart';
+import 'package:pokedex/core/sync/api_gate.dart';
 
 typedef _PageResult = ({bool isLast, int nextCursor});
 
@@ -12,7 +13,8 @@ class CatalogSync {
   CatalogSync(
     this._remote,
     this._local,
-    this._metadata, {
+    this._metadata,
+    this._gate, {
     this.pageSize = catalogPageSize,
   });
 
@@ -22,6 +24,7 @@ class CatalogSync {
   final PokemonRemoteDataSource _remote;
   final PokemonLocalDataSource _local;
   final SyncMetadataLocalDataSource _metadata;
+  final ApiGate _gate;
   final int pageSize;
   final _singleFlight = SingleFlight();
 
@@ -82,10 +85,12 @@ class CatalogSync {
   }) async {
     // El total es el mismo para todas las páginas: basta pedirlo al empezar
     // un recorrido (cursor 0).
-    final page = await _remote.fetchCatalogPage(
-      afterId: cursor,
-      pageSize: pageSize,
-      includeTotal: cursor == 0,
+    final page = await _gate.run(
+      () => _remote.fetchCatalogPage(
+        afterId: cursor,
+        pageSize: pageSize,
+        includeTotal: cursor == 0,
+      ),
     );
 
     final isLast = page.items.length < pageSize;

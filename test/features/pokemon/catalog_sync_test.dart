@@ -12,6 +12,7 @@ import 'package:pokedex/core/sync/sync_status.dart';
 import 'package:pokedex/features/pokemon/data/catalog_sync.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_local_data_source.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_remote_data_source.dart';
+import 'package:pokedex/core/sync/api_gate.dart';
 
 Map<String, dynamic> species(int id) {
   return {
@@ -97,12 +98,13 @@ void main() {
   late SyncMetadataLocalDataSource meta;
 
   // Páginas de 10 sobre 25 especies: 3 peticiones (10, 10 y 5).
-  CatalogSync buildSync() {
+  CatalogSync buildSync({ApiGate? gate}) {
     final client = createPokeApiClient(httpClient: MockClient(api.handle));
     return CatalogSync(
       PokemonRemoteDataSource(client),
       PokemonLocalDataSource(db, meta),
       meta,
+      gate ?? ApiGate(meta, maxAttempts: 1),
       pageSize: 10,
     );
   }
@@ -295,4 +297,45 @@ void main() {
     expect(index.status, SyncStatus.failed);
     expect(index.lastError, contains('InvalidResponseFailure'));
   });
+  test(
+    'un fallo del servicio se reintenta dentro de la misma sincronización',
+    () async {
+      api.intercept = (call) => call == 2
+          ? http.Response(
+              '{}',
+              503,
+              headers: {'content-type': 'application/json'},
+            )
+          : null;
+
+      await buildSync(gate: ApiGate(meta, wait: (_) async {})).start();
+
+      final index = (await meta.read(CatalogSync.indexKey))!;
+      expect(api.cursors, [0, 10, 10, 20]);
+      expect(index.status, SyncStatus.completed);
+      expect(index.failureCount, 0);
+    },
+  );
+
+  test(
+    'con un cooldown activo ninguna sincronización llega a la red',
+    () async {
+      api.intercept = (call) => http.Response(
+        '{}',
+        429,
+        headers: {'content-type': 'application/json', 'retry-after': '600'},
+      );
+      await buildSync().start();
+      expect(api.cursors, [0]);
+
+      api.intercept = null;
+      await buildSync().start();
+      await buildSync().verifyNextPage();
+
+      expect(api.cursors, [0]);
+      final index = (await meta.read(CatalogSync.indexKey))!;
+      expect(index.status, SyncStatus.failed);
+      expect(index.lastError, contains('RateLimitFailure'));
+    },
+  );
 }

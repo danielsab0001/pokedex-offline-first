@@ -21,11 +21,16 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.defaults() : super(driftDatabase(name: 'pokedex'));
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => m.createAll(),
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.addColumn(syncMetadataEntries, syncMetadataEntries.retryAt);
+      }
+    },
     beforeOpen: (details) async {
       // SQLite no aplica claves foráneas si no se activan en cada conexión.
       await customStatement('PRAGMA foreign_keys = ON');

@@ -1099,6 +1099,17 @@ class $SyncMetadataEntriesTable extends SyncMetadataEntries
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _retryAtMeta = const VerificationMeta(
+    'retryAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> retryAt = GeneratedColumn<DateTime>(
+    'retry_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     resourceKey,
@@ -1109,6 +1120,7 @@ class $SyncMetadataEntriesTable extends SyncMetadataEntries
     lastAttemptAt,
     failureCount,
     lastError,
+    retryAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1187,6 +1199,12 @@ class $SyncMetadataEntriesTable extends SyncMetadataEntries
         lastError.isAcceptableOrUnknown(data['last_error']!, _lastErrorMeta),
       );
     }
+    if (data.containsKey('retry_at')) {
+      context.handle(
+        _retryAtMeta,
+        retryAt.isAcceptableOrUnknown(data['retry_at']!, _retryAtMeta),
+      );
+    }
     return context;
   }
 
@@ -1228,6 +1246,10 @@ class $SyncMetadataEntriesTable extends SyncMetadataEntries
         DriftSqlType.string,
         data['${effectivePrefix}last_error'],
       ),
+      retryAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}retry_at'],
+      ),
     );
   }
 
@@ -1246,6 +1268,7 @@ class SyncMetadataRow extends DataClass implements Insertable<SyncMetadataRow> {
   final DateTime? lastAttemptAt;
   final int failureCount;
   final String? lastError;
+  final DateTime? retryAt;
   const SyncMetadataRow({
     required this.resourceKey,
     required this.status,
@@ -1255,6 +1278,7 @@ class SyncMetadataRow extends DataClass implements Insertable<SyncMetadataRow> {
     this.lastAttemptAt,
     required this.failureCount,
     this.lastError,
+    this.retryAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1274,6 +1298,9 @@ class SyncMetadataRow extends DataClass implements Insertable<SyncMetadataRow> {
     map['failure_count'] = Variable<int>(failureCount);
     if (!nullToAbsent || lastError != null) {
       map['last_error'] = Variable<String>(lastError);
+    }
+    if (!nullToAbsent || retryAt != null) {
+      map['retry_at'] = Variable<DateTime>(retryAt);
     }
     return map;
   }
@@ -1296,6 +1323,9 @@ class SyncMetadataRow extends DataClass implements Insertable<SyncMetadataRow> {
       lastError: lastError == null && nullToAbsent
           ? const Value.absent()
           : Value(lastError),
+      retryAt: retryAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(retryAt),
     );
   }
 
@@ -1313,6 +1343,7 @@ class SyncMetadataRow extends DataClass implements Insertable<SyncMetadataRow> {
       lastAttemptAt: serializer.fromJson<DateTime?>(json['lastAttemptAt']),
       failureCount: serializer.fromJson<int>(json['failureCount']),
       lastError: serializer.fromJson<String?>(json['lastError']),
+      retryAt: serializer.fromJson<DateTime?>(json['retryAt']),
     );
   }
   @override
@@ -1327,6 +1358,7 @@ class SyncMetadataRow extends DataClass implements Insertable<SyncMetadataRow> {
       'lastAttemptAt': serializer.toJson<DateTime?>(lastAttemptAt),
       'failureCount': serializer.toJson<int>(failureCount),
       'lastError': serializer.toJson<String?>(lastError),
+      'retryAt': serializer.toJson<DateTime?>(retryAt),
     };
   }
 
@@ -1339,6 +1371,7 @@ class SyncMetadataRow extends DataClass implements Insertable<SyncMetadataRow> {
     Value<DateTime?> lastAttemptAt = const Value.absent(),
     int? failureCount,
     Value<String?> lastError = const Value.absent(),
+    Value<DateTime?> retryAt = const Value.absent(),
   }) => SyncMetadataRow(
     resourceKey: resourceKey ?? this.resourceKey,
     status: status ?? this.status,
@@ -1354,6 +1387,7 @@ class SyncMetadataRow extends DataClass implements Insertable<SyncMetadataRow> {
         : this.lastAttemptAt,
     failureCount: failureCount ?? this.failureCount,
     lastError: lastError.present ? lastError.value : this.lastError,
+    retryAt: retryAt.present ? retryAt.value : this.retryAt,
   );
   SyncMetadataRow copyWithCompanion(SyncMetadataEntriesCompanion data) {
     return SyncMetadataRow(
@@ -1375,6 +1409,7 @@ class SyncMetadataRow extends DataClass implements Insertable<SyncMetadataRow> {
           ? data.failureCount.value
           : this.failureCount,
       lastError: data.lastError.present ? data.lastError.value : this.lastError,
+      retryAt: data.retryAt.present ? data.retryAt.value : this.retryAt,
     );
   }
 
@@ -1388,7 +1423,8 @@ class SyncMetadataRow extends DataClass implements Insertable<SyncMetadataRow> {
           ..write('lastSuccessAt: $lastSuccessAt, ')
           ..write('lastAttemptAt: $lastAttemptAt, ')
           ..write('failureCount: $failureCount, ')
-          ..write('lastError: $lastError')
+          ..write('lastError: $lastError, ')
+          ..write('retryAt: $retryAt')
           ..write(')'))
         .toString();
   }
@@ -1403,6 +1439,7 @@ class SyncMetadataRow extends DataClass implements Insertable<SyncMetadataRow> {
     lastAttemptAt,
     failureCount,
     lastError,
+    retryAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -1415,7 +1452,8 @@ class SyncMetadataRow extends DataClass implements Insertable<SyncMetadataRow> {
           other.lastSuccessAt == this.lastSuccessAt &&
           other.lastAttemptAt == this.lastAttemptAt &&
           other.failureCount == this.failureCount &&
-          other.lastError == this.lastError);
+          other.lastError == this.lastError &&
+          other.retryAt == this.retryAt);
 }
 
 class SyncMetadataEntriesCompanion extends UpdateCompanion<SyncMetadataRow> {
@@ -1427,6 +1465,7 @@ class SyncMetadataEntriesCompanion extends UpdateCompanion<SyncMetadataRow> {
   final Value<DateTime?> lastAttemptAt;
   final Value<int> failureCount;
   final Value<String?> lastError;
+  final Value<DateTime?> retryAt;
   final Value<int> rowid;
   const SyncMetadataEntriesCompanion({
     this.resourceKey = const Value.absent(),
@@ -1437,6 +1476,7 @@ class SyncMetadataEntriesCompanion extends UpdateCompanion<SyncMetadataRow> {
     this.lastAttemptAt = const Value.absent(),
     this.failureCount = const Value.absent(),
     this.lastError = const Value.absent(),
+    this.retryAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SyncMetadataEntriesCompanion.insert({
@@ -1448,6 +1488,7 @@ class SyncMetadataEntriesCompanion extends UpdateCompanion<SyncMetadataRow> {
     this.lastAttemptAt = const Value.absent(),
     this.failureCount = const Value.absent(),
     this.lastError = const Value.absent(),
+    this.retryAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : resourceKey = Value(resourceKey);
   static Insertable<SyncMetadataRow> custom({
@@ -1459,6 +1500,7 @@ class SyncMetadataEntriesCompanion extends UpdateCompanion<SyncMetadataRow> {
     Expression<DateTime>? lastAttemptAt,
     Expression<int>? failureCount,
     Expression<String>? lastError,
+    Expression<DateTime>? retryAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1470,6 +1512,7 @@ class SyncMetadataEntriesCompanion extends UpdateCompanion<SyncMetadataRow> {
       if (lastAttemptAt != null) 'last_attempt_at': lastAttemptAt,
       if (failureCount != null) 'failure_count': failureCount,
       if (lastError != null) 'last_error': lastError,
+      if (retryAt != null) 'retry_at': retryAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1483,6 +1526,7 @@ class SyncMetadataEntriesCompanion extends UpdateCompanion<SyncMetadataRow> {
     Value<DateTime?>? lastAttemptAt,
     Value<int>? failureCount,
     Value<String?>? lastError,
+    Value<DateTime?>? retryAt,
     Value<int>? rowid,
   }) {
     return SyncMetadataEntriesCompanion(
@@ -1494,6 +1538,7 @@ class SyncMetadataEntriesCompanion extends UpdateCompanion<SyncMetadataRow> {
       lastAttemptAt: lastAttemptAt ?? this.lastAttemptAt,
       failureCount: failureCount ?? this.failureCount,
       lastError: lastError ?? this.lastError,
+      retryAt: retryAt ?? this.retryAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1525,6 +1570,9 @@ class SyncMetadataEntriesCompanion extends UpdateCompanion<SyncMetadataRow> {
     if (lastError.present) {
       map['last_error'] = Variable<String>(lastError.value);
     }
+    if (retryAt.present) {
+      map['retry_at'] = Variable<DateTime>(retryAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1542,6 +1590,7 @@ class SyncMetadataEntriesCompanion extends UpdateCompanion<SyncMetadataRow> {
           ..write('lastAttemptAt: $lastAttemptAt, ')
           ..write('failureCount: $failureCount, ')
           ..write('lastError: $lastError, ')
+          ..write('retryAt: $retryAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2898,6 +2947,7 @@ typedef $$SyncMetadataEntriesTableCreateCompanionBuilder =
       Value<DateTime?> lastAttemptAt,
       Value<int> failureCount,
       Value<String?> lastError,
+      Value<DateTime?> retryAt,
       Value<int> rowid,
     });
 typedef $$SyncMetadataEntriesTableUpdateCompanionBuilder =
@@ -2910,6 +2960,7 @@ typedef $$SyncMetadataEntriesTableUpdateCompanionBuilder =
       Value<DateTime?> lastAttemptAt,
       Value<int> failureCount,
       Value<String?> lastError,
+      Value<DateTime?> retryAt,
       Value<int> rowid,
     });
 
@@ -2959,6 +3010,11 @@ class $$SyncMetadataEntriesTableFilterComposer
 
   ColumnFilters<String> get lastError => $composableBuilder(
     column: $table.lastError,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get retryAt => $composableBuilder(
+    column: $table.retryAt,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3011,6 +3067,11 @@ class $$SyncMetadataEntriesTableOrderingComposer
     column: $table.lastError,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get retryAt => $composableBuilder(
+    column: $table.retryAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SyncMetadataEntriesTableAnnotationComposer
@@ -3055,6 +3116,9 @@ class $$SyncMetadataEntriesTableAnnotationComposer
 
   GeneratedColumn<String> get lastError =>
       $composableBuilder(column: $table.lastError, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get retryAt =>
+      $composableBuilder(column: $table.retryAt, builder: (column) => column);
 }
 
 class $$SyncMetadataEntriesTableTableManager
@@ -3108,6 +3172,7 @@ class $$SyncMetadataEntriesTableTableManager
                 Value<DateTime?> lastAttemptAt = const Value.absent(),
                 Value<int> failureCount = const Value.absent(),
                 Value<String?> lastError = const Value.absent(),
+                Value<DateTime?> retryAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SyncMetadataEntriesCompanion(
                 resourceKey: resourceKey,
@@ -3118,6 +3183,7 @@ class $$SyncMetadataEntriesTableTableManager
                 lastAttemptAt: lastAttemptAt,
                 failureCount: failureCount,
                 lastError: lastError,
+                retryAt: retryAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3130,6 +3196,7 @@ class $$SyncMetadataEntriesTableTableManager
                 Value<DateTime?> lastAttemptAt = const Value.absent(),
                 Value<int> failureCount = const Value.absent(),
                 Value<String?> lastError = const Value.absent(),
+                Value<DateTime?> retryAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SyncMetadataEntriesCompanion.insert(
                 resourceKey: resourceKey,
@@ -3140,6 +3207,7 @@ class $$SyncMetadataEntriesTableTableManager
                 lastAttemptAt: lastAttemptAt,
                 failureCount: failureCount,
                 lastError: lastError,
+                retryAt: retryAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

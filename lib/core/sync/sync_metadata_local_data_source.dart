@@ -26,6 +26,21 @@ class SyncMetadataLocalDataSource {
     )..where((m) => m.resourceKey.isIn(resourceKeys))).watch();
   }
 
+  Future<DateTime?> readRetryAt(String resourceKey) async {
+    return (await read(resourceKey))?.retryAt;
+  }
+
+  Future<void> setRetryAt(String resourceKey, DateTime retryAt) {
+    return _db
+        .into(_db.syncMetadataEntries)
+        .insertOnConflictUpdate(
+          SyncMetadataEntriesCompanion.insert(
+            resourceKey: resourceKey,
+            retryAt: Value(retryAt),
+          ),
+        );
+  }
+
   Future<void> markStarted(String resourceKey) {
     return _db
         .into(_db.syncMetadataEntries)

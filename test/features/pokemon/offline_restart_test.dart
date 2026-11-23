@@ -14,6 +14,7 @@ import 'package:pokedex/features/pokemon/data/pokemon_local_data_source.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_remote_data_source.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_repository_impl.dart';
 import 'package:pokedex/features/pokemon/domain/catalog_sync_info.dart';
+import 'package:pokedex/core/sync/api_gate.dart';
 
 Map<String, dynamic> species(int id) {
   return {
@@ -68,6 +69,7 @@ class Session {
       PokemonRemoteDataSource(client),
       local,
       metadata,
+      ApiGate(metadata, maxAttempts: 1),
       pageSize: 10,
     );
     repository = PokemonRepositoryImpl(local, metadata, sync);
