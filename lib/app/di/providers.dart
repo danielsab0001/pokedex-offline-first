@@ -18,6 +18,7 @@ import 'package:pokedex/features/connectivity/data/connectivity_repository_impl.
 import 'package:pokedex/features/connectivity/data/network_monitor.dart';
 import 'package:pokedex/features/connectivity/domain/connectivity_repository.dart';
 import 'package:pokedex/features/debug_tools/data/logging_http_client.dart';
+import 'package:pokedex/features/debug_tools/data/debug_tools_repository_impl.dart';
 import 'package:pokedex/features/debug_tools/data/simulating_http_client.dart';
 import 'package:pokedex/features/debug_tools/domain/api_simulation.dart';
 import 'package:pokedex/features/pokemon/data/catalog_sync.dart';
@@ -25,6 +26,7 @@ import 'package:pokedex/features/pokemon/data/pokemon_local_data_source.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_remote_data_source.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_repository_impl.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon_repository.dart';
+import 'package:pokedex/features/debug_tools/domain/debug_tools_repository.dart';
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase.defaults();
@@ -144,3 +146,12 @@ final reconnectTriggerProvider = Provider<ReconnectTrigger>((ref) {
   ref.onDispose(trigger.dispose);
   return trigger;
 });
+
+final debugToolsRepositoryProvider = Provider<DebugToolsRepository>(
+  (ref) => DebugToolsRepositoryImpl(
+    ref.watch(appDatabaseProvider),
+    ref.watch(apiCallLogProvider),
+    ref.watch(catalogSyncProvider),
+    ref.watch(syncMetadataLocalDataSourceProvider),
+  ),
+);

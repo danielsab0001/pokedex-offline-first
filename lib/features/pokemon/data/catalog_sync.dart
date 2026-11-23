@@ -48,6 +48,10 @@ class CatalogSync {
   Future<void> verifyNextPage() =>
       _singleFlight.run(verifyKey, () => _guarded(verifyKey, _verifyOnePage));
 
+  /// Recorre todo el catálogo y restaura lo que se haya alterado en local
+  Future<void> verifyAll() =>
+      _singleFlight.run(verifyKey, () => _guarded(verifyKey, _verifyAllPages));
+
   Future<void> _guarded(String key, Future<void> Function() body) async {
     await _metadata.markStarted(key);
     try {
@@ -79,13 +83,24 @@ class CatalogSync {
     await _syncPage(verifyKey, cursor: cursor, resetCursorWhenDone: true);
   }
 
+  Future<void> _verifyAllPages() async {
+    var cursor = 0;
+    while (true) {
+      final result = await _syncPage(
+        verifyKey,
+        cursor: cursor,
+        resetCursorWhenDone: true,
+      );
+      if (result.isLast) return;
+      cursor = result.nextCursor;
+    }
+  }
+
   Future<_PageResult> _syncPage(
     String key, {
     required int cursor,
     required bool resetCursorWhenDone,
   }) async {
-    // El total es el mismo para todas las páginas: basta pedirlo al empezar
-    // un recorrido (cursor 0).
     final page = await _gate.run(
       () => _remote.fetchCatalogPage(
         afterId: cursor,

@@ -36,6 +36,9 @@ class FakeCatalogSync implements CatalogSync {
 
   @override
   Future<void> verifyNextPage() async {}
+
+  @override
+  Future<void> verifyAll() async {}
 }
 
 Future<FakeCatalogSync> _pumpApp(
