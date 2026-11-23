@@ -10,6 +10,8 @@ import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_card.dart'
 import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_thumbnail.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
 import 'package:pokedex/features/connectivity/presentation/connectivity_chip.dart';
+import 'package:go_router/go_router.dart';
+import 'package:pokedex/core/debug/debug_flags.dart';
 
 const _thumbnailSize = 72.0;
 
@@ -27,7 +29,16 @@ class CatalogPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.appTitle),
-        actions: const [ConnectivityChip(), SizedBox(width: 8)],
+        actions: [
+          if (debugToolsEnabled)
+            IconButton(
+              tooltip: 'Herramientas de depuración',
+              icon: const Icon(Icons.bug_report_outlined),
+              onPressed: () => context.push('/debug'),
+            ),
+          const ConnectivityChip(),
+          const SizedBox(width: 8),
+        ],
       ),
       body: switch (state) {
         CatalogLoading() => _LoadingView(message: l10n.catalogLoading),
