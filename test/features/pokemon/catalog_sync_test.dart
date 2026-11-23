@@ -192,7 +192,7 @@ void main() {
     expect(failed.status, SyncStatus.failed);
     expect(failed.cursor, 10);
     expect(failed.failureCount, 1);
-    expect(failed.lastError, contains('NetworkFailure'));
+    expect(failed.lastError, 'network');
 
     // Otra "sesión" de la app con la red de vuelta.
     api.intercept = null;
@@ -274,7 +274,7 @@ void main() {
     final index = (await meta.read(CatalogSync.indexKey))!;
     expect(await pokemonCount(), 0);
     expect(index.status, SyncStatus.failed);
-    expect(index.lastError, contains('RateLimitFailure'));
+    expect(index.lastError, 'rate_limit');
   });
 
   test('una respuesta inválida no guarda datos parciales (OF-04)', () async {
@@ -295,7 +295,7 @@ void main() {
     final index = (await meta.read(CatalogSync.indexKey))!;
     expect(await pokemonCount(), 0);
     expect(index.status, SyncStatus.failed);
-    expect(index.lastError, contains('InvalidResponseFailure'));
+    expect(index.lastError, 'invalid_response');
   });
   test(
     'un fallo del servicio se reintenta dentro de la misma sincronización',
@@ -335,7 +335,7 @@ void main() {
       expect(api.cursors, [0]);
       final index = (await meta.read(CatalogSync.indexKey))!;
       expect(index.status, SyncStatus.failed);
-      expect(index.lastError, contains('RateLimitFailure'));
+      expect(index.lastError, 'rate_limit');
     },
   );
 }

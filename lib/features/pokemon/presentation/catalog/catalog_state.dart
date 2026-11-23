@@ -1,3 +1,4 @@
+import 'package:pokedex/core/sync/sync_error_kind.dart';
 import 'package:pokedex/features/pokemon/domain/catalog_sync_info.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon.dart';
 
@@ -19,8 +20,19 @@ final class CatalogContent extends CatalogState {
   final bool hasMore;
 }
 
+/// Por qué no hay nada que mostrar.
+enum CatalogEmptyReason {
+  /// La sincronización terminó y PokeAPI no devolvió Pokémon.
+  noData,
+
+  /// Todavía no se ha podido descargar nada porque no hay conexión.
+  offline,
+}
+
 final class CatalogEmpty extends CatalogState {
-  const CatalogEmpty();
+  const CatalogEmpty({this.reason = CatalogEmptyReason.noData});
+
+  final CatalogEmptyReason reason;
 }
 
 final class CatalogError extends CatalogState {
@@ -50,6 +62,10 @@ CatalogState resolveCatalogState({
     CatalogSyncStatus.notStarted ||
     CatalogSyncStatus.syncing ||
     CatalogSyncStatus.interrupted => const CatalogLoading(),
+    // Primera ejecución sin red: no es un error, todavía faltan los datos.
+    CatalogSyncStatus.failed
+        when syncInfo?.lastError == SyncErrorKind.network =>
+      const CatalogEmpty(reason: CatalogEmptyReason.offline),
     CatalogSyncStatus.failed => const CatalogError(),
     CatalogSyncStatus.completed => const CatalogEmpty(),
   };

@@ -1,3 +1,5 @@
+import 'package:pokedex/core/sync/sync_error_kind.dart';
+
 enum CatalogSyncStatus { notStarted, syncing, completed, failed, interrupted }
 
 /// Lo que la interfaz necesita saber de la sincronización del catálogo.
@@ -18,5 +20,5 @@ class CatalogSyncInfo {
   final int? catalogTotalCount;
   final DateTime? lastSuccessAt;
   final int failureCount;
-  final String? lastError;
+  final SyncErrorKind? lastError;
 }

@@ -47,5 +47,17 @@
     "connectivityCatalogProgress": "{count} of {total} Pokémon",
     "connectivityCatalogCount": "{count} Pokémon",
     "connectivityLastErrorLabel": "Last error",
+    "connectivityFreshnessLabel": "Data status",
+    "connectivityFreshnessNever": "No data downloaded from PokeAPI yet",
+    "connectivityFreshnessFresh": "Up to date with PokeAPI",
+    "connectivityFreshnessStale": "May be out of date",
+    "syncErrorNetwork": "No Internet connection.",
+    "syncErrorTimeout": "PokeAPI took too long to respond.",
+    "syncErrorService": "PokeAPI responded with an error.",
+    "syncErrorRateLimit": "PokeAPI's request limit was reached. Please try again later.",
+    "syncErrorStorage": "Could not save on this device.",
+    "syncErrorUnknown": "Unknown error.",
+    "catalogOfflineTitle": "No data saved yet",
+    "catalogOfflineMessage": "The catalog can't be downloaded while offline. Connect to the Internet and it will download by itself.",
     "connectivitySyncNow": "Sync now"
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex/features/connectivity/domain/connectivity_models.dart';
+import 'package:pokedex/core/sync/sync_error_kind.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
 
 String indicatorLabel(AppLocalizations l10n, IndicatorKind kind) {
@@ -60,5 +61,24 @@ IconData indicatorIcon(IndicatorKind kind) {
       background: scheme.primaryContainer,
       foreground: scheme.onPrimaryContainer,
     ),
+  };
+}
+
+String freshnessText(AppLocalizations l10n, DataFreshness freshness) {
+  return switch (freshness) {
+    DataFreshness.neverSynced => l10n.connectivityFreshnessNever,
+    DataFreshness.fresh => l10n.connectivityFreshnessFresh,
+    DataFreshness.stale => l10n.connectivityFreshnessStale,
+  };
+}
+
+String syncErrorText(AppLocalizations l10n, SyncErrorKind kind) {
+  return switch (kind) {
+    SyncErrorKind.network => l10n.syncErrorNetwork,
+    SyncErrorKind.timeout => l10n.syncErrorTimeout,
+    SyncErrorKind.service => l10n.syncErrorService,
+    SyncErrorKind.rateLimit => l10n.syncErrorRateLimit,
+    SyncErrorKind.storage => l10n.syncErrorStorage,
+    SyncErrorKind.unknown => l10n.syncErrorUnknown,
   };
 }

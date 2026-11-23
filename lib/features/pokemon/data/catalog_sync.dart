@@ -54,9 +54,10 @@ class CatalogSync {
       await body();
       await _metadata.markCompleted(key);
     } on Failure catch (failure) {
-      await _metadata.markFailed(key, failure.toString());
-    } catch (error) {
-      await _metadata.markFailed(key, StorageFailure('$error').toString());
+      await _metadata.markFailed(key, failure.code);
+    } catch (_) {
+      // Cualquier error que no sea un Failure se trata como fallo al guardar.
+      await _metadata.markFailed(key, FailureCode.storage);
     }
   }
 

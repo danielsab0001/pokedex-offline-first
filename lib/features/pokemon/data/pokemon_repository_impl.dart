@@ -1,4 +1,5 @@
 import 'package:pokedex/core/database/app_database.dart';
+import 'package:pokedex/core/sync/sync_error_kind.dart';
 import 'package:pokedex/core/sync/sync_metadata_local_data_source.dart';
 import 'package:pokedex/core/sync/sync_status.dart';
 import 'package:pokedex/features/pokemon/data/catalog_sync.dart';
@@ -90,7 +91,7 @@ class PokemonRepositoryImpl implements PokemonRepository {
           ? null
           : lastSuccesses.reduce((a, b) => a.isAfter(b) ? a : b),
       failureCount: main.failureCount,
-      lastError: main.lastError,
+      lastError: SyncErrorKind.fromCode(main.lastError),
     );
   }
 }

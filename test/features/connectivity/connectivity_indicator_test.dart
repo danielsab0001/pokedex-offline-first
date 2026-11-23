@@ -13,6 +13,7 @@ import 'package:pokedex/features/pokemon/domain/catalog_sync_info.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon_repository.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
+import 'package:pokedex/core/sync/sync_error_kind.dart';
 
 class FakeConnectivityRepository implements ConnectivityRepository {
   bool _hasNetwork = true;
@@ -111,7 +112,7 @@ ConnectivityIndicator indicator(
   DateTime? lastSuccessAt,
   int localCount = 0,
   int? catalogTotalCount,
-  String? lastError,
+  SyncErrorKind? lastError,
 }) {
   final availability = switch (kind) {
     IndicatorKind.offline => ServiceAvailability.offline,
@@ -178,7 +179,7 @@ void main() {
         lastSuccessAt: at,
         localCount: 40,
         catalogTotalCount: 1025,
-        lastError: 'x',
+        lastError: SyncErrorKind.network,
       );
 
       expect(result.availability, ServiceAvailability.online);
@@ -186,7 +187,7 @@ void main() {
       expect(result.lastSuccessAt, at);
       expect(result.localCount, 40);
       expect(result.catalogTotalCount, 1025);
-      expect(result.lastError, 'x');
+      expect(result.lastError, SyncErrorKind.network);
     });
 
     test(
@@ -459,7 +460,7 @@ void main() {
     testWidgets('si la sincronización falló, la hoja muestra el último error', (
       tester,
     ) async {
-      const error = 'NetworkFailure: Sin conexión de red';
+      const error = SyncErrorKind.network;
       await tester.pumpWidget(
         hostFor(
           indicator(
@@ -474,7 +475,7 @@ void main() {
       await openSheet(tester);
 
       expect(find.text('Último error'), findsOneWidget);
-      expect(find.text(error), findsOneWidget);
+      expect(find.text('Sin conexión a Internet.'), findsOneWidget);
     });
 
     testWidgets('si la sincronización no falló, la hoja no muestra errores', (
@@ -482,10 +483,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         hostFor(
-          indicator(
-            IndicatorKind.online,
-            lastError: 'NetworkFailure: Sin conexión de red',
-          ),
+          indicator(IndicatorKind.online, lastError: SyncErrorKind.network),
         ),
       );
       await tester.pump();

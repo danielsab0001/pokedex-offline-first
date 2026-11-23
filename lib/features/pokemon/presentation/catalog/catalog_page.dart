@@ -32,13 +32,22 @@ class CatalogPage extends ConsumerWidget {
       body: switch (state) {
         CatalogLoading() => _LoadingView(message: l10n.catalogLoading),
         CatalogContent content => _CatalogList(content: content),
-        CatalogEmpty() => StateMessage(
-          icon: Icons.inbox_outlined,
-          title: l10n.catalogEmptyTitle,
-          message: l10n.catalogEmptyMessage,
-          actionLabel: l10n.retry,
-          onAction: () => _retry(ref),
-        ),
+        CatalogEmpty(:final reason) => switch (reason) {
+          CatalogEmptyReason.noData => StateMessage(
+            icon: Icons.inbox_outlined,
+            title: l10n.catalogEmptyTitle,
+            message: l10n.catalogEmptyMessage,
+            actionLabel: l10n.retry,
+            onAction: () => _retry(ref),
+          ),
+          CatalogEmptyReason.offline => StateMessage(
+            icon: Icons.cloud_off_outlined,
+            title: l10n.catalogOfflineTitle,
+            message: l10n.catalogOfflineMessage,
+            actionLabel: l10n.retry,
+            onAction: () => _retry(ref),
+          ),
+        },
         CatalogError() => StateMessage(
           icon: Icons.cloud_off_outlined,
           title: l10n.catalogErrorTitle,

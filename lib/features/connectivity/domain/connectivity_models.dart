@@ -1,3 +1,5 @@
+import 'package:pokedex/core/sync/sync_error_kind.dart';
+
 /// Lo que sabemos de la API según la última llamada real.
 enum ApiReachability { unknown, reachable, noConnection, failing }
 
@@ -9,6 +11,9 @@ enum SyncActivity { idle, syncing, failed }
 
 /// Qué muestra el indicador cuando se combinan las dos dimensiones.
 enum IndicatorKind { offline, serviceUnavailable, syncing, verifying, online }
+
+/// Qué tan al día están los datos locales respecto a PokeAPI (IND-04).
+enum DataFreshness { neverSynced, fresh, stale }
 
 /// Todo lo que el indicador necesita para dibujar el chip y la hoja de detalles.
 class ConnectivityIndicator {
@@ -33,5 +38,5 @@ class ConnectivityIndicator {
   final int localCount;
   final int? catalogTotalCount;
 
-  final String? lastError;
+  final SyncErrorKind? lastError;
 }

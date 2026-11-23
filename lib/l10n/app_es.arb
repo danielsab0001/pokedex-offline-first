@@ -80,5 +80,17 @@
       }
     },
     "connectivityLastErrorLabel": "Último error",
+    "connectivityFreshnessLabel": "Estado de los datos",
+    "connectivityFreshnessNever": "Todavía sin datos descargados de PokeAPI",
+    "connectivityFreshnessFresh": "Actualizados desde PokeAPI",
+    "connectivityFreshnessStale": "Pueden estar desactualizados",
+    "syncErrorNetwork": "Sin conexión a Internet.",
+    "syncErrorTimeout": "PokeAPI tardó demasiado en responder.",
+    "syncErrorService": "PokeAPI respondió con un error.",
+    "syncErrorRateLimit": "Se alcanzó el límite de peticiones de PokeAPI. Inténtalo de nuevo más tarde.",
+    "syncErrorStorage": "No se pudo guardar en este dispositivo.",
+    "syncErrorUnknown": "Error desconocido.",
+    "catalogOfflineTitle": "Todavía no hay datos guardados",
+    "catalogOfflineMessage": "Sin conexión no se puede descargar el catálogo. Conéctate a Internet y se descargará solo.",
     "connectivitySyncNow": "Sincronizar ahora"
 }

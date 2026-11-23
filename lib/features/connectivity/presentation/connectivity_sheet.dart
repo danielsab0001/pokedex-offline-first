@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pokedex/app/di/providers.dart';
 import 'package:pokedex/features/connectivity/domain/connectivity_models.dart';
+import 'package:pokedex/features/connectivity/domain/connectivity_resolver.dart';
 import 'package:pokedex/features/connectivity/presentation/connectivity_providers.dart';
 import 'package:pokedex/features/connectivity/presentation/indicator_presentation.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
@@ -38,6 +39,10 @@ class ConnectivitySheet extends ConsumerWidget {
         syncing && total != null && indicator.localCount < total;
 
     final lastSuccess = indicator.lastSuccessAt;
+    final freshness = resolveFreshness(
+      lastSuccessAt: lastSuccess,
+      now: DateTime.now(),
+    );
     final error = indicator.lastError;
 
     return SingleChildScrollView(
@@ -73,6 +78,10 @@ class ConnectivitySheet extends ConsumerWidget {
             value: l10n.connectivityDataSourceValue,
           ),
           _InfoRow(
+            label: l10n.connectivityFreshnessLabel,
+            value: freshnessText(l10n, freshness),
+          ),
+          _InfoRow(
             label: l10n.connectivityLastSyncLabel,
             value: lastSuccess == null
                 ? l10n.connectivityNeverSynced
@@ -88,7 +97,10 @@ class ConnectivitySheet extends ConsumerWidget {
               ),
             ),
           if (indicator.activity == SyncActivity.failed && error != null)
-            _InfoRow(label: l10n.connectivityLastErrorLabel, value: error),
+            _InfoRow(
+              label: l10n.connectivityLastErrorLabel,
+              value: syncErrorText(l10n, error),
+            ),
           const SizedBox(height: 8),
           SizedBox(
             width: double.infinity,

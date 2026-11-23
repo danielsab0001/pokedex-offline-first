@@ -13,6 +13,7 @@ import 'package:pokedex/features/pokemon/data/pokemon_remote_data_source.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_repository_impl.dart';
 import 'package:pokedex/features/pokemon/domain/catalog_sync_info.dart';
 import 'package:pokedex/core/sync/api_gate.dart';
+import 'package:pokedex/core/sync/sync_error_kind.dart';
 
 Map<String, dynamic> species(int id) {
   return {
@@ -147,11 +148,11 @@ void main() {
       final repo = build(okPage);
       await repo.refresh();
 
-      await meta.markFailed(CatalogSync.verifyKey, 'sin respuesta');
+      await meta.markFailed(CatalogSync.verifyKey, 'timeout');
       final info = await repo.watchSyncInfo().first;
 
       expect(info.status, CatalogSyncStatus.failed);
-      expect(info.lastError, 'sin respuesta');
+      expect(info.lastError, SyncErrorKind.timeout);
       expect(info.lastSuccessAt, isNotNull);
     },
   );
