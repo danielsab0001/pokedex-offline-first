@@ -11,6 +11,7 @@ class ApiGate {
     this.maxAttempts = 4,
     this.baseDelay = const Duration(seconds: 2),
     this.defaultCooldown = const Duration(minutes: 15),
+    this.onRetry,
     DateTime Function()? now,
     Future<void> Function(Duration)? wait,
     Random? random,
@@ -25,6 +26,7 @@ class ApiGate {
   final int maxAttempts;
   final Duration baseDelay;
   final Duration defaultCooldown;
+  final void Function(int attempt, Failure failure, Duration delay)? onRetry;
   final DateTime Function() _now;
   final Future<void> Function(Duration) _wait;
   final Random _random;
@@ -40,7 +42,9 @@ class ApiGate {
         rethrow;
       } on Failure catch (failure) {
         if (attempt >= maxAttempts || !_isTransient(failure)) rethrow;
-        await _wait(_backoff(attempt));
+        final delay = _backoff(attempt);
+        onRetry?.call(attempt, failure, delay);
+        await _wait(delay);
       }
     }
   }

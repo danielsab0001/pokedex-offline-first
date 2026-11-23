@@ -71,6 +71,33 @@ void main() {
     expect(waits[1].inMilliseconds, inInclusiveRange(3000, 5000));
   });
 
+  test(
+    'avisa de cada reintento con el intento, el fallo y la espera',
+    () async {
+      final retries = <(int, Failure, Duration)>[];
+      final gate = ApiGate(
+        meta,
+        now: () => clock,
+        wait: (delay) async => waits.add(delay),
+        random: Random(7),
+        onRetry: (attempt, failure, delay) =>
+            retries.add((attempt, failure, delay)),
+      );
+      final call = script([
+        HttpStatusFailure(503),
+        TimeoutFailure(const Duration(seconds: 15)),
+        'ok',
+      ]);
+
+      await gate.run(call.fn);
+
+      expect(retries.map((r) => r.$1).toList(), [1, 2]);
+      expect(retries[0].$2, isA<HttpStatusFailure>());
+      expect(retries[1].$2, isA<TimeoutFailure>());
+      expect(retries.map((r) => r.$3).toList(), waits);
+    },
+  );
+
   test('se rinde tras 4 intentos y relanza el último fallo', () async {
     final call = script([
       for (var i = 0; i < 4; i++) TimeoutFailure(const Duration(seconds: 15)),
