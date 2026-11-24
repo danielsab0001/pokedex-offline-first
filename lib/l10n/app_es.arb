@@ -4,7 +4,20 @@
   "@appTitle": {
     "description": "Nombre de la aplicación."
   },
-  "retry": "Reintentar",
+    "retry": "Reintentar",
+    "favoriteAdd": "Agregar {name} a favoritos",
+    "@favoriteAdd": {
+      "description": "Botón de favorito cuando el Pokémon todavía no lo es.",
+      "placeholders": {
+        "name": {"type": "String"}
+      }
+    },
+    "favoriteRemove": "Quitar {name} de favoritos",
+    "@favoriteRemove": {
+      "placeholders": {
+        "name": {"type": "String"}
+      }
+    },
   "catalogLoading": "Descargando el catálogo…",
   "catalogEmptyTitle": "El catálogo está vacío",
   "catalogEmptyMessage": "No se recibieron Pokémon. Inténtalo de nuevo más tarde.",

@@ -12,6 +12,7 @@ import 'package:pokedex/l10n/app_localizations.dart';
 import 'package:pokedex/features/connectivity/presentation/connectivity_chip.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pokedex/core/debug/debug_flags.dart';
+import 'package:pokedex/features/favorites/presentation/favorite_button.dart';
 
 const _thumbnailSize = 72.0;
 
@@ -134,10 +135,17 @@ class _CatalogList extends ConsumerWidget {
               itemCount: content.pokemons.length,
               itemBuilder: (context, index) {
                 final pokemon = content.pokemons[index];
+                final name = pokemon.nameFor(
+                  Localizations.localeOf(context).languageCode,
+                );
                 return PokemonCard(
                   key: ValueKey(pokemon.id),
                   pokemon: pokemon,
                   thumbnail: buildThumbnail(pokemon.id, _thumbnailSize),
+                  trailing: FavoriteButton(
+                    pokemonId: pokemon.id,
+                    pokemonName: name,
+                  ),
                 );
               },
             ),

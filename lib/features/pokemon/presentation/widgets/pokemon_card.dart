@@ -12,6 +12,7 @@ class PokemonCard extends StatelessWidget {
     required this.pokemon,
     required this.thumbnail,
     this.onTap,
+    this.trailing,
   });
 
   final Pokemon pokemon;
@@ -19,6 +20,10 @@ class PokemonCard extends StatelessWidget {
 
   /// Todavía null: el detalle llega en una etapa posterior.
   final VoidCallback? onTap;
+
+  /// Acción propia de la tarjeta (el corazón). Queda fuera de la etiqueta
+  /// semántica para que el lector de pantalla pueda activarla.
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -28,54 +33,61 @@ class PokemonCard extends StatelessWidget {
     final typeNames = [
       for (final type in pokemon.types) typeLabel(l10n, type.slug),
     ];
+    final trailing = this.trailing;
 
-    // Una sola frase para lectores de pantalla en lugar de leer cada pieza.
     final semanticsLabel = typeNames.isEmpty
         ? l10n.pokemonCardLabelNoTypes(name, pokemon.id)
         : l10n.pokemonCardLabel(name, pokemon.id, typeNames.join(', '));
 
-    return Semantics(
-      label: semanticsLabel,
-      button: onTap != null,
-      excludeSemantics: true,
-      child: Card.outlined(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                thumbnail,
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+    return Card.outlined(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(12, 12, trailing == null ? 12 : 4, 12),
+          child: Row(
+            children: [
+              Expanded(
+                child: Semantics(
+                  label: semanticsLabel,
+                  button: onTap != null,
+                  excludeSemantics: true,
+                  child: Row(
                     children: [
-                      Text(
-                        formatPokedexNumber(pokemon.id),
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      Text(name, style: theme.textTheme.titleMedium),
-                      if (pokemon.types.isNotEmpty) ...[
-                        const SizedBox(height: 6),
-                        Wrap(
-                          spacing: 6,
-                          runSpacing: 6,
+                      thumbnail,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            for (final type in pokemon.types)
-                              TypeChip(slug: type.slug),
+                            Text(
+                              formatPokedexNumber(pokemon.id),
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            Text(name, style: theme.textTheme.titleMedium),
+                            if (pokemon.types.isNotEmpty) ...[
+                              const SizedBox(height: 6),
+                              Wrap(
+                                spacing: 6,
+                                runSpacing: 6,
+                                children: [
+                                  for (final type in pokemon.types)
+                                    TypeChip(slug: type.slug),
+                                ],
+                              ),
+                            ],
                           ],
                         ),
-                      ],
+                      ),
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
+              ?trailing,
+            ],
           ),
         ),
       ),

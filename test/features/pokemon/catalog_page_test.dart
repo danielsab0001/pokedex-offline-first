@@ -15,6 +15,8 @@ import 'package:pokedex/features/connectivity/domain/connectivity_models.dart';
 import 'package:pokedex/features/connectivity/presentation/connectivity_chip.dart';
 import 'package:pokedex/features/connectivity/presentation/connectivity_providers.dart';
 
+import '../../support/fake_favorites_repository.dart';
+
 const _grassPoison = [
   PokemonType(id: 12, slug: 'grass', slot: 1),
   PokemonType(id: 4, slug: 'poison', slot: 2),
@@ -81,6 +83,8 @@ Widget appFor({
         catalogStateProvider.overrideWithValue(forcedState),
       if (repository != null)
         pokemonRepositoryProvider.overrideWithValue(repository),
+
+      favoritesRepositoryProvider.overrideWithValue(FakeFavoritesRepository()),
       // Los tests no descargan imágenes.
       pokemonThumbnailBuilderProvider.overrideWithValue(
         (id, size) => SizedBox.square(dimension: size),

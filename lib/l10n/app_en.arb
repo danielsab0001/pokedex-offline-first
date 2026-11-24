@@ -1,7 +1,9 @@
 {
   "@@locale": "en",
   "appTitle": "Pokédex",
-  "retry": "Retry",
+    "retry": "Retry",
+    "favoriteAdd": "Add {name} to favorites",
+    "favoriteRemove": "Remove {name} from favorites",
   "catalogLoading": "Downloading the catalog…",
   "catalogEmptyTitle": "The catalog is empty",
   "catalogEmptyMessage": "No Pokémon were received. Please try again later.",
