@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:pokedex/core/database/app_database.dart';
 import 'package:pokedex/core/sync/sync_metadata_local_data_source.dart';
+import 'package:pokedex/features/pokemon/data/pokemon_mapper.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_record.dart';
 
 class PokemonLocalDataSource {
@@ -14,8 +15,6 @@ class PokemonLocalDataSource {
     final pt = _db.pokemonTypes;
     final t = _db.types;
 
-    // El límite va en una subconsulta porque sobre el join contaría filas
-    // (Pokémon x tipos) y no Pokémon.
     final firstIds = _db.selectOnly(p)
       ..addColumns([p.id])
       ..orderBy([OrderingTerm.asc(p.id)])
@@ -29,7 +28,7 @@ class PokemonLocalDataSource {
           ..where(p.id.isInQuery(firstIds))
           ..orderBy([OrderingTerm.asc(p.id), OrderingTerm.asc(pt.slot)]);
 
-    return query.watch().map(_groupTypes);
+    return query.watch().map((rows) => groupPokemonRows(_db, rows));
   }
 
   Stream<int> watchCount() {
@@ -102,35 +101,5 @@ class PokemonLocalDataSource {
             );
       }
     }
-  }
-
-  List<PokemonRecord> _groupTypes(List<TypedResult> rows) {
-    final pokemons = <int, PokemonRow>{};
-    final types = <int, List<PokemonTypeRecord>>{};
-
-    for (final row in rows) {
-      final pokemon = row.readTable(_db.pokemons);
-      pokemons[pokemon.id] = pokemon;
-      final list = types.putIfAbsent(pokemon.id, () => []);
-
-      final link = row.readTableOrNull(_db.pokemonTypes);
-      final type = row.readTableOrNull(_db.types);
-      if (link != null && type != null) {
-        list.add(
-          PokemonTypeRecord(typeId: type.id, slug: type.slug, slot: link.slot),
-        );
-      }
-    }
-
-    return [
-      for (final p in pokemons.values)
-        PokemonRecord(
-          id: p.id,
-          nameEn: p.nameEn,
-          nameEs: p.nameEs,
-          generationId: p.generationId,
-          types: types[p.id]!,
-        ),
-    ];
   }
 }

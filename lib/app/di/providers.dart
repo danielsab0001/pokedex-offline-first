@@ -29,6 +29,9 @@ import 'package:pokedex/features/pokemon/domain/pokemon_repository.dart';
 import 'package:pokedex/features/debug_tools/domain/debug_tools_repository.dart';
 import 'package:pokedex/core/sync/call_budget.dart';
 import 'package:pokedex/app/sync/periodic_sync_trigger.dart';
+import 'package:pokedex/features/favorites/data/favorites_local_data_source.dart';
+import 'package:pokedex/features/favorites/data/favorites_repository_impl.dart';
+import 'package:pokedex/features/favorites/domain/favorites_repository.dart';
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase.defaults();
@@ -180,3 +183,11 @@ final periodicSyncTriggerProvider = Provider<PeriodicSyncTrigger>((ref) {
   ref.onDispose(trigger.dispose);
   return trigger;
 });
+
+final favoritesLocalDataSourceProvider = Provider<FavoritesLocalDataSource>(
+  (ref) => FavoritesLocalDataSource(ref.watch(appDatabaseProvider)),
+);
+
+final favoritesRepositoryProvider = Provider<FavoritesRepository>(
+  (ref) => FavoritesRepositoryImpl(ref.watch(favoritesLocalDataSourceProvider)),
+);

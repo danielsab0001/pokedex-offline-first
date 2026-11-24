@@ -4,7 +4,7 @@ import 'package:pokedex/core/sync/sync_metadata_local_data_source.dart';
 import 'package:pokedex/core/sync/sync_status.dart';
 import 'package:pokedex/features/pokemon/data/catalog_sync.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_local_data_source.dart';
-import 'package:pokedex/features/pokemon/data/pokemon_record.dart';
+import 'package:pokedex/features/pokemon/data/pokemon_mapper.dart';
 import 'package:pokedex/features/pokemon/domain/catalog_sync_info.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon_repository.dart';
@@ -20,7 +20,7 @@ class PokemonRepositoryImpl implements PokemonRepository {
   Stream<List<Pokemon>> watchCatalog({required int limit}) {
     return _local
         .watchCatalog(limit: limit)
-        .map((records) => [for (final r in records) _toEntity(r)]);
+        .map((records) => [for (final r in records) pokemonFromRecord(r)]);
   }
 
   @override
@@ -35,19 +35,6 @@ class PokemonRepositoryImpl implements PokemonRepository {
 
   @override
   Future<void> refresh() => _sync.syncNow();
-
-  Pokemon _toEntity(PokemonRecord record) {
-    return Pokemon(
-      id: record.id,
-      nameEn: record.nameEn,
-      nameEs: record.nameEs,
-      generationId: record.generationId,
-      types: [
-        for (final t in record.types)
-          PokemonType(id: t.typeId, slug: t.slug, slot: t.slot),
-      ],
-    );
-  }
 
   CatalogSyncInfo _summarize(List<SyncMetadataRow> rows) {
     if (rows.isEmpty) return CatalogSyncInfo.notStarted;
