@@ -13,6 +13,7 @@ import 'package:pokedex/app/sync/reconnect_trigger.dart';
 import 'package:pokedex/features/connectivity/domain/connectivity_models.dart';
 import 'package:pokedex/features/connectivity/presentation/connectivity_providers.dart';
 import 'package:pokedex/core/sync/call_budget.dart';
+import 'package:pokedex/app/sync/periodic_sync_trigger.dart';
 
 class FakeCatalogSync implements CatalogSync {
   FakeCatalogSync({this.onStart});
@@ -46,6 +47,17 @@ class FakeCatalogSync implements CatalogSync {
   Future<void> verifyAll() async {}
 }
 
+class _InertTimer implements Timer {
+  @override
+  bool get isActive => false;
+
+  @override
+  int get tick => 0;
+
+  @override
+  void cancel() {}
+}
+
 Future<FakeCatalogSync> _pumpApp(
   WidgetTester tester,
   Locale locale, {
@@ -64,6 +76,17 @@ Future<FakeCatalogSync> _pumpApp(
         reconnectTriggerProvider.overrideWithValue(
           ReconnectTrigger(const Stream<bool>.empty(), () {}),
         ),
+
+        periodicSyncTriggerProvider.overrideWithValue(
+          PeriodicSyncTrigger(
+            onTick: () async {},
+            hasNetwork: const Stream<bool>.empty(),
+            serviceFailing: const Stream<bool>.empty(),
+            // Con un timer real el test terminaría con un temporizador pendiente.
+            createTimer: (_, _) => _InertTimer(),
+          ),
+        ),
+
         connectivityIndicatorProvider.overrideWithValue(
           const ConnectivityIndicator(
             kind: IndicatorKind.online,

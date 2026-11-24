@@ -28,6 +28,7 @@ import 'package:pokedex/features/pokemon/data/pokemon_repository_impl.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon_repository.dart';
 import 'package:pokedex/features/debug_tools/domain/debug_tools_repository.dart';
 import 'package:pokedex/core/sync/call_budget.dart';
+import 'package:pokedex/app/sync/periodic_sync_trigger.dart';
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase.defaults();
@@ -159,3 +160,23 @@ final debugToolsRepositoryProvider = Provider<DebugToolsRepository>(
     ref.watch(syncMetadataLocalDataSourceProvider),
   ),
 );
+
+/// Verificación periódica y recomprobación mientras el servicio está caído.
+final periodicSyncTriggerProvider = Provider<PeriodicSyncTrigger>((ref) {
+  final sync = ref.watch(catalogSyncProvider);
+  final gate = ref.watch(apiGateProvider);
+  final health = ref.watch(serviceHealthProvider);
+  final connectivity = ref.watch(connectivityRepositoryProvider);
+
+  final trigger = PeriodicSyncTrigger(
+    onTick: () => sync.syncNow(priority: CallPriority.background),
+    hasNetwork: connectivity.watchHasNetwork(),
+    serviceFailing: health
+        .watch()
+        .map((outcome) => outcome == ServiceOutcome.serviceFailure)
+        .distinct(),
+    blockedFor: () => gate.blockedFor(CallPriority.background),
+  );
+  ref.onDispose(trigger.dispose);
+  return trigger;
+});

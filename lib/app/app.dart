@@ -22,6 +22,7 @@ class _PokedexAppState extends ConsumerState<PokedexApp> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(ref.read(catalogSyncProvider).start());
       ref.read(reconnectTriggerProvider).start();
+      ref.read(periodicSyncTriggerProvider).start();
     });
   }
 
