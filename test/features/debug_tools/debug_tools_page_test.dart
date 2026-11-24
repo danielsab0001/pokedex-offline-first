@@ -11,6 +11,7 @@ import 'package:pokedex/features/debug_tools/presentation/debug_tools_page.dart'
 import 'package:pokedex/features/pokemon/presentation/catalog/catalog_providers.dart';
 import 'package:pokedex/features/pokemon/presentation/catalog/catalog_state.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
+import 'package:pokedex/core/sync/sync_error_kind.dart';
 
 class _FakeRepository implements DebugToolsRepository {
   SyncAllResult syncResult = SyncAllResult.done;
@@ -20,6 +21,8 @@ class _FakeRepository implements DebugToolsRepository {
   ];
   final syncRounds = <int>[];
   final renames = <(int, String)>[];
+  final restored = <int>[];
+  SyncErrorKind? restoreResult;
 
   @override
   int get apiHourlyLimit => 100;
@@ -65,6 +68,12 @@ class _FakeRepository implements DebugToolsRepository {
 
   @override
   Future<void> setPrimaryType(int pokemonId, int typeId) async {}
+
+  @override
+  Future<SyncErrorKind?> restorePokemon(int id) async {
+    restored.add(id);
+    return restoreResult;
+  }
 
   @override
   Future<SyncAllResult> syncAll({int rounds = 1}) async {
@@ -265,5 +274,35 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(DebugToolsPage), findsOneWidget);
+  });
+
+  testWidgets('restaurar un Pokémon llama al repositorio y lo avisa', (
+    tester,
+  ) async {
+    _bigScreen(tester);
+    final repo = _FakeRepository();
+    await tester.pumpWidget(_page(repo));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Restaurar desde PokeAPI (1 llamada)'));
+    await tester.pumpAndSettle();
+
+    expect(repo.restored, [25]);
+    expect(find.text('Restaurado desde PokeAPI.'), findsOneWidget);
+  });
+
+  testWidgets('si restaurar falla muestra el motivo traducido', (tester) async {
+    _bigScreen(tester);
+    final repo = _FakeRepository()..restoreResult = SyncErrorKind.network;
+    await tester.pumpWidget(_page(repo));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Restaurar desde PokeAPI (1 llamada)'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('No se pudo restaurar: Sin conexión a Internet.'),
+      findsOneWidget,
+    );
   });
 }

@@ -1,3 +1,5 @@
+import 'package:pokedex/core/sync/sync_error_kind.dart';
+
 /// Cuántas filas tiene una tabla (PA-13).
 class TableCount {
   const TableCount(this.table, this.count);
@@ -82,4 +84,7 @@ abstract interface class DebugToolsRepository {
 
   /// Recorre el catálogo completo [rounds] veces (PA-13, PA-16).
   Future<SyncAllResult> syncAll({int rounds = 1});
+
+  /// Restaura un Pokémon desde PokeAPI con una sola llamada. Null si salió bien.
+  Future<SyncErrorKind?> restorePokemon(int id);
 }

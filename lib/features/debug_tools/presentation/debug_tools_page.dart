@@ -9,6 +9,8 @@ import 'package:pokedex/features/connectivity/presentation/connectivity_provider
 import 'package:pokedex/features/debug_tools/domain/api_simulation.dart';
 import 'package:pokedex/features/debug_tools/domain/debug_tools_repository.dart';
 import 'package:pokedex/features/debug_tools/presentation/debug_tools_providers.dart';
+import 'package:pokedex/features/connectivity/presentation/indicator_presentation.dart';
+import 'package:pokedex/l10n/app_localizations.dart';
 
 // Herramienta solo de depuración: los textos no se traducen a propósito.
 class DebugToolsPage extends StatelessWidget {
@@ -348,9 +350,26 @@ class _EditorSectionState extends ConsumerState<_EditorSection> {
             ),
           ),
           const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: FilledButton.tonal(
+              onPressed: () async {
+                final error = await repository.restorePokemon(id);
+                if (!context.mounted) return;
+                final text = error == null
+                    ? 'Restaurado desde PokeAPI.'
+                    : 'No se pudo restaurar: '
+                          '${syncErrorText(AppLocalizations.of(context), error)}';
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(SnackBar(content: Text(text)));
+              },
+              child: const Text('Restaurar desde PokeAPI (1 llamada)'),
+            ),
+          ),
+          const SizedBox(height: 8),
           const Text(
-            'Para ver la restauración, ejecuta una sincronización completa: '
-            'el nombre y el tipo deben volver al valor de PokeAPI.',
+            'También puedes ejecutar una sincronización completa: el nombre '
+            'y el tipo deben volver al valor de PokeAPI.',
           ),
         ],
       ],

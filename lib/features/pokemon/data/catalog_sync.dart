@@ -65,6 +65,29 @@ class CatalogSync {
   Future<void> verifyAll() =>
       _singleFlight.run(verifyKey, () => _guarded(verifyKey, _verifyAllPages));
 
+  /// Sin metadatos propios: la vigencia de cada especie es su `synced_at`.
+  Future<Failure?> refreshSpecies(int id) {
+    return _singleFlight.run<Failure?>('species:$id', () async {
+      try {
+        final page = await _gate.run(
+          () => _remote.fetchCatalogPage(afterId: id - 1, pageSize: 1),
+        );
+        final record = page.toRecords().where((r) => r.id == id).firstOrNull;
+        if (record == null) {
+          return const InvalidResponseFailure(
+            'La especie no existe en PokeAPI',
+          );
+        }
+        await _local.saveSpecies(record);
+        return null;
+      } on Failure catch (failure) {
+        return failure;
+      } catch (error) {
+        return StorageFailure('$error');
+      }
+    });
+  }
+
   Future<void> _guarded(String key, Future<void> Function() body) async {
     await _metadata.markStarted(key);
     try {

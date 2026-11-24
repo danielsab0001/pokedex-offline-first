@@ -9,7 +9,6 @@ class PokemonLocalDataSource {
   final AppDatabase _db;
   final SyncMetadataLocalDataSource _syncMetadata;
 
-  /// Observa los primeros [limit] Pokémon por número de Pokédex, con sus tipos.
   Stream<List<PokemonRecord>> watchCatalog({required int limit}) {
     final p = _db.pokemons;
     final pt = _db.pokemonTypes;
@@ -39,65 +38,70 @@ class PokemonLocalDataSource {
     return query.watchSingle().map((row) => row.read(count)!);
   }
 
-  /// Guarda una página completa y avanza el cursor en una sola transacción:
-  /// si algo falla, no queda nada a medias (RNF-RES-04).
+  /// Página y cursor en una sola transacción (RNF-RES-04).
   Future<void> savePage(
     List<PokemonRecord> page, {
     required String resourceKey,
     required int nextCursor,
     int? catalogTotalCount,
   }) {
-    final syncedAt = DateTime.now();
-
     return _db.transaction(() async {
-      final slugsById = {
-        for (final item in page)
-          for (final type in item.types) type.typeId: type.slug,
-      };
-      for (final entry in slugsById.entries) {
-        await _db
-            .into(_db.types)
-            .insertOnConflictUpdate(
-              TypesCompanion.insert(id: Value(entry.key), slug: entry.value),
-            );
-      }
-
-      for (final item in page) {
-        // Upsert con todas las columnas presentes
-        await _db
-            .into(_db.pokemons)
-            .insertOnConflictUpdate(
-              PokemonsCompanion.insert(
-                id: Value(item.id),
-                nameEn: item.nameEn,
-                nameEs: Value(item.nameEs),
-                generationId: item.generationId,
-                syncedAt: syncedAt,
-              ),
-            );
-
-        await (_db.delete(
-          _db.pokemonTypes,
-        )..where((t) => t.pokemonId.equals(item.id))).go();
-        for (final type in item.types) {
-          await _db
-              .into(_db.pokemonTypes)
-              .insert(
-                PokemonTypesCompanion.insert(
-                  pokemonId: item.id,
-                  typeId: type.typeId,
-                  slot: type.slot,
-                ),
-              );
-        }
-      }
-
+      await _upsert(page);
       await _syncMetadata.recordPageSaved(
         resourceKey,
         cursor: nextCursor,
         catalogTotalCount: catalogTotalCount,
       );
     });
+  }
+
+  Future<void> saveSpecies(PokemonRecord record) {
+    return _db.transaction(() => _upsert([record]));
+  }
+
+  Future<void> _upsert(List<PokemonRecord> page) async {
+    final syncedAt = DateTime.now();
+
+    final slugsById = {
+      for (final item in page)
+        for (final type in item.types) type.typeId: type.slug,
+    };
+    for (final entry in slugsById.entries) {
+      await _db
+          .into(_db.types)
+          .insertOnConflictUpdate(
+            TypesCompanion.insert(id: Value(entry.key), slug: entry.value),
+          );
+    }
+
+    for (final item in page) {
+      await _db
+          .into(_db.pokemons)
+          .insertOnConflictUpdate(
+            PokemonsCompanion.insert(
+              id: Value(item.id),
+              nameEn: item.nameEn,
+              nameEs: Value(item.nameEs),
+              generationId: item.generationId,
+              syncedAt: syncedAt,
+            ),
+          );
+
+      await (_db.delete(
+        _db.pokemonTypes,
+      )..where((t) => t.pokemonId.equals(item.id))).go();
+      for (final type in item.types) {
+        await _db
+            .into(_db.pokemonTypes)
+            .insert(
+              PokemonTypesCompanion.insert(
+                pokemonId: item.id,
+                typeId: type.typeId,
+                slot: type.slot,
+              ),
+            );
+      }
+    }
   }
 
   List<PokemonRecord> _groupTypes(List<TypedResult> rows) {

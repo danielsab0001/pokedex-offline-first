@@ -1,12 +1,12 @@
 import 'package:drift/drift.dart';
 import 'package:pokedex/core/database/app_database.dart';
 import 'package:pokedex/core/sync/api_call_log.dart';
+import 'package:pokedex/core/sync/sync_error_kind.dart';
 import 'package:pokedex/core/sync/sync_metadata_local_data_source.dart';
 import 'package:pokedex/core/sync/sync_status.dart';
 import 'package:pokedex/features/debug_tools/domain/debug_tools_repository.dart';
 import 'package:pokedex/features/pokemon/data/catalog_sync.dart';
 
-/// Total de PokeAPI que se asume mientras no se haya descargado el real.
 const _assumedCatalogTotal = 1025;
 
 class DebugToolsRepositoryImpl implements DebugToolsRepository {
@@ -118,5 +118,12 @@ class DebugToolsRepositoryImpl implements DebugToolsRepository {
       if (status != SyncStatus.completed) return SyncAllResult.stopped;
     }
     return SyncAllResult.done;
+  }
+
+  @override
+  Future<SyncErrorKind?> restorePokemon(int id) async {
+    final failure = await _sync.refreshSpecies(id);
+    if (failure == null) return null;
+    return SyncErrorKind.fromCode(failure.code) ?? SyncErrorKind.unknown;
   }
 }

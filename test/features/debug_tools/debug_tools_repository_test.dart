@@ -14,6 +14,7 @@ import 'package:pokedex/features/pokemon/data/catalog_sync.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_local_data_source.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_remote_data_source.dart';
 import 'package:drift/drift.dart' show Value;
+import 'package:pokedex/core/sync/sync_error_kind.dart';
 
 import '../pokemon/catalog_sync_test.dart' show FakePokeApi;
 
@@ -171,5 +172,30 @@ void main() {
     expect((await repo.loadTypes()).map((t) => t.slug), ['poison', 'grass']);
     final entries = await repo.watchSyncEntries().first;
     expect(entries.map((e) => e.resourceKey), contains(CatalogSync.indexKey));
+  });
+
+  group('restaurar un Pokémon', () {
+    test('restaura nombre y tipo con una sola llamada', () async {
+      await sync.start();
+      await repo.renamePokemon(7, 'Alterado');
+      await repo.setPrimaryType(7, 4);
+      api.cursors.clear();
+
+      expect(await repo.restorePokemon(7), isNull);
+
+      final pokemon = (await repo.watchPokemon(7).first)!;
+      expect(pokemon.nameEn, 'Mon 7');
+      expect(pokemon.primaryTypeId, 12);
+      expect(api.cursors, [6]);
+    });
+
+    test('devuelve el tipo de error si falla', () async {
+      await sync.start();
+      api.intercept = (call) {
+        throw http.ClientException('sin red');
+      };
+
+      expect(await repo.restorePokemon(7), SyncErrorKind.network);
+    });
   });
 }
