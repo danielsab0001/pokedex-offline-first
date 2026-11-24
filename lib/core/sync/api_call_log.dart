@@ -34,6 +34,22 @@ class ApiCallLog {
     return _db.select(_db.apiCalls).watch().map(_countInWindow);
   }
 
+  /// Cuánto falta para que haya menos de [limit] llamadas en la ventana, o
+  /// null si ya las hay.
+  Future<Duration?> waitUntilBelow(int limit) async {
+    final now = _now();
+    final cutoff = now.subtract(window);
+    final times = [
+      for (final call in await _db.select(_db.apiCalls).get())
+        if (!call.calledAt.isBefore(cutoff)) call.calledAt,
+    ]..sort();
+    if (times.length < limit) return null;
+
+    // La llamada que tiene que salir de la ventana para quedar por debajo.
+    final blocking = times[times.length - limit];
+    return blocking.add(window).difference(now);
+  }
+
   // Se filtra al leer porque las filas viejas solo se borran al registrar.
   int _countInWindow(List<ApiCallRow> rows) {
     final cutoff = _now().subtract(window);

@@ -27,6 +27,7 @@ import 'package:pokedex/features/pokemon/data/pokemon_remote_data_source.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_repository_impl.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon_repository.dart';
 import 'package:pokedex/features/debug_tools/domain/debug_tools_repository.dart';
+import 'package:pokedex/core/sync/call_budget.dart';
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase.defaults();
@@ -45,9 +46,6 @@ final apiSimulationProvider = Provider<ApiSimulation>((ref) {
   return simulation;
 });
 
-/// Cliente HTTP de PokeAPI. De abajo hacia arriba: el real, el contador de
-/// cuota y, solo en depuración, el simulador y el log. El simulador queda
-/// encima del contador para que lo simulado no cuente como llamada real.
 final httpClientProvider = Provider<http.Client>((ref) {
   http.Client client = CountingHttpClient(
     http.Client(),
@@ -76,6 +74,10 @@ final syncMetadataLocalDataSourceProvider =
       (ref) => SyncMetadataLocalDataSource(ref.watch(appDatabaseProvider)),
     );
 
+final callBudgetProvider = Provider<CallBudget>(
+  (ref) => CallBudget(ref.watch(apiCallLogProvider)),
+);
+
 void _logRetry(int attempt, Failure failure, Duration delay) {
   debugPrint(
     '[gate] intento $attempt falló ($failure); '
@@ -87,6 +89,7 @@ final apiGateProvider = Provider<ApiGate>(
   (ref) => ApiGate(
     ref.watch(syncMetadataLocalDataSourceProvider),
     health: ref.watch(serviceHealthProvider),
+    budget: ref.watch(callBudgetProvider),
     onRetry: debugToolsEnabled ? _logRetry : null,
   ),
 );
@@ -134,14 +137,15 @@ final connectivityRepositoryProvider = Provider<ConnectivityRepository>(
   ),
 );
 
-/// Al volver la red: se descarta lo que se sabía de la API y se sincroniza.
+/// Al volver la red: se descarta lo que se sabía de la API y se verifica en
+/// segundo plano, sin quitarle presupuesto a lo que pida el usuario.
 final reconnectTriggerProvider = Provider<ReconnectTrigger>((ref) {
   final connectivity = ref.watch(connectivityRepositoryProvider);
-  final catalog = ref.watch(pokemonRepositoryProvider);
+  final sync = ref.watch(catalogSyncProvider);
 
   final trigger = ReconnectTrigger(connectivity.watchHasNetwork(), () {
     connectivity.invalidateApiStatus();
-    unawaited(catalog.refresh());
+    unawaited(sync.syncNow(priority: CallPriority.background));
   });
   ref.onDispose(trigger.dispose);
   return trigger;

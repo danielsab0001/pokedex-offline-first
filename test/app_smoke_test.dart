@@ -12,6 +12,7 @@ import 'package:pokedex/features/pokemon/presentation/catalog/catalog_state.dart
 import 'package:pokedex/app/sync/reconnect_trigger.dart';
 import 'package:pokedex/features/connectivity/domain/connectivity_models.dart';
 import 'package:pokedex/features/connectivity/presentation/connectivity_providers.dart';
+import 'package:pokedex/core/sync/call_budget.dart';
 
 class FakeCatalogSync implements CatalogSync {
   FakeCatalogSync({this.onStart});
@@ -29,13 +30,17 @@ class FakeCatalogSync implements CatalogSync {
   }
 
   @override
-  Future<void> syncNow() async {}
+  Future<void> syncNow({
+    CallPriority priority = CallPriority.interactive,
+  }) async {}
 
   @override
   Future<void> syncIndex() async {}
 
   @override
-  Future<void> verifyNextPage() async {}
+  Future<void> verifyNextPage({
+    CallPriority priority = CallPriority.interactive,
+  }) async {}
 
   @override
   Future<void> verifyAll() async {}

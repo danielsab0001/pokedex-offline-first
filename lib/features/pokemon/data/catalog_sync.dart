@@ -1,10 +1,11 @@
 import 'package:pokedex/core/error/failure.dart';
+import 'package:pokedex/core/sync/api_gate.dart';
+import 'package:pokedex/core/sync/call_budget.dart';
 import 'package:pokedex/core/sync/single_flight.dart';
 import 'package:pokedex/core/sync/sync_metadata_local_data_source.dart';
 import 'package:pokedex/core/sync/sync_status.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_local_data_source.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_remote_data_source.dart';
-import 'package:pokedex/core/sync/api_gate.dart';
 
 typedef _PageResult = ({bool isLast, int nextCursor});
 
@@ -30,13 +31,15 @@ class CatalogSync {
 
   Future<void> start() async {
     await _metadata.markInterruptedOrphans();
-    await syncNow();
+    await syncNow(priority: CallPriority.background);
   }
 
-  Future<void> syncNow() async {
+  Future<void> syncNow({
+    CallPriority priority = CallPriority.interactive,
+  }) async {
     final index = await _metadata.read(indexKey);
     if (index?.status == SyncStatus.completed) {
-      await verifyNextPage();
+      await verifyNextPage(priority: priority);
     } else {
       await syncIndex();
     }
@@ -45,8 +48,18 @@ class CatalogSync {
   Future<void> syncIndex() =>
       _singleFlight.run(indexKey, () => _guarded(indexKey, _downloadIndex));
 
-  Future<void> verifyNextPage() =>
-      _singleFlight.run(verifyKey, () => _guarded(verifyKey, _verifyOnePage));
+  Future<void> verifyNextPage({
+    CallPriority priority = CallPriority.interactive,
+  }) async {
+    if (priority == CallPriority.background &&
+        await _gate.blockedFor(priority) != null) {
+      return;
+    }
+    await _singleFlight.run(
+      verifyKey,
+      () => _guarded(verifyKey, () => _verifyOnePage(priority)),
+    );
+  }
 
   /// Recorre todo el catálogo y restaura lo que se haya alterado en local
   Future<void> verifyAll() =>
@@ -78,9 +91,14 @@ class CatalogSync {
     }
   }
 
-  Future<void> _verifyOnePage() async {
+  Future<void> _verifyOnePage(CallPriority priority) async {
     final cursor = (await _metadata.read(verifyKey))?.cursor ?? 0;
-    await _syncPage(verifyKey, cursor: cursor, resetCursorWhenDone: true);
+    await _syncPage(
+      verifyKey,
+      cursor: cursor,
+      resetCursorWhenDone: true,
+      priority: priority,
+    );
   }
 
   Future<void> _verifyAllPages() async {
@@ -100,6 +118,7 @@ class CatalogSync {
     String key, {
     required int cursor,
     required bool resetCursorWhenDone,
+    CallPriority priority = CallPriority.interactive,
   }) async {
     final page = await _gate.run(
       () => _remote.fetchCatalogPage(
@@ -107,6 +126,7 @@ class CatalogSync {
         pageSize: pageSize,
         includeTotal: cursor == 0,
       ),
+      priority: priority,
     );
 
     final isLast = page.items.length < pageSize;

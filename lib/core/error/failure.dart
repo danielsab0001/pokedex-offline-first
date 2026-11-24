@@ -22,6 +22,7 @@ abstract final class FailureCode {
   static const rateLimit = 'rate_limit';
   static const http = 'http';
   static const storage = 'storage';
+  static const budget = 'budget';
 }
 
 final class NetworkFailure extends Failure {
@@ -78,4 +79,15 @@ final class StorageFailure extends Failure {
 
   @override
   String get code => FailureCode.storage;
+}
+
+/// La llamada no se hizo: se agotó el presupuesto propio de llamadas por hora.
+final class BudgetExhaustedFailure extends Failure {
+  const BudgetExhaustedFailure({this.retryAfter})
+    : super('Presupuesto de llamadas agotado');
+
+  final Duration? retryAfter;
+
+  @override
+  String get code => FailureCode.budget;
 }

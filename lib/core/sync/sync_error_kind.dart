@@ -19,7 +19,7 @@ enum SyncErrorKind {
     FailureCode.graphQl ||
     FailureCode.invalidResponse ||
     FailureCode.http => service,
-    FailureCode.rateLimit => rateLimit,
+    FailureCode.rateLimit || FailureCode.budget => rateLimit,
     FailureCode.storage => storage,
     _ => unknown,
   };

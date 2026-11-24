@@ -28,8 +28,8 @@ class ServiceHealth {
       InvalidResponseFailure() ||
       RateLimitFailure() ||
       HttpStatusFailure() => ServiceOutcome.serviceFailure,
-      // Un error al guardar en la base no dice nada sobre la API.
-      StorageFailure() => null,
+      // Ni un error al guardar ni el presupuesto propio dicen nada sobre la API.
+      StorageFailure() || BudgetExhaustedFailure() => null,
     };
     if (outcome != null) _update(outcome);
   }
