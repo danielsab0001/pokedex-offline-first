@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pokedex/app/di/providers.dart';
 import 'package:pokedex/features/connectivity/domain/connectivity_models.dart';
-import 'package:pokedex/features/connectivity/presentation/connectivity_chip.dart';
+import 'package:pokedex/features/connectivity/presentation/indicator_app_bar.dart';
 import 'package:pokedex/features/connectivity/presentation/connectivity_providers.dart';
 import 'package:pokedex/features/debug_tools/domain/api_simulation.dart';
 import 'package:pokedex/features/debug_tools/domain/debug_tools_repository.dart';
@@ -19,10 +19,7 @@ class DebugToolsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Herramientas de depuración'),
-        actions: const [ConnectivityChip(), SizedBox(width: 8)],
-      ),
+      appBar: const IndicatorAppBar(title: 'Herramientas de depuración'),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(

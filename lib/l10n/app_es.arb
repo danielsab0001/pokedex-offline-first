@@ -5,7 +5,15 @@
     "description": "Nombre de la aplicación."
   },
     "retry": "Reintentar",
-    "favoriteAdd": "Agregar {name} a favoritos",
+      "navCatalog": "Catálogo",
+      "navFavorites": "Favoritos",
+      "favoritesTitle": "Favoritos",
+      "favoritesEmptyTitle": "Todavía no tienes favoritos",
+      "favoritesEmptyMessage": "Toca el corazón de un Pokémon del catálogo para guardarlo aquí. Los favoritos funcionan sin conexión.",
+      "favoritesEmptyAction": "Ir al catálogo",
+      "favoritesErrorTitle": "No se pudieron cargar los favoritos",
+      "favoritesErrorMessage": "Inténtalo de nuevo.",
+      "favoriteAdd": "Agregar {name} a favoritos",
     "@favoriteAdd": {
       "description": "Botón de favorito cuando el Pokémon todavía no lo es.",
       "placeholders": {

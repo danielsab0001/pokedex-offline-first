@@ -6,6 +6,8 @@ import 'package:pokedex/l10n/app_localizations.dart';
 
 String formatPokedexNumber(int id) => '#${id.toString().padLeft(4, '0')}';
 
+const pokemonCardThumbnailSize = 72.0;
+
 class PokemonCard extends StatelessWidget {
   const PokemonCard({
     super.key,

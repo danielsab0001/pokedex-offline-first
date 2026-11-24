@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pokedex/app/di/providers.dart';
 import 'package:pokedex/core/debug/debug_flags.dart';
+import 'package:pokedex/features/pokemon/domain/pokemon.dart';
 
 final favoriteIdsProvider = StreamProvider<Set<int>>(
   (ref) => ref.watch(favoritesRepositoryProvider).watchFavoriteIds(),
@@ -32,3 +33,7 @@ Future<void> setFavorite(
     );
   }
 }
+
+final favoritePokemonsProvider = StreamProvider<List<Pokemon>>(
+  (ref) => ref.watch(favoritesRepositoryProvider).watchFavorites(),
+);
