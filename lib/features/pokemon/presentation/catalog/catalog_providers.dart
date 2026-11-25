@@ -1,5 +1,8 @@
+import 'dart:ui' show PlatformDispatcher;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pokedex/app/di/providers.dart';
+import 'package:pokedex/features/pokemon/domain/catalog_filters.dart';
 import 'package:pokedex/features/pokemon/domain/catalog_sync_info.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon.dart';
 import 'package:pokedex/features/pokemon/presentation/catalog/catalog_state.dart';
@@ -14,15 +17,44 @@ class CatalogLimit extends Notifier<int> {
   int build() => catalogPageStep;
 
   void loadMore() => state += catalogPageStep;
+
+  void reset() => state = catalogPageStep;
 }
 
 final catalogLimitProvider = NotifierProvider<CatalogLimit, int>(
   CatalogLimit.new,
 );
 
+class CatalogFiltersNotifier extends Notifier<CatalogFilters> {
+  @override
+  CatalogFilters build() => CatalogFilters.defaults;
+
+  void set(CatalogFilters value) {
+    if (value == state) return;
+    state = value;
+    ref.read(catalogLimitProvider.notifier).reset();
+  }
+}
+
+final catalogFiltersProvider =
+    NotifierProvider<CatalogFiltersNotifier, CatalogFilters>(
+      CatalogFiltersNotifier.new,
+    );
+
+/// Los idiomas de la app son español e inglés; cualquier otro cae a inglés,
+/// igual que la localización.
+final catalogLanguageCodeProvider = Provider<String>((ref) {
+  return PlatformDispatcher.instance.locale.languageCode == 'es' ? 'es' : 'en';
+});
+
 final _catalogPokemonsProvider = StreamProvider<List<Pokemon>>((ref) {
-  final limit = ref.watch(catalogLimitProvider);
-  return ref.watch(pokemonRepositoryProvider).watchCatalog(limit: limit);
+  return ref
+      .watch(pokemonRepositoryProvider)
+      .watchCatalog(
+        limit: ref.watch(catalogLimitProvider),
+        filters: ref.watch(catalogFiltersProvider),
+        languageCode: ref.watch(catalogLanguageCodeProvider),
+      );
 });
 
 final _catalogSyncInfoProvider = StreamProvider<CatalogSyncInfo>(

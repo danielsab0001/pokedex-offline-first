@@ -1,8 +1,10 @@
 import 'package:drift/drift.dart';
 import 'package:pokedex/core/database/app_database.dart';
 import 'package:pokedex/core/sync/sync_metadata_local_data_source.dart';
+import 'package:pokedex/features/pokemon/data/pokemon_catalog_query.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_mapper.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_record.dart';
+import 'package:pokedex/features/pokemon/domain/catalog_filters.dart';
 
 class PokemonLocalDataSource {
   PokemonLocalDataSource(this._db, this._syncMetadata);
@@ -10,16 +12,22 @@ class PokemonLocalDataSource {
   final AppDatabase _db;
   final SyncMetadataLocalDataSource _syncMetadata;
 
-  Stream<List<PokemonRecord>> watchCatalog({required int limit}) {
+  Stream<List<PokemonRecord>> watchCatalog({
+    required int limit,
+    CatalogFilters filters = CatalogFilters.defaults,
+    String languageCode = 'es',
+  }) {
     final p = _db.pokemons;
     final pt = _db.pokemonTypes;
     final t = _db.types;
+    final ordering = catalogOrdering(_db, filters, languageCode);
 
     // El límite va en una subconsulta porque sobre el join contaría filas
     // (Pokémon x tipos) y no Pokémon.
     final firstIds = _db.selectOnly(p)
       ..addColumns([p.id])
-      ..orderBy([OrderingTerm.asc(p.id)])
+      ..where(catalogWhere(_db, filters))
+      ..orderBy(ordering)
       ..limit(limit);
 
     final query =
@@ -28,16 +36,22 @@ class PokemonLocalDataSource {
             leftOuterJoin(t, t.id.equalsExp(pt.typeId)),
           ])
           ..where(p.id.isInQuery(firstIds))
-          ..orderBy([OrderingTerm.asc(p.id), OrderingTerm.asc(pt.slot)]);
+          ..orderBy([...ordering, OrderingTerm.asc(pt.slot)]);
 
     return query.watch().map((rows) => groupPokemonRows(_db, rows));
   }
 
-  Stream<int> watchCount() {
+  Stream<int> watchMatchCount({
+    CatalogFilters filters = CatalogFilters.defaults,
+  }) {
     final count = _db.pokemons.id.count();
-    final query = _db.selectOnly(_db.pokemons)..addColumns([count]);
+    final query = _db.selectOnly(_db.pokemons)
+      ..addColumns([count])
+      ..where(catalogWhere(_db, filters));
     return query.watchSingle().map((row) => row.read(count)!);
   }
+
+  Stream<int> watchCount() => watchMatchCount();
 
   /// Página y cursor en una sola transacción (RNF-RES-04).
   Future<void> savePage(

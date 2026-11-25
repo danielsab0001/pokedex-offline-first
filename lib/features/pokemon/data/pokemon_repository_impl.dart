@@ -8,6 +8,7 @@ import 'package:pokedex/features/pokemon/data/pokemon_mapper.dart';
 import 'package:pokedex/features/pokemon/domain/catalog_sync_info.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon_repository.dart';
+import 'package:pokedex/features/pokemon/domain/catalog_filters.dart';
 
 class PokemonRepositoryImpl implements PokemonRepository {
   PokemonRepositoryImpl(this._local, this._metadata, this._sync);
@@ -17,10 +18,25 @@ class PokemonRepositoryImpl implements PokemonRepository {
   final CatalogSync _sync;
 
   @override
-  Stream<List<Pokemon>> watchCatalog({required int limit}) {
+  Stream<List<Pokemon>> watchCatalog({
+    required int limit,
+    CatalogFilters filters = CatalogFilters.defaults,
+    String languageCode = 'es',
+  }) {
     return _local
-        .watchCatalog(limit: limit)
+        .watchCatalog(
+          limit: limit,
+          filters: filters,
+          languageCode: languageCode,
+        )
         .map((records) => [for (final r in records) pokemonFromRecord(r)]);
+  }
+
+  @override
+  Stream<int> watchMatchCount({
+    CatalogFilters filters = CatalogFilters.defaults,
+  }) {
+    return _local.watchMatchCount(filters: filters);
   }
 
   @override

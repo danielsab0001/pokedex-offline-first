@@ -38,4 +38,27 @@ void main() {
     );
     expect(result, contains('idx_pokemon_base_stat_total'));
   });
+
+  test(
+    'el filtro por tipo con subconsulta usa idx_pokemon_type_by_type',
+    () async {
+      final result = await plan(
+        'SELECT id FROM pokemon WHERE id IN '
+        '(SELECT pokemon_id FROM pokemon_type WHERE type_id = 10) ORDER BY id',
+      );
+      expect(result, contains('idx_pokemon_type_by_type'));
+    },
+  );
+
+  test(
+    'buscar dentro del nombre recorre la tabla (decisión documentada)',
+    () async {
+      final result = await plan(
+        "SELECT id FROM pokemon WHERE name_en LIKE '%x%' ESCAPE '\\' "
+        "OR name_es LIKE '%x%' ESCAPE '\\'",
+      );
+      expect(result, contains('SCAN'));
+      expect(result, isNot(contains('SEARCH')));
+    },
+  );
 }

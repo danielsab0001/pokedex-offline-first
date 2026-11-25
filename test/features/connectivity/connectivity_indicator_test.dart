@@ -67,8 +67,14 @@ class FakePokemonRepository implements PokemonRepository {
   }
 
   @override
-  Stream<List<Pokemon>> watchCatalog({required int limit}) =>
-      const Stream<List<Pokemon>>.empty();
+  Stream<int> watchMatchCount({Object? filters}) => const Stream.empty();
+
+  @override
+  Stream<List<Pokemon>> watchCatalog({
+    required int limit,
+    Object? filters,
+    Object? languageCode,
+  }) => const Stream<List<Pokemon>>.empty();
 
   @override
   Stream<int> watchLocalCount() async* {

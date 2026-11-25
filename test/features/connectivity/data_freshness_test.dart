@@ -14,8 +14,14 @@ import 'package:pokedex/l10n/app_localizations.dart';
 
 class _FakeRepository implements PokemonRepository {
   @override
-  Stream<List<Pokemon>> watchCatalog({required int limit}) =>
-      const Stream.empty();
+  Stream<int> watchMatchCount({Object? filters}) => const Stream.empty();
+
+  @override
+  Stream<List<Pokemon>> watchCatalog({
+    required int limit,
+    Object? filters,
+    Object? languageCode,
+  }) => const Stream.empty();
 
   @override
   Stream<int> watchLocalCount() => const Stream.empty();

@@ -55,7 +55,15 @@ class FakePokemonRepository implements PokemonRepository {
   final requestedLimits = <int>[];
 
   @override
-  Stream<List<Pokemon>> watchCatalog({required int limit}) {
+  Stream<int> watchMatchCount({Object? filters}) =>
+      Stream.value(pokemons.length);
+
+  @override
+  Stream<List<Pokemon>> watchCatalog({
+    required int limit,
+    Object? filters,
+    Object? languageCode,
+  }) {
     requestedLimits.add(limit);
     return Stream.value(pokemons.take(limit).toList());
   }
