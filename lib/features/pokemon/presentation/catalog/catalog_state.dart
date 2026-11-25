@@ -35,6 +35,11 @@ final class CatalogEmpty extends CatalogState {
   final CatalogEmptyReason reason;
 }
 
+/// Hay catálogo local, pero ningún Pokémon cumple los filtros.
+final class CatalogNoResults extends CatalogState {
+  const CatalogNoResults();
+}
+
 final class CatalogError extends CatalogState {
   const CatalogError();
 }
@@ -45,6 +50,8 @@ CatalogState resolveCatalogState({
   required List<Pokemon>? pokemons,
   required CatalogSyncInfo? syncInfo,
   required int limit,
+  bool narrowed = false,
+  int? localCount,
 }) {
   if (pokemons == null) return const CatalogLoading();
 
@@ -54,6 +61,11 @@ CatalogState resolveCatalogState({
       pokemons: pokemons,
       hasMore: pokemons.length >= limit,
     );
+  }
+
+  if (narrowed) {
+    if (localCount == null) return const CatalogLoading();
+    if (localCount > 0) return const CatalogNoResults();
   }
 
   return switch (syncInfo?.status) {

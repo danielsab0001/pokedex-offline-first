@@ -5,7 +5,58 @@
     "description": "Nombre de la aplicación."
   },
     "retry": "Reintentar",
-      "navCatalog": "Catálogo",
+        "catalogSearchLabel": "Buscar por nombre",
+        "catalogSearchClear": "Borrar búsqueda",
+        "catalogFilterButton": "Filtros y orden",
+        "catalogFilterButtonActive": "Filtros y orden, {count, plural, =1{1 filtro activo} other{{count} filtros activos}}",
+        "@catalogFilterButtonActive": {
+          "placeholders": {
+            "count": {"type": "int"}
+          }
+        },
+        "catalogFiltersTitle": "Filtros y orden",
+        "catalogFilterType": "Tipo",
+        "catalogFilterGeneration": "Generación",
+        "catalogFilterAll": "Todos",
+        "catalogFilterAllGenerations": "Todas",
+        "catalogFilterSort": "Ordenar por",
+        "sortByNumber": "Número",
+        "sortByName": "Nombre",
+        "sortByTotal": "Total base",
+        "sortAscending": "Ascendente",
+        "sortDescending": "Descendente",
+        "catalogClearFilters": "Limpiar filtros",
+        "catalogRemoveFilter": "Quitar filtro {name}",
+        "@catalogRemoveFilter": {
+          "placeholders": {
+            "name": {"type": "String"}
+          }
+        },
+        "catalogResultCount": "{count, plural, =0{Sin resultados} =1{1 resultado} other{{count} resultados}}",
+        "@catalogResultCount": {
+          "placeholders": {
+            "count": {"type": "int"}
+          }
+        },
+        "catalogPartialNotice": "Catálogo parcial: {local} de {total} descargados. Los resultados pueden estar incompletos.",
+        "@catalogPartialNotice": {
+          "placeholders": {
+            "local": {"type": "int"},
+            "total": {"type": "int"}
+          }
+        },
+        "catalogNoResultsTitle": "Ningún Pokémon coincide",
+        "catalogNoResultsMessage": "Prueba con otro nombre o quita algún filtro.",
+        "generation1": "Gen. I · Kanto",
+        "generation2": "Gen. II · Johto",
+        "generation3": "Gen. III · Hoenn",
+        "generation4": "Gen. IV · Sinnoh",
+        "generation5": "Gen. V · Teselia",
+        "generation6": "Gen. VI · Kalos",
+        "generation7": "Gen. VII · Alola",
+        "generation8": "Gen. VIII · Galar",
+        "generation9": "Gen. IX · Paldea",
+        "navCatalog": "Catálogo",
       "navFavorites": "Favoritos",
       "favoritesTitle": "Favoritos",
       "favoritesEmptyTitle": "Todavía no tienes favoritos",

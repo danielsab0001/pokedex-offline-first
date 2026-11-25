@@ -9,6 +9,7 @@ import 'package:pokedex/core/widgets/state_message.dart';
 import 'package:pokedex/features/connectivity/presentation/indicator_app_bar.dart';
 import 'package:pokedex/features/pokemon/presentation/catalog/catalog_providers.dart';
 import 'package:pokedex/features/pokemon/presentation/catalog/catalog_state.dart';
+import 'package:pokedex/features/pokemon/presentation/catalog/catalog_toolbar.dart';
 import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_list_item.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
 
@@ -22,6 +23,7 @@ class CatalogPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final state = ref.watch(catalogStateProvider);
+    final showToolbar = state is CatalogContent || state is CatalogNoResults;
 
     return Scaffold(
       appBar: IndicatorAppBar(
@@ -35,33 +37,57 @@ class CatalogPage extends ConsumerWidget {
             ),
         ],
       ),
-      body: switch (state) {
-        CatalogLoading() => _LoadingView(message: l10n.catalogLoading),
-        CatalogContent content => _CatalogList(content: content),
-        CatalogEmpty(:final reason) => switch (reason) {
-          CatalogEmptyReason.noData => StateMessage(
-            icon: Icons.inbox_outlined,
-            title: l10n.catalogEmptyTitle,
-            message: l10n.catalogEmptyMessage,
-            actionLabel: l10n.retry,
-            onAction: () => _retry(ref),
+      body: SafeArea(
+        top: false,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: Column(
+              children: [
+                if (showToolbar) const CatalogToolbar(),
+                Expanded(
+                  child: switch (state) {
+                    CatalogLoading() => _LoadingView(
+                      message: l10n.catalogLoading,
+                    ),
+                    CatalogContent content => _CatalogList(content: content),
+                    CatalogNoResults() => StateMessage(
+                      icon: Icons.search_off,
+                      title: l10n.catalogNoResultsTitle,
+                      message: l10n.catalogNoResultsMessage,
+                      actionLabel: l10n.catalogClearFilters,
+                      onAction: () => clearCatalogFilters(ref),
+                    ),
+                    CatalogEmpty(:final reason) => switch (reason) {
+                      CatalogEmptyReason.noData => StateMessage(
+                        icon: Icons.inbox_outlined,
+                        title: l10n.catalogEmptyTitle,
+                        message: l10n.catalogEmptyMessage,
+                        actionLabel: l10n.retry,
+                        onAction: () => _retry(ref),
+                      ),
+                      CatalogEmptyReason.offline => StateMessage(
+                        icon: Icons.cloud_off_outlined,
+                        title: l10n.catalogOfflineTitle,
+                        message: l10n.catalogOfflineMessage,
+                        actionLabel: l10n.retry,
+                        onAction: () => _retry(ref),
+                      ),
+                    },
+                    CatalogError() => StateMessage(
+                      icon: Icons.cloud_off_outlined,
+                      title: l10n.catalogErrorTitle,
+                      message: l10n.catalogErrorMessage,
+                      actionLabel: l10n.retry,
+                      onAction: () => _retry(ref),
+                    ),
+                  },
+                ),
+              ],
+            ),
           ),
-          CatalogEmptyReason.offline => StateMessage(
-            icon: Icons.cloud_off_outlined,
-            title: l10n.catalogOfflineTitle,
-            message: l10n.catalogOfflineMessage,
-            actionLabel: l10n.retry,
-            onAction: () => _retry(ref),
-          ),
-        },
-        CatalogError() => StateMessage(
-          icon: Icons.cloud_off_outlined,
-          title: l10n.catalogErrorTitle,
-          message: l10n.catalogErrorMessage,
-          actionLabel: l10n.retry,
-          onAction: () => _retry(ref),
         ),
-      },
+      ),
     );
   }
 }
@@ -110,31 +136,20 @@ class _CatalogList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return SafeArea(
-      top: false,
-      child: NotificationListener<ScrollNotification>(
-        onNotification: (notification) {
-          if (notification.metrics.extentAfter < _loadMoreThreshold) {
-            _loadMore(ref);
-          }
-          return false;
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (notification.metrics.extentAfter < _loadMoreThreshold) {
+          _loadMore(ref);
+        }
+        return false;
+      },
+      child: ListView.builder(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        itemCount: content.pokemons.length,
+        itemBuilder: (context, index) {
+          final pokemon = content.pokemons[index];
+          return PokemonListItem(key: ValueKey(pokemon.id), pokemon: pokemon);
         },
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 720),
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-              itemCount: content.pokemons.length,
-              itemBuilder: (context, index) {
-                final pokemon = content.pokemons[index];
-                return PokemonListItem(
-                  key: ValueKey(pokemon.id),
-                  pokemon: pokemon,
-                );
-              },
-            ),
-          ),
-        ),
       ),
     );
   }

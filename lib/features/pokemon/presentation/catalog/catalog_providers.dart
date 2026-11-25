@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui' show PlatformDispatcher;
 
+import 'package:flutter/widgets.dart' show TextEditingController;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pokedex/app/di/providers.dart';
 import 'package:pokedex/features/pokemon/domain/catalog_filters.dart';
@@ -96,6 +97,27 @@ final catalogFiltersProvider =
       CatalogFiltersController.new,
     );
 
+/// El controlador del campo vive aquí para poder vaciarlo desde otros widgets.
+final catalogSearchTextControllerProvider = Provider<TextEditingController>((
+  ref,
+) {
+  final controller = TextEditingController(
+    text: ref.read(catalogFiltersProvider).value?.searchText ?? '',
+  );
+  ref.onDispose(controller.dispose);
+  return controller;
+});
+
+/// Quita búsqueda, tipo y generación; conserva el orden elegido.
+void clearCatalogFilters(WidgetRef ref) {
+  ref.read(catalogSearchTextControllerProvider).clear();
+  ref
+      .read(catalogFiltersProvider.notifier)
+      .apply(
+        (f) => CatalogFilters(sortField: f.sortField, ascending: f.ascending),
+      );
+}
+
 /// Los idiomas de la app son español e inglés; cualquier otro cae a inglés,
 /// igual que la localización.
 final catalogLanguageCodeProvider = Provider<String>((ref) {
@@ -115,8 +137,23 @@ final _catalogPokemonsProvider = StreamProvider<List<Pokemon>>((ref) async* {
   );
 });
 
+final catalogMatchCountProvider = StreamProvider<int>((ref) async* {
+  final repository = ref.watch(pokemonRepositoryProvider);
+  final filters = await ref.watch(catalogFiltersProvider.future);
+
+  yield* repository.watchMatchCount(filters: filters);
+});
+
+final catalogLocalCountProvider = StreamProvider<int>(
+  (ref) => ref.watch(pokemonRepositoryProvider).watchLocalCount(),
+);
+
 final _catalogSyncInfoProvider = StreamProvider<CatalogSyncInfo>(
   (ref) => ref.watch(pokemonRepositoryProvider).watchSyncInfo(),
+);
+
+final catalogRemoteTotalProvider = Provider<int?>(
+  (ref) => ref.watch(_catalogSyncInfoProvider).value?.catalogTotalCount,
 );
 
 /// Lo único que lee la pantalla del catálogo.
@@ -124,6 +161,8 @@ final catalogStateProvider = Provider<CatalogState>((ref) {
   final limit = ref.watch(catalogLimitProvider);
   final pokemons = ref.watch(_catalogPokemonsProvider);
   final syncInfo = ref.watch(_catalogSyncInfoProvider);
+  final filters = ref.watch(catalogFiltersProvider).value;
+  final localCount = ref.watch(catalogLocalCountProvider).value;
 
   if (pokemons.hasError) return const CatalogError();
 
@@ -131,5 +170,7 @@ final catalogStateProvider = Provider<CatalogState>((ref) {
     pokemons: pokemons.value,
     syncInfo: syncInfo.value,
     limit: limit,
+    narrowed: filters?.narrowsCatalog ?? false,
+    localCount: localCount,
   );
 });
