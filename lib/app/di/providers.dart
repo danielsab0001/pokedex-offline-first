@@ -32,6 +32,9 @@ import 'package:pokedex/app/sync/periodic_sync_trigger.dart';
 import 'package:pokedex/features/favorites/data/favorites_local_data_source.dart';
 import 'package:pokedex/features/favorites/data/favorites_repository_impl.dart';
 import 'package:pokedex/features/favorites/domain/favorites_repository.dart';
+import 'package:pokedex/core/preferences/user_preferences_local_data_source.dart';
+import 'package:pokedex/features/pokemon/data/catalog_filters_repository_impl.dart';
+import 'package:pokedex/features/pokemon/domain/catalog_filters_repository.dart';
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase.defaults();
@@ -190,4 +193,15 @@ final favoritesLocalDataSourceProvider = Provider<FavoritesLocalDataSource>(
 
 final favoritesRepositoryProvider = Provider<FavoritesRepository>(
   (ref) => FavoritesRepositoryImpl(ref.watch(favoritesLocalDataSourceProvider)),
+);
+
+final userPreferencesLocalDataSourceProvider =
+    Provider<UserPreferencesLocalDataSource>(
+      (ref) => UserPreferencesLocalDataSource(ref.watch(appDatabaseProvider)),
+    );
+
+final catalogFiltersRepositoryProvider = Provider<CatalogFiltersRepository>(
+  (ref) => CatalogFiltersRepositoryImpl(
+    ref.watch(userPreferencesLocalDataSourceProvider),
+  ),
 );

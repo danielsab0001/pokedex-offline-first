@@ -15,6 +15,7 @@ import 'package:pokedex/features/connectivity/domain/connectivity_models.dart';
 import 'package:pokedex/features/connectivity/presentation/connectivity_chip.dart';
 import 'package:pokedex/features/connectivity/presentation/connectivity_providers.dart';
 
+import '../../support/fake_catalog_filters_repository.dart';
 import '../../support/fake_favorites_repository.dart';
 
 const _grassPoison = [
@@ -93,6 +94,9 @@ Widget appFor({
         pokemonRepositoryProvider.overrideWithValue(repository),
 
       favoritesRepositoryProvider.overrideWithValue(FakeFavoritesRepository()),
+      catalogFiltersRepositoryProvider.overrideWithValue(
+        FakeCatalogFiltersRepository(),
+      ),
       // Los tests no descargan imágenes.
       pokemonThumbnailBuilderProvider.overrideWithValue(
         (id, size) => SizedBox.square(dimension: size),

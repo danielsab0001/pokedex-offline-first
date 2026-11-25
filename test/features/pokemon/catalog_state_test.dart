@@ -9,6 +9,8 @@ import 'package:pokedex/features/pokemon/domain/pokemon_repository.dart';
 import 'package:pokedex/features/pokemon/presentation/catalog/catalog_providers.dart';
 import 'package:pokedex/features/pokemon/presentation/catalog/catalog_state.dart';
 
+import '../../support/fake_catalog_filters_repository.dart';
+
 Pokemon pokemon(int id) =>
     Pokemon(id: id, nameEn: 'Mon $id', generationId: 1, types: const []);
 
@@ -76,7 +78,12 @@ class FakePokemonRepository implements PokemonRepository {
 
 ProviderContainer containerFor(FakePokemonRepository repository) {
   final container = ProviderContainer(
-    overrides: [pokemonRepositoryProvider.overrideWithValue(repository)],
+    overrides: [
+      pokemonRepositoryProvider.overrideWithValue(repository),
+      catalogFiltersRepositoryProvider.overrideWithValue(
+        FakeCatalogFiltersRepository(),
+      ),
+    ],
     retry: (_, _) => null,
   );
   addTearDown(container.dispose);
