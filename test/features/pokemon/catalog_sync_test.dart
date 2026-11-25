@@ -36,6 +36,20 @@ Map<String, dynamic> species(int id) {
             'type': {'id': 4, 'name': 'poison'},
           },
         ],
+        'pokemonstats': [
+          for (final (name, value) in [
+            ('hp', 10),
+            ('attack', 20),
+            ('defense', 30),
+            ('special-attack', 40),
+            ('special-defense', 50),
+            ('speed', id),
+          ])
+            {
+              'base_stat': value,
+              'stat': {'name': name},
+            },
+        ],
       },
     ],
   };

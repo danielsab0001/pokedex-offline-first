@@ -40,6 +40,7 @@ class PokemonSpeciesDto {
     required this.generationId,
     required this.names,
     required this.types,
+    this.stats = const [],
   });
 
   factory PokemonSpeciesDto.fromJson(Map<String, dynamic> json) {
@@ -52,6 +53,7 @@ class PokemonSpeciesDto {
     // La consulta filtra is_default, así que llega un solo Pokémon por especie.
     final pokemons = _list(json, 'pokemons');
     final types = <PokemonTypeRecord>[];
+    final statsById = <int, int>{};
     if (pokemons.isNotEmpty) {
       final pokemon = _asMap(pokemons.first, 'pokemons');
       for (final t in _list(pokemon, 'pokemontypes')) {
@@ -65,6 +67,13 @@ class PokemonSpeciesDto {
           ),
         );
       }
+
+      for (final s in _optionalList(pokemon, 'pokemonstats')) {
+        final link = _asMap(s, 'pokemonstats');
+        final statId =
+            pokemonStatIdsByName[_string(_map(link, 'stat'), 'name')];
+        if (statId != null) statsById[statId] = _int(link, 'base_stat');
+      }
     }
 
     return PokemonSpeciesDto(
@@ -73,6 +82,10 @@ class PokemonSpeciesDto {
       generationId: _int(json, 'generation_id'),
       names: names,
       types: types,
+      stats: [
+        for (final entry in statsById.entries)
+          PokemonStatRecord(statId: entry.key, baseStat: entry.value),
+      ],
     );
   }
 
@@ -81,6 +94,7 @@ class PokemonSpeciesDto {
   final int generationId;
   final Map<int, String> names;
   final List<PokemonTypeRecord> types;
+  final List<PokemonStatRecord> stats;
 
   PokemonRecord toRecord() {
     final english = names[englishLanguageId]?.trim();
@@ -92,6 +106,7 @@ class PokemonSpeciesDto {
       nameEs: (spanish == null || spanish.isEmpty) ? null : spanish,
       generationId: generationId,
       types: types,
+      stats: stats,
     );
   }
 }
@@ -106,6 +121,13 @@ Map<String, dynamic> _map(Map<String, dynamic> json, String key) =>
 
 List<Object?> _list(Map<String, dynamic> json, String key) {
   final value = json[key];
+  if (value is List) return value;
+  throw InvalidResponseFailure('Se esperaba una lista en "$key"');
+}
+
+List<Object?> _optionalList(Map<String, dynamic> json, String key) {
+  final value = json[key];
+  if (value == null) return const [];
   if (value is List) return value;
   throw InvalidResponseFailure('Se esperaba una lista en "$key"');
 }

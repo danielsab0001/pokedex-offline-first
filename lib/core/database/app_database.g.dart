@@ -47,6 +47,17 @@ class $PokemonsTable extends Pokemons
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _baseStatTotalMeta = const VerificationMeta(
+    'baseStatTotal',
+  );
+  @override
+  late final GeneratedColumn<int> baseStatTotal = GeneratedColumn<int>(
+    'base_stat_total',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _syncedAtMeta = const VerificationMeta(
     'syncedAt',
   );
@@ -64,6 +75,7 @@ class $PokemonsTable extends Pokemons
     nameEn,
     nameEs,
     generationId,
+    baseStatTotal,
     syncedAt,
   ];
   @override
@@ -106,6 +118,15 @@ class $PokemonsTable extends Pokemons
     } else if (isInserting) {
       context.missing(_generationIdMeta);
     }
+    if (data.containsKey('base_stat_total')) {
+      context.handle(
+        _baseStatTotalMeta,
+        baseStatTotal.isAcceptableOrUnknown(
+          data['base_stat_total']!,
+          _baseStatTotalMeta,
+        ),
+      );
+    }
     if (data.containsKey('synced_at')) {
       context.handle(
         _syncedAtMeta,
@@ -139,6 +160,10 @@ class $PokemonsTable extends Pokemons
         DriftSqlType.int,
         data['${effectivePrefix}generation_id'],
       )!,
+      baseStatTotal: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}base_stat_total'],
+      ),
       syncedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}synced_at'],
@@ -157,12 +182,14 @@ class PokemonRow extends DataClass implements Insertable<PokemonRow> {
   final String nameEn;
   final String? nameEs;
   final int generationId;
+  final int? baseStatTotal;
   final DateTime syncedAt;
   const PokemonRow({
     required this.id,
     required this.nameEn,
     this.nameEs,
     required this.generationId,
+    this.baseStatTotal,
     required this.syncedAt,
   });
   @override
@@ -174,6 +201,9 @@ class PokemonRow extends DataClass implements Insertable<PokemonRow> {
       map['name_es'] = Variable<String>(nameEs);
     }
     map['generation_id'] = Variable<int>(generationId);
+    if (!nullToAbsent || baseStatTotal != null) {
+      map['base_stat_total'] = Variable<int>(baseStatTotal);
+    }
     map['synced_at'] = Variable<DateTime>(syncedAt);
     return map;
   }
@@ -186,6 +216,9 @@ class PokemonRow extends DataClass implements Insertable<PokemonRow> {
           ? const Value.absent()
           : Value(nameEs),
       generationId: Value(generationId),
+      baseStatTotal: baseStatTotal == null && nullToAbsent
+          ? const Value.absent()
+          : Value(baseStatTotal),
       syncedAt: Value(syncedAt),
     );
   }
@@ -200,6 +233,7 @@ class PokemonRow extends DataClass implements Insertable<PokemonRow> {
       nameEn: serializer.fromJson<String>(json['nameEn']),
       nameEs: serializer.fromJson<String?>(json['nameEs']),
       generationId: serializer.fromJson<int>(json['generationId']),
+      baseStatTotal: serializer.fromJson<int?>(json['baseStatTotal']),
       syncedAt: serializer.fromJson<DateTime>(json['syncedAt']),
     );
   }
@@ -211,6 +245,7 @@ class PokemonRow extends DataClass implements Insertable<PokemonRow> {
       'nameEn': serializer.toJson<String>(nameEn),
       'nameEs': serializer.toJson<String?>(nameEs),
       'generationId': serializer.toJson<int>(generationId),
+      'baseStatTotal': serializer.toJson<int?>(baseStatTotal),
       'syncedAt': serializer.toJson<DateTime>(syncedAt),
     };
   }
@@ -220,12 +255,16 @@ class PokemonRow extends DataClass implements Insertable<PokemonRow> {
     String? nameEn,
     Value<String?> nameEs = const Value.absent(),
     int? generationId,
+    Value<int?> baseStatTotal = const Value.absent(),
     DateTime? syncedAt,
   }) => PokemonRow(
     id: id ?? this.id,
     nameEn: nameEn ?? this.nameEn,
     nameEs: nameEs.present ? nameEs.value : this.nameEs,
     generationId: generationId ?? this.generationId,
+    baseStatTotal: baseStatTotal.present
+        ? baseStatTotal.value
+        : this.baseStatTotal,
     syncedAt: syncedAt ?? this.syncedAt,
   );
   PokemonRow copyWithCompanion(PokemonsCompanion data) {
@@ -236,6 +275,9 @@ class PokemonRow extends DataClass implements Insertable<PokemonRow> {
       generationId: data.generationId.present
           ? data.generationId.value
           : this.generationId,
+      baseStatTotal: data.baseStatTotal.present
+          ? data.baseStatTotal.value
+          : this.baseStatTotal,
       syncedAt: data.syncedAt.present ? data.syncedAt.value : this.syncedAt,
     );
   }
@@ -247,13 +289,15 @@ class PokemonRow extends DataClass implements Insertable<PokemonRow> {
           ..write('nameEn: $nameEn, ')
           ..write('nameEs: $nameEs, ')
           ..write('generationId: $generationId, ')
+          ..write('baseStatTotal: $baseStatTotal, ')
           ..write('syncedAt: $syncedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, nameEn, nameEs, generationId, syncedAt);
+  int get hashCode =>
+      Object.hash(id, nameEn, nameEs, generationId, baseStatTotal, syncedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -262,6 +306,7 @@ class PokemonRow extends DataClass implements Insertable<PokemonRow> {
           other.nameEn == this.nameEn &&
           other.nameEs == this.nameEs &&
           other.generationId == this.generationId &&
+          other.baseStatTotal == this.baseStatTotal &&
           other.syncedAt == this.syncedAt);
 }
 
@@ -270,12 +315,14 @@ class PokemonsCompanion extends UpdateCompanion<PokemonRow> {
   final Value<String> nameEn;
   final Value<String?> nameEs;
   final Value<int> generationId;
+  final Value<int?> baseStatTotal;
   final Value<DateTime> syncedAt;
   const PokemonsCompanion({
     this.id = const Value.absent(),
     this.nameEn = const Value.absent(),
     this.nameEs = const Value.absent(),
     this.generationId = const Value.absent(),
+    this.baseStatTotal = const Value.absent(),
     this.syncedAt = const Value.absent(),
   });
   PokemonsCompanion.insert({
@@ -283,6 +330,7 @@ class PokemonsCompanion extends UpdateCompanion<PokemonRow> {
     required String nameEn,
     this.nameEs = const Value.absent(),
     required int generationId,
+    this.baseStatTotal = const Value.absent(),
     required DateTime syncedAt,
   }) : nameEn = Value(nameEn),
        generationId = Value(generationId),
@@ -292,6 +340,7 @@ class PokemonsCompanion extends UpdateCompanion<PokemonRow> {
     Expression<String>? nameEn,
     Expression<String>? nameEs,
     Expression<int>? generationId,
+    Expression<int>? baseStatTotal,
     Expression<DateTime>? syncedAt,
   }) {
     return RawValuesInsertable({
@@ -299,6 +348,7 @@ class PokemonsCompanion extends UpdateCompanion<PokemonRow> {
       if (nameEn != null) 'name_en': nameEn,
       if (nameEs != null) 'name_es': nameEs,
       if (generationId != null) 'generation_id': generationId,
+      if (baseStatTotal != null) 'base_stat_total': baseStatTotal,
       if (syncedAt != null) 'synced_at': syncedAt,
     });
   }
@@ -308,6 +358,7 @@ class PokemonsCompanion extends UpdateCompanion<PokemonRow> {
     Value<String>? nameEn,
     Value<String?>? nameEs,
     Value<int>? generationId,
+    Value<int?>? baseStatTotal,
     Value<DateTime>? syncedAt,
   }) {
     return PokemonsCompanion(
@@ -315,6 +366,7 @@ class PokemonsCompanion extends UpdateCompanion<PokemonRow> {
       nameEn: nameEn ?? this.nameEn,
       nameEs: nameEs ?? this.nameEs,
       generationId: generationId ?? this.generationId,
+      baseStatTotal: baseStatTotal ?? this.baseStatTotal,
       syncedAt: syncedAt ?? this.syncedAt,
     );
   }
@@ -334,6 +386,9 @@ class PokemonsCompanion extends UpdateCompanion<PokemonRow> {
     if (generationId.present) {
       map['generation_id'] = Variable<int>(generationId.value);
     }
+    if (baseStatTotal.present) {
+      map['base_stat_total'] = Variable<int>(baseStatTotal.value);
+    }
     if (syncedAt.present) {
       map['synced_at'] = Variable<DateTime>(syncedAt.value);
     }
@@ -347,6 +402,7 @@ class PokemonsCompanion extends UpdateCompanion<PokemonRow> {
           ..write('nameEn: $nameEn, ')
           ..write('nameEs: $nameEs, ')
           ..write('generationId: $generationId, ')
+          ..write('baseStatTotal: $baseStatTotal, ')
           ..write('syncedAt: $syncedAt')
           ..write(')'))
         .toString();
@@ -795,6 +851,273 @@ class PokemonTypesCompanion extends UpdateCompanion<PokemonTypeRow> {
           ..write('pokemonId: $pokemonId, ')
           ..write('typeId: $typeId, ')
           ..write('slot: $slot, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PokemonStatsTable extends PokemonStats
+    with TableInfo<$PokemonStatsTable, PokemonStatRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PokemonStatsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _pokemonIdMeta = const VerificationMeta(
+    'pokemonId',
+  );
+  @override
+  late final GeneratedColumn<int> pokemonId = GeneratedColumn<int>(
+    'pokemon_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES pokemon (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _statIdMeta = const VerificationMeta('statId');
+  @override
+  late final GeneratedColumn<int> statId = GeneratedColumn<int>(
+    'stat_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _baseStatMeta = const VerificationMeta(
+    'baseStat',
+  );
+  @override
+  late final GeneratedColumn<int> baseStat = GeneratedColumn<int>(
+    'base_stat',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [pokemonId, statId, baseStat];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'pokemon_stat';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PokemonStatRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('pokemon_id')) {
+      context.handle(
+        _pokemonIdMeta,
+        pokemonId.isAcceptableOrUnknown(data['pokemon_id']!, _pokemonIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pokemonIdMeta);
+    }
+    if (data.containsKey('stat_id')) {
+      context.handle(
+        _statIdMeta,
+        statId.isAcceptableOrUnknown(data['stat_id']!, _statIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statIdMeta);
+    }
+    if (data.containsKey('base_stat')) {
+      context.handle(
+        _baseStatMeta,
+        baseStat.isAcceptableOrUnknown(data['base_stat']!, _baseStatMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_baseStatMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {pokemonId, statId};
+  @override
+  PokemonStatRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PokemonStatRow(
+      pokemonId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}pokemon_id'],
+      )!,
+      statId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}stat_id'],
+      )!,
+      baseStat: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}base_stat'],
+      )!,
+    );
+  }
+
+  @override
+  $PokemonStatsTable createAlias(String alias) {
+    return $PokemonStatsTable(attachedDatabase, alias);
+  }
+}
+
+class PokemonStatRow extends DataClass implements Insertable<PokemonStatRow> {
+  final int pokemonId;
+  final int statId;
+  final int baseStat;
+  const PokemonStatRow({
+    required this.pokemonId,
+    required this.statId,
+    required this.baseStat,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['pokemon_id'] = Variable<int>(pokemonId);
+    map['stat_id'] = Variable<int>(statId);
+    map['base_stat'] = Variable<int>(baseStat);
+    return map;
+  }
+
+  PokemonStatsCompanion toCompanion(bool nullToAbsent) {
+    return PokemonStatsCompanion(
+      pokemonId: Value(pokemonId),
+      statId: Value(statId),
+      baseStat: Value(baseStat),
+    );
+  }
+
+  factory PokemonStatRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PokemonStatRow(
+      pokemonId: serializer.fromJson<int>(json['pokemonId']),
+      statId: serializer.fromJson<int>(json['statId']),
+      baseStat: serializer.fromJson<int>(json['baseStat']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'pokemonId': serializer.toJson<int>(pokemonId),
+      'statId': serializer.toJson<int>(statId),
+      'baseStat': serializer.toJson<int>(baseStat),
+    };
+  }
+
+  PokemonStatRow copyWith({int? pokemonId, int? statId, int? baseStat}) =>
+      PokemonStatRow(
+        pokemonId: pokemonId ?? this.pokemonId,
+        statId: statId ?? this.statId,
+        baseStat: baseStat ?? this.baseStat,
+      );
+  PokemonStatRow copyWithCompanion(PokemonStatsCompanion data) {
+    return PokemonStatRow(
+      pokemonId: data.pokemonId.present ? data.pokemonId.value : this.pokemonId,
+      statId: data.statId.present ? data.statId.value : this.statId,
+      baseStat: data.baseStat.present ? data.baseStat.value : this.baseStat,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PokemonStatRow(')
+          ..write('pokemonId: $pokemonId, ')
+          ..write('statId: $statId, ')
+          ..write('baseStat: $baseStat')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(pokemonId, statId, baseStat);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PokemonStatRow &&
+          other.pokemonId == this.pokemonId &&
+          other.statId == this.statId &&
+          other.baseStat == this.baseStat);
+}
+
+class PokemonStatsCompanion extends UpdateCompanion<PokemonStatRow> {
+  final Value<int> pokemonId;
+  final Value<int> statId;
+  final Value<int> baseStat;
+  final Value<int> rowid;
+  const PokemonStatsCompanion({
+    this.pokemonId = const Value.absent(),
+    this.statId = const Value.absent(),
+    this.baseStat = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PokemonStatsCompanion.insert({
+    required int pokemonId,
+    required int statId,
+    required int baseStat,
+    this.rowid = const Value.absent(),
+  }) : pokemonId = Value(pokemonId),
+       statId = Value(statId),
+       baseStat = Value(baseStat);
+  static Insertable<PokemonStatRow> custom({
+    Expression<int>? pokemonId,
+    Expression<int>? statId,
+    Expression<int>? baseStat,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (pokemonId != null) 'pokemon_id': pokemonId,
+      if (statId != null) 'stat_id': statId,
+      if (baseStat != null) 'base_stat': baseStat,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PokemonStatsCompanion copyWith({
+    Value<int>? pokemonId,
+    Value<int>? statId,
+    Value<int>? baseStat,
+    Value<int>? rowid,
+  }) {
+    return PokemonStatsCompanion(
+      pokemonId: pokemonId ?? this.pokemonId,
+      statId: statId ?? this.statId,
+      baseStat: baseStat ?? this.baseStat,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (pokemonId.present) {
+      map['pokemon_id'] = Variable<int>(pokemonId.value);
+    }
+    if (statId.present) {
+      map['stat_id'] = Variable<int>(statId.value);
+    }
+    if (baseStat.present) {
+      map['base_stat'] = Variable<int>(baseStat.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PokemonStatsCompanion(')
+          ..write('pokemonId: $pokemonId, ')
+          ..write('statId: $statId, ')
+          ..write('baseStat: $baseStat, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2063,6 +2386,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PokemonsTable pokemons = $PokemonsTable(this);
   late final $TypesTable types = $TypesTable(this);
   late final $PokemonTypesTable pokemonTypes = $PokemonTypesTable(this);
+  late final $PokemonStatsTable pokemonStats = $PokemonStatsTable(this);
   late final $FavoritesTable favorites = $FavoritesTable(this);
   late final $SyncMetadataEntriesTable syncMetadataEntries =
       $SyncMetadataEntriesTable(this);
@@ -2078,6 +2402,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'idx_pokemon_generation',
     'CREATE INDEX idx_pokemon_generation ON pokemon (generation_id, id)',
   );
+  late final Index idxPokemonBaseStatTotal = Index(
+    'idx_pokemon_base_stat_total',
+    'CREATE INDEX idx_pokemon_base_stat_total ON pokemon (base_stat_total)',
+  );
   late final Index idxPokemonTypeByType = Index(
     'idx_pokemon_type_by_type',
     'CREATE INDEX idx_pokemon_type_by_type ON pokemon_type (type_id, pokemon_id)',
@@ -2090,12 +2418,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     pokemons,
     types,
     pokemonTypes,
+    pokemonStats,
     favorites,
     syncMetadataEntries,
     userPreferences,
     apiCalls,
     idxPokemonNameEn,
     idxPokemonGeneration,
+    idxPokemonBaseStatTotal,
     idxPokemonTypeByType,
   ];
   @override
@@ -2107,6 +2437,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       ),
       result: [TableUpdate('pokemon_type', kind: UpdateKind.delete)],
     ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'pokemon',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('pokemon_stat', kind: UpdateKind.delete)],
+    ),
   ]);
 }
 
@@ -2115,6 +2452,7 @@ typedef $$PokemonsTableCreateCompanionBuilder = PokemonsCompanion Function({
   required String nameEn,
   Value<String?> nameEs,
   required int generationId,
+  Value<int?> baseStatTotal,
   required DateTime syncedAt,
 });
 typedef $$PokemonsTableUpdateCompanionBuilder = PokemonsCompanion Function({
@@ -2122,6 +2460,7 @@ typedef $$PokemonsTableUpdateCompanionBuilder = PokemonsCompanion Function({
   Value<String> nameEn,
   Value<String?> nameEs,
   Value<int> generationId,
+  Value<int?> baseStatTotal,
   Value<DateTime> syncedAt,
 });
 
@@ -2142,6 +2481,24 @@ final class $$PokemonsTableReferences
     ).filter((f) => f.pokemonId.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_pokemonTypesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$PokemonStatsTable, List<PokemonStatRow>>
+  _pokemonStatsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.pokemonStats,
+    aliasName: 'pokemon__id__pokemon_stat__pokemon_id',
+  );
+
+  $$PokemonStatsTableProcessedTableManager get pokemonStatsRefs {
+    final manager = $$PokemonStatsTableTableManager(
+      $_db,
+      $_db.pokemonStats,
+    ).filter((f) => f.pokemonId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_pokemonStatsRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -2177,6 +2534,11 @@ class $$PokemonsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get baseStatTotal => $composableBuilder(
+    column: $table.baseStatTotal,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<DateTime> get syncedAt => $composableBuilder(
     column: $table.syncedAt,
     builder: (column) => ColumnFilters(column),
@@ -2198,6 +2560,31 @@ class $$PokemonsTableFilterComposer
           }) => $$PokemonTypesTableFilterComposer(
             $db: $db,
             $table: $db.pokemonTypes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> pokemonStatsRefs(
+    Expression<bool> Function($$PokemonStatsTableFilterComposer f) f,
+  ) {
+    final $$PokemonStatsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.pokemonStats,
+      getReferencedColumn: (t) => t.pokemonId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PokemonStatsTableFilterComposer(
+            $db: $db,
+            $table: $db.pokemonStats,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -2237,6 +2624,11 @@ class $$PokemonsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get baseStatTotal => $composableBuilder(
+    column: $table.baseStatTotal,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get syncedAt => $composableBuilder(
     column: $table.syncedAt,
     builder: (column) => ColumnOrderings(column),
@@ -2263,6 +2655,11 @@ class $$PokemonsTableAnnotationComposer
 
   GeneratedColumn<int> get generationId => $composableBuilder(
     column: $table.generationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get baseStatTotal => $composableBuilder(
+    column: $table.baseStatTotal,
     builder: (column) => column,
   );
 
@@ -2293,6 +2690,31 @@ class $$PokemonsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> pokemonStatsRefs<T extends Object>(
+    Expression<T> Function($$PokemonStatsTableAnnotationComposer a) f,
+  ) {
+    final $$PokemonStatsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.pokemonStats,
+      getReferencedColumn: (t) => t.pokemonId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PokemonStatsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.pokemonStats,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$PokemonsTableTableManager
@@ -2308,7 +2730,7 @@ class $$PokemonsTableTableManager
           $$PokemonsTableUpdateCompanionBuilder,
           (PokemonRow, $$PokemonsTableReferences),
           PokemonRow,
-          PrefetchHooks Function({bool pokemonTypesRefs})
+          PrefetchHooks Function({bool pokemonTypesRefs, bool pokemonStatsRefs})
         > {
   $$PokemonsTableTableManager(_$AppDatabase db, $PokemonsTable table)
     : super(
@@ -2327,12 +2749,14 @@ class $$PokemonsTableTableManager
                 Value<String> nameEn = const Value.absent(),
                 Value<String?> nameEs = const Value.absent(),
                 Value<int> generationId = const Value.absent(),
+                Value<int?> baseStatTotal = const Value.absent(),
                 Value<DateTime> syncedAt = const Value.absent(),
               }) => PokemonsCompanion(
                 id: id,
                 nameEn: nameEn,
                 nameEs: nameEs,
                 generationId: generationId,
+                baseStatTotal: baseStatTotal,
                 syncedAt: syncedAt,
               ),
           createCompanionCallback:
@@ -2341,12 +2765,14 @@ class $$PokemonsTableTableManager
                 required String nameEn,
                 Value<String?> nameEs = const Value.absent(),
                 required int generationId,
+                Value<int?> baseStatTotal = const Value.absent(),
                 required DateTime syncedAt,
               }) => PokemonsCompanion.insert(
                 id: id,
                 nameEn: nameEn,
                 nameEs: nameEs,
                 generationId: generationId,
+                baseStatTotal: baseStatTotal,
                 syncedAt: syncedAt,
               ),
           withReferenceMapper: (p0) => p0
@@ -2357,36 +2783,61 @@ class $$PokemonsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({pokemonTypesRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (pokemonTypesRefs) db.pokemonTypes],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (pokemonTypesRefs)
-                    await $_getPrefetchedDataByColumns<
-                      PokemonRow,
-                      $PokemonsTable,
-                      PokemonTypeRow,
-                      $PokemonTypesTable
-                    >(
-                      currentTable: table,
-                      referencedTable: $$PokemonsTableReferences
-                          ._pokemonTypesRefsTable(db),
-                      managerFromTypedResult: (p0) => $$PokemonsTableReferences(
-                        db,
-                        table,
-                        p0,
-                      ).pokemonTypesRefs,
-                      currentColumn: 'id',
-                      referencedColumn: 'pokemon_id',
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({pokemonTypesRefs = false, pokemonStatsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (pokemonTypesRefs) db.pokemonTypes,
+                    if (pokemonStatsRefs) db.pokemonStats,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (pokemonTypesRefs)
+                        await $_getPrefetchedDataByColumns<
+                          PokemonRow,
+                          $PokemonsTable,
+                          PokemonTypeRow,
+                          $PokemonTypesTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$PokemonsTableReferences
+                              ._pokemonTypesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$PokemonsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).pokemonTypesRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'pokemon_id',
+                          typedResults: items,
+                        ),
+                      if (pokemonStatsRefs)
+                        await $_getPrefetchedDataByColumns<
+                          PokemonRow,
+                          $PokemonsTable,
+                          PokemonStatRow,
+                          $PokemonStatsTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$PokemonsTableReferences
+                              ._pokemonStatsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$PokemonsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).pokemonStatsRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'pokemon_id',
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -2403,7 +2854,7 @@ typedef $$PokemonsTableProcessedTableManager =
       $$PokemonsTableUpdateCompanionBuilder,
       (PokemonRow, $$PokemonsTableReferences),
       PokemonRow,
-      PrefetchHooks Function({bool pokemonTypesRefs})
+      PrefetchHooks Function({bool pokemonTypesRefs, bool pokemonStatsRefs})
     >;
 typedef $$TypesTableCreateCompanionBuilder = TypesCompanion Function({
   Value<int> id,
@@ -2992,6 +3443,283 @@ typedef $$PokemonTypesTableProcessedTableManager =
       (PokemonTypeRow, $$PokemonTypesTableReferences),
       PokemonTypeRow,
       PrefetchHooks Function({bool pokemonId, bool typeId})
+    >;
+typedef $$PokemonStatsTableCreateCompanionBuilder =
+    PokemonStatsCompanion Function({
+      required int pokemonId,
+      required int statId,
+      required int baseStat,
+      Value<int> rowid,
+    });
+typedef $$PokemonStatsTableUpdateCompanionBuilder =
+    PokemonStatsCompanion Function({
+      Value<int> pokemonId,
+      Value<int> statId,
+      Value<int> baseStat,
+      Value<int> rowid,
+    });
+
+final class $$PokemonStatsTableReferences
+    extends BaseReferences<_$AppDatabase, $PokemonStatsTable, PokemonStatRow> {
+  $$PokemonStatsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $PokemonsTable _pokemonIdTable(_$AppDatabase db) =>
+      db.pokemons.createAlias('pokemon_stat__pokemon_id__pokemon__id');
+
+  $$PokemonsTableProcessedTableManager get pokemonId {
+    final $_column = $_itemColumn<int>('pokemon_id')!;
+
+    final manager = $$PokemonsTableTableManager(
+      $_db,
+      $_db.pokemons,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_pokemonIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$PokemonStatsTableFilterComposer
+    extends Composer<_$AppDatabase, $PokemonStatsTable> {
+  $$PokemonStatsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get statId => $composableBuilder(
+    column: $table.statId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get baseStat => $composableBuilder(
+    column: $table.baseStat,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$PokemonsTableFilterComposer get pokemonId {
+    final $$PokemonsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pokemonId,
+      referencedTable: $db.pokemons,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PokemonsTableFilterComposer(
+            $db: $db,
+            $table: $db.pokemons,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PokemonStatsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PokemonStatsTable> {
+  $$PokemonStatsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get statId => $composableBuilder(
+    column: $table.statId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get baseStat => $composableBuilder(
+    column: $table.baseStat,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$PokemonsTableOrderingComposer get pokemonId {
+    final $$PokemonsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pokemonId,
+      referencedTable: $db.pokemons,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PokemonsTableOrderingComposer(
+            $db: $db,
+            $table: $db.pokemons,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PokemonStatsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PokemonStatsTable> {
+  $$PokemonStatsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get statId =>
+      $composableBuilder(column: $table.statId, builder: (column) => column);
+
+  GeneratedColumn<int> get baseStat =>
+      $composableBuilder(column: $table.baseStat, builder: (column) => column);
+
+  $$PokemonsTableAnnotationComposer get pokemonId {
+    final $$PokemonsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pokemonId,
+      referencedTable: $db.pokemons,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PokemonsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.pokemons,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PokemonStatsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PokemonStatsTable,
+          PokemonStatRow,
+          $$PokemonStatsTableFilterComposer,
+          $$PokemonStatsTableOrderingComposer,
+          $$PokemonStatsTableAnnotationComposer,
+          $$PokemonStatsTableCreateCompanionBuilder,
+          $$PokemonStatsTableUpdateCompanionBuilder,
+          (PokemonStatRow, $$PokemonStatsTableReferences),
+          PokemonStatRow,
+          PrefetchHooks Function({bool pokemonId})
+        > {
+  $$PokemonStatsTableTableManager(_$AppDatabase db, $PokemonStatsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PokemonStatsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PokemonStatsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PokemonStatsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> pokemonId = const Value.absent(),
+                Value<int> statId = const Value.absent(),
+                Value<int> baseStat = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PokemonStatsCompanion(
+                pokemonId: pokemonId,
+                statId: statId,
+                baseStat: baseStat,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required int pokemonId,
+                required int statId,
+                required int baseStat,
+                Value<int> rowid = const Value.absent(),
+              }) => PokemonStatsCompanion.insert(
+                pokemonId: pokemonId,
+                statId: statId,
+                baseStat: baseStat,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$PokemonStatsTable, PokemonStatRow>(table),
+                  $$PokemonStatsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({pokemonId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (pokemonId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.pokemonId,
+                        referencedTable: $$PokemonStatsTableReferences
+                            ._pokemonIdTable(db),
+                        referencedColumn: $$PokemonStatsTableReferences
+                            ._pokemonIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$PokemonStatsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PokemonStatsTable,
+      PokemonStatRow,
+      $$PokemonStatsTableFilterComposer,
+      $$PokemonStatsTableOrderingComposer,
+      $$PokemonStatsTableAnnotationComposer,
+      $$PokemonStatsTableCreateCompanionBuilder,
+      $$PokemonStatsTableUpdateCompanionBuilder,
+      (PokemonStatRow, $$PokemonStatsTableReferences),
+      PokemonStatRow,
+      PrefetchHooks Function({bool pokemonId})
     >;
 typedef $$FavoritesTableCreateCompanionBuilder = FavoritesCompanion Function({
   Value<int> pokemonId,
@@ -3766,6 +4494,8 @@ class $AppDatabaseManager {
       $$TypesTableTableManager(_db, _db.types);
   $$PokemonTypesTableTableManager get pokemonTypes =>
       $$PokemonTypesTableTableManager(_db, _db.pokemonTypes);
+  $$PokemonStatsTableTableManager get pokemonStats =>
+      $$PokemonStatsTableTableManager(_db, _db.pokemonStats);
   $$FavoritesTableTableManager get favorites =>
       $$FavoritesTableTableManager(_db, _db.favorites);
   $$SyncMetadataEntriesTableTableManager get syncMetadataEntries =>

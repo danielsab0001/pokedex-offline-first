@@ -9,6 +9,7 @@ part 'app_database.g.dart';
     Pokemons,
     Types,
     PokemonTypes,
+    PokemonStats,
     Favorites,
     SyncMetadataEntries,
     UserPreferences,
@@ -16,13 +17,12 @@ part 'app_database.g.dart';
   ],
 )
 class AppDatabase extends _$AppDatabase {
-  // Constructor con executor para poder usar una base en memoria en los tests.
   AppDatabase(super.e);
 
   AppDatabase.defaults() : super(driftDatabase(name: 'pokedex'));
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -34,9 +34,23 @@ class AppDatabase extends _$AppDatabase {
       if (from < 3) {
         await m.createTable(apiCalls);
       }
+      if (from < 4) {
+        await m.addColumn(pokemons, pokemons.baseStatTotal);
+        await m.createTable(pokemonStats);
+        await m.createIndex(idxPokemonBaseStatTotal);
+        // Las estadísticas llegan con la próxima descarga del catálogo.
+        await (update(syncMetadataEntries)..where(
+              (r) => r.resourceKey.isIn(['catalog_index', 'catalog_verify']),
+            ))
+            .write(
+              const SyncMetadataEntriesCompanion(
+                status: Value('idle'),
+                cursor: Value(0),
+              ),
+            );
+      }
     },
     beforeOpen: (details) async {
-      // SQLite no aplica claves foráneas si no se activan en cada conexión.
       await customStatement('PRAGMA foreign_keys = ON');
     },
   );

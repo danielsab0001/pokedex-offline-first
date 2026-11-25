@@ -31,4 +31,11 @@ void main() {
     );
     expect(result, contains('idx_pokemon_type_by_type'));
   });
+
+  test('ordenar por total base usa idx_pokemon_base_stat_total', () async {
+    final result = await plan(
+      'SELECT id FROM pokemon ORDER BY base_stat_total DESC',
+    );
+    expect(result, contains('idx_pokemon_base_stat_total'));
+  });
 }

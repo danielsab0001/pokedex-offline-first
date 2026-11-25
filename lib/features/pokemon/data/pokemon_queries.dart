@@ -31,6 +31,12 @@ query CatalogPage($afterId: Int!, $limit: Int!, $includeTotal: Boolean!) {
           name
         }
       }
+      pokemonstats {
+        base_stat
+        stat {
+          name
+        }
+      }
     }
   }
 }

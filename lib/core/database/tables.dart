@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 @DataClassName('PokemonRow')
 @TableIndex(name: 'idx_pokemon_name_en', columns: {#nameEn})
 @TableIndex(name: 'idx_pokemon_generation', columns: {#generationId, #id})
+@TableIndex(name: 'idx_pokemon_base_stat_total', columns: {#baseStatTotal})
 class Pokemons extends Table {
   @override
   String get tableName => 'pokemon';
@@ -12,6 +13,7 @@ class Pokemons extends Table {
   TextColumn get nameEn => text()();
   TextColumn get nameEs => text().nullable()();
   IntColumn get generationId => integer()();
+  IntColumn get baseStatTotal => integer().nullable()();
   DateTimeColumn get syncedAt => dateTime()();
 
   @override
@@ -99,4 +101,18 @@ class ApiCalls extends Table {
 
   IntColumn get id => integer().autoIncrement()();
   DateTimeColumn get calledAt => dateTime()();
+}
+
+@DataClassName('PokemonStatRow')
+class PokemonStats extends Table {
+  @override
+  String get tableName => 'pokemon_stat';
+
+  IntColumn get pokemonId =>
+      integer().references(Pokemons, #id, onDelete: KeyAction.cascade)();
+  IntColumn get statId => integer()();
+  IntColumn get baseStat => integer()();
+
+  @override
+  Set<Column> get primaryKey => {pokemonId, statId};
 }

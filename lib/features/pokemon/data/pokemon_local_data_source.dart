@@ -15,6 +15,8 @@ class PokemonLocalDataSource {
     final pt = _db.pokemonTypes;
     final t = _db.types;
 
+    // El límite va en una subconsulta porque sobre el join contaría filas
+    // (Pokémon x tipos) y no Pokémon.
     final firstIds = _db.selectOnly(p)
       ..addColumns([p.id])
       ..orderBy([OrderingTerm.asc(p.id)])
@@ -82,6 +84,7 @@ class PokemonLocalDataSource {
               nameEn: item.nameEn,
               nameEs: Value(item.nameEs),
               generationId: item.generationId,
+              baseStatTotal: Value(item.baseStatTotal),
               syncedAt: syncedAt,
             ),
           );
@@ -97,6 +100,21 @@ class PokemonLocalDataSource {
                 pokemonId: item.id,
                 typeId: type.typeId,
                 slot: type.slot,
+              ),
+            );
+      }
+
+      await (_db.delete(
+        _db.pokemonStats,
+      )..where((s) => s.pokemonId.equals(item.id))).go();
+      for (final stat in item.stats) {
+        await _db
+            .into(_db.pokemonStats)
+            .insert(
+              PokemonStatsCompanion.insert(
+                pokemonId: item.id,
+                statId: stat.statId,
+                baseStat: stat.baseStat,
               ),
             );
       }
