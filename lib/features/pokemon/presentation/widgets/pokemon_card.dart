@@ -20,11 +20,10 @@ class PokemonCard extends StatelessWidget {
   final Pokemon pokemon;
   final Widget thumbnail;
 
-  /// Todavía null: el detalle llega en una etapa posterior.
+  /// Abre el detalle del Pokémon; null si la tarjeta no es pulsable.
   final VoidCallback? onTap;
 
-  /// Acción propia de la tarjeta (el corazón). Queda fuera de la etiqueta
-  /// semántica para que el lector de pantalla pueda activarla.
+  /// Acción propia de la tarjeta (el corazón).
   final Widget? trailing;
 
   @override

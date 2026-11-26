@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:pokedex/features/favorites/presentation/favorite_button.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon.dart';
 import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_card.dart';
@@ -20,6 +21,7 @@ class PokemonListItem extends ConsumerWidget {
     return PokemonCard(
       pokemon: pokemon,
       thumbnail: buildThumbnail(pokemon.id, pokemonCardThumbnailSize),
+      onTap: () => context.push('/pokemon/${pokemon.id}'),
       trailing: FavoriteButton(pokemonId: pokemon.id, pokemonName: name),
     );
   }

@@ -1,0 +1,102 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:pokedex/app/di/providers.dart';
+import 'package:pokedex/app/router/app_router.dart';
+import 'package:pokedex/features/connectivity/domain/connectivity_models.dart';
+import 'package:pokedex/features/connectivity/presentation/connectivity_chip.dart';
+import 'package:pokedex/features/connectivity/presentation/connectivity_providers.dart';
+import 'package:pokedex/features/pokemon/presentation/catalog/catalog_page.dart';
+import 'package:pokedex/features/pokemon/presentation/catalog/catalog_providers.dart';
+import 'package:pokedex/features/pokemon/presentation/catalog/catalog_state.dart';
+import 'package:pokedex/features/pokemon/presentation/detail/detail_page.dart';
+import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_artwork.dart';
+import 'package:pokedex/l10n/app_localizations.dart';
+
+import '../support/fake_favorites_repository.dart';
+import '../support/fake_pokemon_detail_repository.dart';
+import '../support/pokemon_detail_fixtures.dart';
+
+Widget app() {
+  return ProviderScope(
+    overrides: [
+      catalogStateProvider.overrideWithValue(const CatalogEmpty()),
+      favoritesRepositoryProvider.overrideWithValue(FakeFavoritesRepository()),
+      pokemonDetailRepositoryProvider.overrideWithValue(
+        FakePokemonDetailRepository(sampleDetail()),
+      ),
+      pokemonArtworkBuilderProvider.overrideWithValue(
+        (id, {required shiny, required size}) =>
+            SizedBox.square(dimension: size),
+      ),
+      connectivityIndicatorProvider.overrideWithValue(
+        const ConnectivityIndicator(
+          kind: IndicatorKind.online,
+          availability: ServiceAvailability.online,
+          activity: SyncActivity.idle,
+        ),
+      ),
+    ],
+    child: Consumer(
+      builder: (context, ref, _) => MaterialApp.router(
+        routerConfig: ref.watch(routerProvider),
+        locale: const Locale('es'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+      ),
+    ),
+  );
+}
+
+GoRouter routerOf(WidgetTester tester) {
+  final container = ProviderScope.containerOf(
+    tester.element(find.byType(MaterialApp)),
+  );
+  return container.read(routerProvider);
+}
+
+void main() {
+  testWidgets(
+    'el detalle se abre sobre el shell y al volver reaparecen las pestañas',
+    (tester) async {
+      await tester.pumpWidget(app());
+      await tester.pumpAndSettle();
+
+      unawaited(routerOf(tester).push('/pokemon/25'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(PokemonDetailPage), findsOneWidget);
+      expect(find.byType(NavigationBar), findsNothing);
+
+      routerOf(tester).pop();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(PokemonDetailPage), findsNothing);
+      expect(find.byType(NavigationBar), findsOneWidget);
+    },
+  );
+
+  testWidgets('el detalle lleva el indicador de conectividad', (tester) async {
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+
+    unawaited(routerOf(tester).push('/pokemon/25'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ConnectivityChip), findsOneWidget);
+  });
+
+  testWidgets('un id que no es número vuelve al catálogo', (tester) async {
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+
+    routerOf(tester).go('/pokemon/abc');
+    await tester.pumpAndSettle();
+
+    expect(find.byType(PokemonDetailPage), findsNothing);
+    expect(find.byType(CatalogPage), findsOneWidget);
+  });
+}

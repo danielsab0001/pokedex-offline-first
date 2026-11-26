@@ -99,5 +99,28 @@
     "syncErrorUnknown": "Unknown error.",
     "catalogOfflineTitle": "No data saved yet",
     "catalogOfflineMessage": "The catalog can't be downloaded while offline. Connect to the Internet and it will download by itself.",
-    "connectivitySyncNow": "Sync now"
+    "connectivitySyncNow": "Sync now",
+        "detailTitle": "Details",
+        "detailLoading": "Loading details",
+        "detailUnavailableTitle": "Couldn't load this Pokémon",
+        "detailRefreshing": "Checking data with PokeAPI",
+        "detailRefreshFailed": "Couldn't update. {reason} Showing saved data.",
+        "@detailRefreshFailed": {
+          "placeholders": {
+            "reason": {"type": "String"}
+          }
+        },
+        "detailArtworkLabel": "Artwork of {name}",
+        "@detailArtworkLabel": {
+          "placeholders": {
+            "name": {"type": "String"}
+          }
+        },
+        "detailArtworkShinyLabel": "Shiny artwork of {name}",
+        "@detailArtworkShinyLabel": {
+          "placeholders": {
+            "name": {"type": "String"}
+          }
+        },
+        "detailShiny": "Shiny"
 }

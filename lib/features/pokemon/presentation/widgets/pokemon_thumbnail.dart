@@ -23,10 +23,16 @@ final _thumbnailCache = CacheManager(
 );
 
 class PokemonThumbnail extends StatelessWidget {
-  const PokemonThumbnail({super.key, required this.pokemonId, this.size = 72});
+  const PokemonThumbnail({
+    super.key,
+    required this.pokemonId,
+    this.size = 72,
+    this.shiny = false,
+  });
 
   final int pokemonId;
   final double size;
+  final bool shiny;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +48,7 @@ class PokemonThumbnail extends StatelessWidget {
       child: SizedBox.square(
         dimension: size,
         child: CachedNetworkImage(
-          imageUrl: pokemonSpriteUrl(pokemonId),
+          imageUrl: pokemonSpriteUrl(pokemonId, shiny: shiny),
           cacheManager: _thumbnailCache,
           // Decodifica al tamaño en pantalla y no al de la imagen original.
           memCacheWidth: (size * pixelRatio).round(),

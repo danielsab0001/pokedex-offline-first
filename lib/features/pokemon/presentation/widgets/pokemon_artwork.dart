@@ -1,0 +1,64 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_image_urls.dart';
+import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_thumbnail.dart';
+
+typedef PokemonArtworkBuilder = Widget Function(
+  int pokemonId, {
+  required bool shiny,
+  required double size,
+});
+
+/// Punto de sustitución para los tests de widgets, que no deben bajar imágenes.
+final pokemonArtworkBuilderProvider = Provider<PokemonArtworkBuilder>(
+  (ref) =>
+      (int pokemonId, {required bool shiny, required double size}) =>
+          PokemonArtwork(pokemonId: pokemonId, shiny: shiny, size: size),
+);
+
+// Cada ilustración pesa unos 120 KB: se guardan las últimas que se vieron (PS-08).
+final _artworkCache = CacheManager(
+  Config(
+    'pokemon_artwork',
+    stalePeriod: const Duration(days: 30),
+    maxNrOfCacheObjects: 120,
+  ),
+);
+
+class PokemonArtwork extends StatelessWidget {
+  const PokemonArtwork({
+    super.key,
+    required this.pokemonId,
+    required this.size,
+    this.shiny = false,
+  });
+
+  final int pokemonId;
+  final double size;
+  final bool shiny;
+
+  @override
+  Widget build(BuildContext context) {
+    final pixelRatio = MediaQuery.devicePixelRatioOf(context);
+
+    // La pantalla de detalle ya describe la imagen con su etiqueta.
+    return ExcludeSemantics(
+      child: SizedBox.square(
+        dimension: size,
+        child: CachedNetworkImage(
+          imageUrl: pokemonArtworkUrl(pokemonId, shiny: shiny),
+          cacheManager: _artworkCache,
+          memCacheWidth: (size * pixelRatio).round(),
+          fit: BoxFit.contain,
+          placeholder: (_, _) =>
+              const Center(child: CircularProgressIndicator()),
+          // Sin ilustración se usa el sprite, que suele estar ya en disco.
+          errorWidget: (_, _, _) =>
+              PokemonThumbnail(pokemonId: pokemonId, size: size, shiny: shiny),
+        ),
+      ),
+    );
+  }
+}

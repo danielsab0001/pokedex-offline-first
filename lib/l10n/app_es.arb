@@ -164,5 +164,28 @@
     "syncErrorUnknown": "Error desconocido.",
     "catalogOfflineTitle": "Todavía no hay datos guardados",
     "catalogOfflineMessage": "Sin conexión no se puede descargar el catálogo. Conéctate a Internet y se descargará solo.",
-    "connectivitySyncNow": "Sincronizar ahora"
+    "connectivitySyncNow": "Sincronizar ahora",
+        "detailTitle": "Detalle",
+        "detailLoading": "Cargando detalle",
+        "detailUnavailableTitle": "No se pudo cargar este Pokémon",
+        "detailRefreshing": "Comprobando los datos en PokeAPI",
+        "detailRefreshFailed": "No se pudo actualizar. {reason} Se muestran los datos guardados.",
+        "@detailRefreshFailed": {
+          "placeholders": {
+            "reason": {"type": "String"}
+          }
+        },
+        "detailArtworkLabel": "Ilustración de {name}",
+        "@detailArtworkLabel": {
+          "placeholders": {
+            "name": {"type": "String"}
+          }
+        },
+        "detailArtworkShinyLabel": "Ilustración shiny de {name}",
+        "@detailArtworkShinyLabel": {
+          "placeholders": {
+            "name": {"type": "String"}
+          }
+        },
+        "detailShiny": "Shiny"
 }
