@@ -12,6 +12,7 @@ import 'package:pokedex/features/pokemon/presentation/detail/detail_page.dart';
 import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_artwork.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
 
+import '../../support/fake_favorites_repository.dart';
 import '../../support/fake_pokemon_detail_repository.dart';
 import '../../support/pokemon_detail_fixtures.dart';
 
@@ -22,6 +23,7 @@ Widget app(
   return ProviderScope(
     overrides: [
       pokemonDetailRepositoryProvider.overrideWithValue(repository),
+      favoritesRepositoryProvider.overrideWithValue(FakeFavoritesRepository()),
       pokemonArtworkBuilderProvider.overrideWithValue((
         id, {
         required shiny,

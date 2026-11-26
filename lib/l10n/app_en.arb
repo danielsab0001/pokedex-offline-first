@@ -174,5 +174,22 @@
             "eggGroupWater2": "Water 2",
             "eggGroupDitto": "Ditto",
             "eggGroupDragon": "Dragon",
-            "eggGroupNoEggs": "Undiscovered"
+            "eggGroupNoEggs": "Undiscovered",
+                "detailShare": "Share",
+                "detailShareFailed": "Couldn't share.",
+                "detailShareText": "{name} {number} · Type: {types}",
+                "@detailShareText": {
+                  "placeholders": {
+                    "name": {"type": "String"},
+                    "number": {"type": "String"},
+                    "types": {"type": "String"}
+                  }
+                },
+                "detailShareTextNoTypes": "{name} {number}",
+                "@detailShareTextNoTypes": {
+                  "placeholders": {
+                    "name": {"type": "String"},
+                    "number": {"type": "String"}
+                  }
+                }
 }

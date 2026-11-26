@@ -13,6 +13,7 @@ import 'package:pokedex/features/pokemon/presentation/detail/detail_page.dart';
 import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_artwork.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
 
+import '../../support/fake_favorites_repository.dart';
 import '../../support/fake_pokemon_detail_repository.dart';
 
 const _pikachu = Pokemon(
@@ -56,6 +57,7 @@ Widget app(FakePokemonDetailRepository repository) {
   return ProviderScope(
     overrides: [
       pokemonDetailRepositoryProvider.overrideWithValue(repository),
+      favoritesRepositoryProvider.overrideWithValue(FakeFavoritesRepository()),
       pokemonArtworkBuilderProvider.overrideWithValue(
         (id, {required shiny, required size}) =>
             SizedBox.square(dimension: size),

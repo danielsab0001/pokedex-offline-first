@@ -4,6 +4,7 @@ import 'package:pokedex/core/sync/sync_error_kind.dart';
 import 'package:pokedex/core/widgets/state_message.dart';
 import 'package:pokedex/features/connectivity/presentation/indicator_app_bar.dart';
 import 'package:pokedex/features/connectivity/presentation/indicator_presentation.dart';
+import 'package:pokedex/features/favorites/presentation/favorite_button.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon_detail.dart';
 import 'package:pokedex/features/pokemon/presentation/detail/detail_abilities_section.dart';
 import 'package:pokedex/features/pokemon/presentation/detail/detail_header.dart';
@@ -11,6 +12,7 @@ import 'package:pokedex/features/pokemon/presentation/detail/detail_info_section
 import 'package:pokedex/features/pokemon/presentation/detail/detail_pending_notice.dart';
 import 'package:pokedex/features/pokemon/presentation/detail/detail_providers.dart';
 import 'package:pokedex/features/pokemon/presentation/detail/detail_refresh_notice.dart';
+import 'package:pokedex/features/pokemon/presentation/detail/detail_share_button.dart';
 import 'package:pokedex/features/pokemon/presentation/detail/detail_state.dart';
 import 'package:pokedex/features/pokemon/presentation/detail/detail_stats_section.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
@@ -33,6 +35,15 @@ class PokemonDetailPage extends ConsumerWidget {
           DetailContent(:final detail) => detail.pokemon.nameFor(languageCode),
           _ => l10n.detailTitle,
         },
+        actions: [
+          if (state case DetailContent(:final detail)) ...[
+            FavoriteButton(
+              pokemonId: pokemonId,
+              pokemonName: detail.pokemon.nameFor(languageCode),
+            ),
+            DetailShareButton(pokemon: detail.pokemon),
+          ],
+        ],
       ),
       body: switch (state) {
         DetailLoading() => Center(
