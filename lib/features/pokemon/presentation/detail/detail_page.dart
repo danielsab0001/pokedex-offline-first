@@ -5,10 +5,14 @@ import 'package:pokedex/core/widgets/state_message.dart';
 import 'package:pokedex/features/connectivity/presentation/indicator_app_bar.dart';
 import 'package:pokedex/features/connectivity/presentation/indicator_presentation.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon_detail.dart';
+import 'package:pokedex/features/pokemon/presentation/detail/detail_abilities_section.dart';
 import 'package:pokedex/features/pokemon/presentation/detail/detail_header.dart';
+import 'package:pokedex/features/pokemon/presentation/detail/detail_info_section.dart';
+import 'package:pokedex/features/pokemon/presentation/detail/detail_pending_notice.dart';
 import 'package:pokedex/features/pokemon/presentation/detail/detail_providers.dart';
 import 'package:pokedex/features/pokemon/presentation/detail/detail_refresh_notice.dart';
 import 'package:pokedex/features/pokemon/presentation/detail/detail_state.dart';
+import 'package:pokedex/features/pokemon/presentation/detail/detail_stats_section.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
 
 class PokemonDetailPage extends ConsumerWidget {
@@ -71,6 +75,8 @@ class _DetailBodyState extends State<_DetailBody> {
 
   @override
   Widget build(BuildContext context) {
+    final detail = widget.detail;
+
     return SafeArea(
       top: false,
       child: Center(
@@ -87,10 +93,28 @@ class _DetailBodyState extends State<_DetailBody> {
                       onRetry: widget.onRetry,
                     ),
                     DetailHeader(
-                      pokemon: widget.detail.pokemon,
+                      pokemon: detail.pokemon,
                       shiny: _shiny,
                       onShinyChanged: (value) => setState(() => _shiny = value),
                     ),
+                    if (detail.stats.isNotEmpty) ...[
+                      const SizedBox(height: 24),
+                      DetailStatsSection(
+                        stats: detail.stats,
+                        total: detail.baseStatTotal,
+                      ),
+                    ],
+                    const SizedBox(height: 24),
+                    if (detail.hasDetail) ...[
+                      if (detail.abilities.isNotEmpty) ...[
+                        DetailAbilitiesSection(abilities: detail.abilities),
+                        const SizedBox(height: 24),
+                      ],
+                      DetailInfoSection(detail: detail),
+                    ] else
+                      DetailPendingNotice(
+                        isRefreshing: widget.refresh.isRefreshing,
+                      ),
                   ],
                 ),
               ),

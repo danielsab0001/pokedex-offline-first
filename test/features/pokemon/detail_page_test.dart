@@ -118,11 +118,21 @@ void main() {
 
     await tester.pumpWidget(app(repository));
     await tester.pump();
-    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (widget) => widget is LinearProgressIndicator && widget.value == null,
+      ),
+      findsOneWidget,
+    );
 
     pending.complete(null);
     await tester.pumpAndSettle();
-    expect(find.byType(LinearProgressIndicator), findsNothing);
+    expect(
+      find.byWidgetPredicate(
+        (widget) => widget is LinearProgressIndicator && widget.value == null,
+      ),
+      findsNothing,
+    );
   });
 
   testWidgets('el interruptor shiny cambia la ilustración', (tester) async {

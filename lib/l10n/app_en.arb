@@ -122,5 +122,57 @@
             "name": {"type": "String"}
           }
         },
-        "detailShiny": "Shiny"
+        "detailShiny": "Shiny",
+            "detailStatsTitle": "Base stats",
+            "detailStatTotal": "Total",
+            "detailStatHp": "HP",
+            "detailStatAttack": "Attack",
+            "detailStatDefense": "Defense",
+            "detailStatSpecialAttack": "Sp. Atk",
+            "detailStatSpecialDefense": "Sp. Def",
+            "detailStatSpeed": "Speed",
+            "detailStatSemantics": "{stat}: {value} of 255, {percent}%",
+            "@detailStatSemantics": {
+              "placeholders": {
+                "stat": {"type": "String"},
+                "value": {"type": "int"},
+                "percent": {"type": "int"}
+              }
+            },
+            "detailAbilitiesTitle": "Abilities",
+            "detailAbilityHidden": "Hidden",
+            "detailAbilityNoEffect": "No description available",
+            "detailInfoTitle": "Info",
+            "detailHeight": "Height",
+            "detailWeight": "Weight",
+            "detailEggGroups": "Egg groups",
+            "detailHeightValue": "{value} m",
+            "@detailHeightValue": {
+              "placeholders": {
+                "value": {"type": "String"}
+              }
+            },
+            "detailWeightValue": "{value} kg",
+            "@detailWeightValue": {
+              "placeholders": {
+                "value": {"type": "String"}
+              }
+            },
+            "detailPendingDownloading": "Downloading abilities and info…",
+            "detailPendingMissing": "Abilities and info for this Pokémon aren't saved yet.",
+            "eggGroupMonster": "Monster",
+            "eggGroupWater1": "Water 1",
+            "eggGroupBug": "Bug",
+            "eggGroupFlying": "Flying",
+            "eggGroupGround": "Field",
+            "eggGroupFairy": "Fairy",
+            "eggGroupPlant": "Grass",
+            "eggGroupHumanShape": "Human-Like",
+            "eggGroupWater3": "Water 3",
+            "eggGroupMineral": "Mineral",
+            "eggGroupIndeterminate": "Amorphous",
+            "eggGroupWater2": "Water 2",
+            "eggGroupDitto": "Ditto",
+            "eggGroupDragon": "Dragon",
+            "eggGroupNoEggs": "Undiscovered"
 }

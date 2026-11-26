@@ -187,5 +187,57 @@
             "name": {"type": "String"}
           }
         },
-        "detailShiny": "Shiny"
+        "detailShiny": "Shiny",
+            "detailStatsTitle": "Estadísticas base",
+            "detailStatTotal": "Total",
+            "detailStatHp": "PS",
+            "detailStatAttack": "Ataque",
+            "detailStatDefense": "Defensa",
+            "detailStatSpecialAttack": "Ataque especial",
+            "detailStatSpecialDefense": "Defensa especial",
+            "detailStatSpeed": "Velocidad",
+            "detailStatSemantics": "{stat}: {value} de 255, {percent} %",
+            "@detailStatSemantics": {
+              "placeholders": {
+                "stat": {"type": "String"},
+                "value": {"type": "int"},
+                "percent": {"type": "int"}
+              }
+            },
+            "detailAbilitiesTitle": "Habilidades",
+            "detailAbilityHidden": "Oculta",
+            "detailAbilityNoEffect": "Sin descripción disponible",
+            "detailInfoTitle": "Datos",
+            "detailHeight": "Altura",
+            "detailWeight": "Peso",
+            "detailEggGroups": "Grupos huevo",
+            "detailHeightValue": "{value} m",
+            "@detailHeightValue": {
+              "placeholders": {
+                "value": {"type": "String"}
+              }
+            },
+            "detailWeightValue": "{value} kg",
+            "@detailWeightValue": {
+              "placeholders": {
+                "value": {"type": "String"}
+              }
+            },
+            "detailPendingDownloading": "Descargando habilidades y datos…",
+            "detailPendingMissing": "Las habilidades y los datos de este Pokémon aún no están guardados.",
+            "eggGroupMonster": "Monstruo",
+            "eggGroupWater1": "Agua 1",
+            "eggGroupBug": "Bicho",
+            "eggGroupFlying": "Volador",
+            "eggGroupGround": "Campo",
+            "eggGroupFairy": "Hada",
+            "eggGroupPlant": "Planta",
+            "eggGroupHumanShape": "Humanoide",
+            "eggGroupWater3": "Agua 3",
+            "eggGroupMineral": "Mineral",
+            "eggGroupIndeterminate": "Amorfo",
+            "eggGroupWater2": "Agua 2",
+            "eggGroupDitto": "Ditto",
+            "eggGroupDragon": "Dragón",
+            "eggGroupNoEggs": "Desconocido"
 }
