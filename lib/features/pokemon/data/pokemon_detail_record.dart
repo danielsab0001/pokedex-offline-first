@@ -36,6 +36,7 @@ class PokemonDetailRecord {
     this.weight,
     this.abilities = const [],
     this.eggGroups = const [],
+    this.detailSyncedAt,
   });
 
   final PokemonRecord species;
@@ -43,4 +44,7 @@ class PokemonDetailRecord {
   final int? weight;
   final List<PokemonAbilityRecord> abilities;
   final List<EggGroupRecord> eggGroups;
+
+  /// Solo al leer: al guardar, la fecha la pone la base.
+  final DateTime? detailSyncedAt;
 }

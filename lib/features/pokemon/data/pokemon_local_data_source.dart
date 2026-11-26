@@ -75,6 +75,119 @@ class PokemonLocalDataSource {
     return _db.transaction(() => _upsert([record]));
   }
 
+  /// Emite de nuevo cuando cambia cualquiera de las tablas del detalle. La
+  /// consulta solo avisa de los cambios; los datos se leen en [_readDetail].
+  Stream<PokemonDetailRecord?> watchDetail(int id) {
+    return _db
+        .customSelect(
+          'SELECT 1',
+          readsFrom: {
+            _db.pokemons,
+            _db.pokemonTypes,
+            _db.types,
+            _db.pokemonStats,
+            _db.pokemonAbilities,
+            _db.abilities,
+            _db.pokemonEggGroups,
+            _db.eggGroups,
+          },
+        )
+        .watch()
+        .asyncMap((_) => _readDetail(id));
+  }
+
+  Future<PokemonDetailRecord?> _readDetail(int id) {
+    return _db.transaction(() async {
+      final pokemon = await (_db.select(
+        _db.pokemons,
+      )..where((p) => p.id.equals(id))).getSingleOrNull();
+      if (pokemon == null) return null;
+
+      final typeRows =
+          await (_db.select(_db.pokemonTypes).join([
+                  innerJoin(
+                    _db.types,
+                    _db.types.id.equalsExp(_db.pokemonTypes.typeId),
+                  ),
+                ])
+                ..where(_db.pokemonTypes.pokemonId.equals(id))
+                ..orderBy([OrderingTerm.asc(_db.pokemonTypes.slot)]))
+              .get();
+
+      final statRows =
+          await (_db.select(_db.pokemonStats)
+                ..where((s) => s.pokemonId.equals(id))
+                ..orderBy([(s) => OrderingTerm.asc(s.statId)]))
+              .get();
+
+      final abilityRows =
+          await (_db.select(_db.pokemonAbilities).join([
+                  innerJoin(
+                    _db.abilities,
+                    _db.abilities.id.equalsExp(_db.pokemonAbilities.abilityId),
+                  ),
+                ])
+                ..where(_db.pokemonAbilities.pokemonId.equals(id))
+                ..orderBy([OrderingTerm.asc(_db.pokemonAbilities.slot)]))
+              .get();
+
+      final eggRows =
+          await (_db.select(_db.pokemonEggGroups).join([
+                  innerJoin(
+                    _db.eggGroups,
+                    _db.eggGroups.id.equalsExp(_db.pokemonEggGroups.eggGroupId),
+                  ),
+                ])
+                ..where(_db.pokemonEggGroups.pokemonId.equals(id))
+                ..orderBy([OrderingTerm.asc(_db.eggGroups.id)]))
+              .get();
+
+      return PokemonDetailRecord(
+        species: PokemonRecord(
+          id: pokemon.id,
+          nameEn: pokemon.nameEn,
+          nameEs: pokemon.nameEs,
+          generationId: pokemon.generationId,
+          types: [
+            for (final row in typeRows)
+              PokemonTypeRecord(
+                typeId: row.readTable(_db.types).id,
+                slug: row.readTable(_db.types).slug,
+                slot: row.readTable(_db.pokemonTypes).slot,
+              ),
+          ],
+          stats: [
+            for (final stat in statRows)
+              PokemonStatRecord(statId: stat.statId, baseStat: stat.baseStat),
+          ],
+        ),
+        height: pokemon.height,
+        weight: pokemon.weight,
+        detailSyncedAt: pokemon.detailSyncedAt,
+        abilities: [
+          for (final row in abilityRows)
+            PokemonAbilityRecord(
+              abilityId: row.readTable(_db.abilities).id,
+              slug: row.readTable(_db.abilities).slug,
+              slot: row.readTable(_db.pokemonAbilities).slot,
+              isHidden: row.readTable(_db.pokemonAbilities).isHidden,
+              nameEn: row.readTable(_db.abilities).nameEn,
+              nameEs: row.readTable(_db.abilities).nameEs,
+              effectEn: row.readTable(_db.abilities).effectEn,
+              effectEs: row.readTable(_db.abilities).effectEs,
+            ),
+        ],
+        eggGroups: [
+          for (final row in eggRows)
+            EggGroupRecord(
+              id: row.readTable(_db.eggGroups).id,
+              slug: row.readTable(_db.eggGroups).slug,
+            ),
+        ],
+      );
+    });
+  }
+
   /// Núcleo, habilidades y egg groups en una sola transacción (RNF-RES-04).
   Future<void> saveDetail(PokemonDetailRecord detail) {
     final id = detail.species.id;
