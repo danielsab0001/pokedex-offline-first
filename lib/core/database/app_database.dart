@@ -10,6 +10,10 @@ part 'app_database.g.dart';
     Types,
     PokemonTypes,
     PokemonStats,
+    Abilities,
+    PokemonAbilities,
+    EggGroups,
+    PokemonEggGroups,
     Favorites,
     SyncMetadataEntries,
     UserPreferences,
@@ -22,7 +26,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.defaults() : super(driftDatabase(name: 'pokedex'));
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -48,6 +52,15 @@ class AppDatabase extends _$AppDatabase {
                 cursor: Value(0),
               ),
             );
+      }
+      if (from < 5) {
+        await m.addColumn(pokemons, pokemons.height);
+        await m.addColumn(pokemons, pokemons.weight);
+        await m.addColumn(pokemons, pokemons.detailSyncedAt);
+        await m.createTable(abilities);
+        await m.createTable(pokemonAbilities);
+        await m.createTable(eggGroups);
+        await m.createTable(pokemonEggGroups);
       }
     },
     beforeOpen: (details) async {

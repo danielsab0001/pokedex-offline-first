@@ -1,6 +1,7 @@
 import 'package:pokedex/core/error/failure.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_queries.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_record.dart';
+import 'package:pokedex/features/pokemon/data/pokemon_detail_record.dart';
 
 /// Una página ya validada de la respuesta de PokeAPI.
 class RemoteCatalogPage {
@@ -109,6 +110,116 @@ class PokemonSpeciesDto {
       stats: stats,
     );
   }
+}
+
+class PokemonDetailDto {
+  const PokemonDetailDto({
+    required this.species,
+    this.height,
+    this.weight,
+    this.abilities = const [],
+    this.eggGroups = const [],
+  });
+
+  factory PokemonDetailDto.fromJson(Map<String, dynamic> json) {
+    int? height;
+    int? weight;
+    final abilities = <PokemonAbilityRecord>[];
+
+    final pokemons = _list(json, 'pokemons');
+    if (pokemons.isNotEmpty) {
+      final pokemon = _asMap(pokemons.first, 'pokemons');
+      height = _optionalInt(pokemon, 'height');
+      weight = _optionalInt(pokemon, 'weight');
+      for (final item in _optionalList(pokemon, 'pokemonabilities')) {
+        abilities.add(_ability(_asMap(item, 'pokemonabilities')));
+      }
+    }
+
+    final eggGroups = <EggGroupRecord>[];
+    for (final item in _optionalList(json, 'pokemonegggroups')) {
+      final group = _map(_asMap(item, 'pokemonegggroups'), 'egggroup');
+      eggGroups.add(
+        EggGroupRecord(id: _int(group, 'id'), slug: _string(group, 'name')),
+      );
+    }
+
+    return PokemonDetailDto(
+      species: PokemonSpeciesDto.fromJson(json),
+      height: height,
+      weight: weight,
+      abilities: abilities,
+      eggGroups: eggGroups,
+    );
+  }
+
+  /// Null si la respuesta no trae ninguna especie.
+  static PokemonDetailDto? fromResponse(Map<String, dynamic> json) {
+    final items = _list(json, 'pokemonspecies');
+    if (items.isEmpty) return null;
+    return PokemonDetailDto.fromJson(_asMap(items.first, 'pokemonspecies'));
+  }
+
+  final PokemonSpeciesDto species;
+  final int? height;
+  final int? weight;
+  final List<PokemonAbilityRecord> abilities;
+  final List<EggGroupRecord> eggGroups;
+
+  PokemonDetailRecord toRecord() {
+    return PokemonDetailRecord(
+      species: species.toRecord(),
+      height: height,
+      weight: weight,
+      abilities: abilities,
+      eggGroups: eggGroups,
+    );
+  }
+}
+
+PokemonAbilityRecord _ability(Map<String, dynamic> link) {
+  final ability = _map(link, 'ability');
+  final slug = _string(ability, 'name');
+
+  final names = <int, String>{};
+  for (final item in _optionalList(ability, 'abilitynames')) {
+    final map = _asMap(item, 'abilitynames');
+    names[_int(map, 'language_id')] = _string(map, 'name');
+  }
+  final english = names[englishLanguageId]?.trim();
+  final spanish = names[spanishLanguageId]?.trim();
+
+  return PokemonAbilityRecord(
+    abilityId: _int(ability, 'id'),
+    slug: slug,
+    slot: _int(link, 'slot'),
+    isHidden: _bool(link, 'is_hidden'),
+    nameEn: (english == null || english.isEmpty) ? slug : english,
+    nameEs: (spanish == null || spanish.isEmpty) ? null : spanish,
+    effectEn: _firstText(ability, 'abilityeffecttexts', 'short_effect'),
+    effectEs: _firstText(ability, 'abilityflavortexts', 'flavor_text'),
+  );
+}
+
+String? _firstText(Map<String, dynamic> json, String listKey, String field) {
+  for (final item in _optionalList(json, listKey)) {
+    final text = _asMap(item, listKey)[field];
+    if (text is String && text.trim().isNotEmpty) return text.trim();
+  }
+  return null;
+}
+
+int? _optionalInt(Map<String, dynamic> json, String key) {
+  final value = json[key];
+  if (value == null) return null;
+  if (value is int) return value;
+  throw InvalidResponseFailure('Campo "$key" no es entero');
+}
+
+bool _bool(Map<String, dynamic> json, String key) {
+  final value = json[key];
+  if (value is bool) return value;
+  throw InvalidResponseFailure('Campo "$key" ausente o no booleano');
 }
 
 Map<String, dynamic> _asMap(Object? value, String where) {

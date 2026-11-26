@@ -5,6 +5,7 @@ import 'package:pokedex/features/pokemon/data/pokemon_catalog_query.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_mapper.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_record.dart';
 import 'package:pokedex/features/pokemon/domain/catalog_filters.dart';
+import 'package:pokedex/features/pokemon/data/pokemon_detail_record.dart';
 
 class PokemonLocalDataSource {
   PokemonLocalDataSource(this._db, this._syncMetadata);
@@ -72,6 +73,73 @@ class PokemonLocalDataSource {
 
   Future<void> saveSpecies(PokemonRecord record) {
     return _db.transaction(() => _upsert([record]));
+  }
+
+  /// Núcleo, habilidades y egg groups en una sola transacción (RNF-RES-04).
+  Future<void> saveDetail(PokemonDetailRecord detail) {
+    final id = detail.species.id;
+
+    return _db.transaction(() async {
+      await _upsert([detail.species]);
+      await (_db.update(_db.pokemons)..where((p) => p.id.equals(id))).write(
+        PokemonsCompanion(
+          height: Value(detail.height),
+          weight: Value(detail.weight),
+          detailSyncedAt: Value(DateTime.now()),
+        ),
+      );
+
+      for (final ability in detail.abilities) {
+        await _db
+            .into(_db.abilities)
+            .insertOnConflictUpdate(
+              AbilitiesCompanion.insert(
+                id: Value(ability.abilityId),
+                slug: ability.slug,
+                nameEn: ability.nameEn,
+                nameEs: Value(ability.nameEs),
+                effectEn: Value(ability.effectEn),
+                effectEs: Value(ability.effectEs),
+              ),
+            );
+      }
+      await (_db.delete(
+        _db.pokemonAbilities,
+      )..where((a) => a.pokemonId.equals(id))).go();
+      for (final ability in detail.abilities) {
+        await _db
+            .into(_db.pokemonAbilities)
+            .insert(
+              PokemonAbilitiesCompanion.insert(
+                pokemonId: id,
+                slot: ability.slot,
+                abilityId: ability.abilityId,
+                isHidden: ability.isHidden,
+              ),
+            );
+      }
+
+      for (final group in detail.eggGroups) {
+        await _db
+            .into(_db.eggGroups)
+            .insertOnConflictUpdate(
+              EggGroupsCompanion.insert(id: Value(group.id), slug: group.slug),
+            );
+      }
+      await (_db.delete(
+        _db.pokemonEggGroups,
+      )..where((g) => g.pokemonId.equals(id))).go();
+      for (final group in detail.eggGroups) {
+        await _db
+            .into(_db.pokemonEggGroups)
+            .insert(
+              PokemonEggGroupsCompanion.insert(
+                pokemonId: id,
+                eggGroupId: group.id,
+              ),
+            );
+      }
+    });
   }
 
   Future<void> _upsert(List<PokemonRecord> page) async {

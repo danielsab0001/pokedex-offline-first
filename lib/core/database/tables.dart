@@ -14,6 +14,9 @@ class Pokemons extends Table {
   TextColumn get nameEs => text().nullable()();
   IntColumn get generationId => integer()();
   IntColumn get baseStatTotal => integer().nullable()();
+  IntColumn get height => integer().nullable()();
+  IntColumn get weight => integer().nullable()();
+  DateTimeColumn get detailSyncedAt => dateTime().nullable()();
   DateTimeColumn get syncedAt => dateTime()();
 
   @override
@@ -115,4 +118,61 @@ class PokemonStats extends Table {
 
   @override
   Set<Column> get primaryKey => {pokemonId, statId};
+}
+
+@DataClassName('AbilityRow')
+class Abilities extends Table {
+  @override
+  String get tableName => 'ability';
+
+  IntColumn get id => integer()();
+  TextColumn get slug => text()();
+  TextColumn get nameEn => text()();
+  TextColumn get nameEs => text().nullable()();
+  // PokeAPI solo trae el efecto en inglés; en español va el texto descriptivo.
+  TextColumn get effectEn => text().nullable()();
+  TextColumn get effectEs => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DataClassName('PokemonAbilityRow')
+class PokemonAbilities extends Table {
+  @override
+  String get tableName => 'pokemon_ability';
+
+  IntColumn get pokemonId =>
+      integer().references(Pokemons, #id, onDelete: KeyAction.cascade)();
+  IntColumn get slot => integer()();
+  IntColumn get abilityId => integer().references(Abilities, #id)();
+  BoolColumn get isHidden => boolean()();
+
+  @override
+  Set<Column> get primaryKey => {pokemonId, slot};
+}
+
+@DataClassName('EggGroupRow')
+class EggGroups extends Table {
+  @override
+  String get tableName => 'egg_group';
+
+  IntColumn get id => integer()();
+  TextColumn get slug => text()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DataClassName('PokemonEggGroupRow')
+class PokemonEggGroups extends Table {
+  @override
+  String get tableName => 'pokemon_egg_group';
+
+  IntColumn get pokemonId =>
+      integer().references(Pokemons, #id, onDelete: KeyAction.cascade)();
+  IntColumn get eggGroupId => integer().references(EggGroups, #id)();
+
+  @override
+  Set<Column> get primaryKey => {pokemonId, eggGroupId};
 }

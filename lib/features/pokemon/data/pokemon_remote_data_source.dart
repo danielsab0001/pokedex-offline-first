@@ -21,50 +21,68 @@ class PokemonRemoteDataSource {
   final GraphQLClient _client;
   final Duration timeout;
   final ServiceHealth? health;
-  final _document = gql(catalogPageQuery);
+  final _catalogDocument = gql(catalogPageQuery);
+  final _detailDocument = gql(pokemonDetailQuery);
 
   /// Pide las especies con id mayor que [afterId] (paginación por cursor).
   /// Con [includeTotal] pide además el total de especies de PokeAPI.
-  /// Cada llamada deja constancia del resultado en [health] (IND-02).
   Future<RemoteCatalogPage> fetchCatalogPage({
     required int afterId,
     int pageSize = catalogPageSize,
     bool includeTotal = false,
-  }) async {
-    try {
-      final page = await _request(
-        afterId: afterId,
-        pageSize: pageSize,
-        includeTotal: includeTotal,
+  }) {
+    return _reporting(() async {
+      final data = await _query(
+        QueryOptions(
+          document: _catalogDocument,
+          variables: {
+            'afterId': afterId,
+            'limit': pageSize,
+            'includeTotal': includeTotal,
+          },
+          fetchPolicy: FetchPolicy.noCache,
+        ),
       );
+      return _parse(() {
+        final page = RemoteCatalogPage.fromJson(data);
+        if (includeTotal && page.catalogTotalCount == null) {
+          throw const InvalidResponseFailure('Se pidió el total y no llegó');
+        }
+        return page;
+      });
+    });
+  }
+
+  /// Núcleo y detalle de una especie; null si PokeAPI no la tiene.
+  Future<PokemonDetailDto?> fetchDetail(int id) {
+    return _reporting(() async {
+      final data = await _query(
+        QueryOptions(
+          document: _detailDocument,
+          variables: {'id': id},
+          fetchPolicy: FetchPolicy.noCache,
+        ),
+      );
+      return _parse(() => PokemonDetailDto.fromResponse(data));
+    });
+  }
+
+  /// Cada llamada deja constancia del resultado en [health] (IND-02).
+  Future<T> _reporting<T>(Future<T> Function() request) async {
+    try {
+      final value = await request();
       health?.reportSuccess();
-      return page;
+      return value;
     } on Failure catch (failure) {
       health?.reportFailure(failure);
       rethrow;
     }
   }
 
-  Future<RemoteCatalogPage> _request({
-    required int afterId,
-    required int pageSize,
-    required bool includeTotal,
-  }) async {
+  Future<Map<String, dynamic>> _query(QueryOptions options) async {
     final QueryResult result;
     try {
-      result = await _client
-          .query(
-            QueryOptions(
-              document: _document,
-              variables: {
-                'afterId': afterId,
-                'limit': pageSize,
-                'includeTotal': includeTotal,
-              },
-              fetchPolicy: FetchPolicy.noCache,
-            ),
-          )
-          .timeout(timeout);
+      result = await _client.query(options).timeout(timeout);
     } on TimeoutException {
       throw TimeoutFailure(timeout);
     } on SocketException {
@@ -80,13 +98,12 @@ class PokemonRemoteDataSource {
     if (data == null) {
       throw const InvalidResponseFailure('La respuesta no trae datos');
     }
+    return data;
+  }
 
+  T _parse<T>(T Function() build) {
     try {
-      final page = RemoteCatalogPage.fromJson(data);
-      if (includeTotal && page.catalogTotalCount == null) {
-        throw const InvalidResponseFailure('Se pidió el total y no llegó');
-      }
-      return page;
+      return build();
     } on Failure {
       rethrow;
     } catch (e) {

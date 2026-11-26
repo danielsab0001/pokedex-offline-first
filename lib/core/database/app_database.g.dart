@@ -58,6 +58,36 @@ class $PokemonsTable extends Pokemons
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _heightMeta = const VerificationMeta('height');
+  @override
+  late final GeneratedColumn<int> height = GeneratedColumn<int>(
+    'height',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _weightMeta = const VerificationMeta('weight');
+  @override
+  late final GeneratedColumn<int> weight = GeneratedColumn<int>(
+    'weight',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _detailSyncedAtMeta = const VerificationMeta(
+    'detailSyncedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> detailSyncedAt =
+      GeneratedColumn<DateTime>(
+        'detail_synced_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _syncedAtMeta = const VerificationMeta(
     'syncedAt',
   );
@@ -76,6 +106,9 @@ class $PokemonsTable extends Pokemons
     nameEs,
     generationId,
     baseStatTotal,
+    height,
+    weight,
+    detailSyncedAt,
     syncedAt,
   ];
   @override
@@ -127,6 +160,27 @@ class $PokemonsTable extends Pokemons
         ),
       );
     }
+    if (data.containsKey('height')) {
+      context.handle(
+        _heightMeta,
+        height.isAcceptableOrUnknown(data['height']!, _heightMeta),
+      );
+    }
+    if (data.containsKey('weight')) {
+      context.handle(
+        _weightMeta,
+        weight.isAcceptableOrUnknown(data['weight']!, _weightMeta),
+      );
+    }
+    if (data.containsKey('detail_synced_at')) {
+      context.handle(
+        _detailSyncedAtMeta,
+        detailSyncedAt.isAcceptableOrUnknown(
+          data['detail_synced_at']!,
+          _detailSyncedAtMeta,
+        ),
+      );
+    }
     if (data.containsKey('synced_at')) {
       context.handle(
         _syncedAtMeta,
@@ -164,6 +218,18 @@ class $PokemonsTable extends Pokemons
         DriftSqlType.int,
         data['${effectivePrefix}base_stat_total'],
       ),
+      height: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}height'],
+      ),
+      weight: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}weight'],
+      ),
+      detailSyncedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}detail_synced_at'],
+      ),
       syncedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}synced_at'],
@@ -183,6 +249,9 @@ class PokemonRow extends DataClass implements Insertable<PokemonRow> {
   final String? nameEs;
   final int generationId;
   final int? baseStatTotal;
+  final int? height;
+  final int? weight;
+  final DateTime? detailSyncedAt;
   final DateTime syncedAt;
   const PokemonRow({
     required this.id,
@@ -190,6 +259,9 @@ class PokemonRow extends DataClass implements Insertable<PokemonRow> {
     this.nameEs,
     required this.generationId,
     this.baseStatTotal,
+    this.height,
+    this.weight,
+    this.detailSyncedAt,
     required this.syncedAt,
   });
   @override
@@ -203,6 +275,15 @@ class PokemonRow extends DataClass implements Insertable<PokemonRow> {
     map['generation_id'] = Variable<int>(generationId);
     if (!nullToAbsent || baseStatTotal != null) {
       map['base_stat_total'] = Variable<int>(baseStatTotal);
+    }
+    if (!nullToAbsent || height != null) {
+      map['height'] = Variable<int>(height);
+    }
+    if (!nullToAbsent || weight != null) {
+      map['weight'] = Variable<int>(weight);
+    }
+    if (!nullToAbsent || detailSyncedAt != null) {
+      map['detail_synced_at'] = Variable<DateTime>(detailSyncedAt);
     }
     map['synced_at'] = Variable<DateTime>(syncedAt);
     return map;
@@ -219,6 +300,15 @@ class PokemonRow extends DataClass implements Insertable<PokemonRow> {
       baseStatTotal: baseStatTotal == null && nullToAbsent
           ? const Value.absent()
           : Value(baseStatTotal),
+      height: height == null && nullToAbsent
+          ? const Value.absent()
+          : Value(height),
+      weight: weight == null && nullToAbsent
+          ? const Value.absent()
+          : Value(weight),
+      detailSyncedAt: detailSyncedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(detailSyncedAt),
       syncedAt: Value(syncedAt),
     );
   }
@@ -234,6 +324,9 @@ class PokemonRow extends DataClass implements Insertable<PokemonRow> {
       nameEs: serializer.fromJson<String?>(json['nameEs']),
       generationId: serializer.fromJson<int>(json['generationId']),
       baseStatTotal: serializer.fromJson<int?>(json['baseStatTotal']),
+      height: serializer.fromJson<int?>(json['height']),
+      weight: serializer.fromJson<int?>(json['weight']),
+      detailSyncedAt: serializer.fromJson<DateTime?>(json['detailSyncedAt']),
       syncedAt: serializer.fromJson<DateTime>(json['syncedAt']),
     );
   }
@@ -246,6 +339,9 @@ class PokemonRow extends DataClass implements Insertable<PokemonRow> {
       'nameEs': serializer.toJson<String?>(nameEs),
       'generationId': serializer.toJson<int>(generationId),
       'baseStatTotal': serializer.toJson<int?>(baseStatTotal),
+      'height': serializer.toJson<int?>(height),
+      'weight': serializer.toJson<int?>(weight),
+      'detailSyncedAt': serializer.toJson<DateTime?>(detailSyncedAt),
       'syncedAt': serializer.toJson<DateTime>(syncedAt),
     };
   }
@@ -256,6 +352,9 @@ class PokemonRow extends DataClass implements Insertable<PokemonRow> {
     Value<String?> nameEs = const Value.absent(),
     int? generationId,
     Value<int?> baseStatTotal = const Value.absent(),
+    Value<int?> height = const Value.absent(),
+    Value<int?> weight = const Value.absent(),
+    Value<DateTime?> detailSyncedAt = const Value.absent(),
     DateTime? syncedAt,
   }) => PokemonRow(
     id: id ?? this.id,
@@ -265,6 +364,11 @@ class PokemonRow extends DataClass implements Insertable<PokemonRow> {
     baseStatTotal: baseStatTotal.present
         ? baseStatTotal.value
         : this.baseStatTotal,
+    height: height.present ? height.value : this.height,
+    weight: weight.present ? weight.value : this.weight,
+    detailSyncedAt: detailSyncedAt.present
+        ? detailSyncedAt.value
+        : this.detailSyncedAt,
     syncedAt: syncedAt ?? this.syncedAt,
   );
   PokemonRow copyWithCompanion(PokemonsCompanion data) {
@@ -278,6 +382,11 @@ class PokemonRow extends DataClass implements Insertable<PokemonRow> {
       baseStatTotal: data.baseStatTotal.present
           ? data.baseStatTotal.value
           : this.baseStatTotal,
+      height: data.height.present ? data.height.value : this.height,
+      weight: data.weight.present ? data.weight.value : this.weight,
+      detailSyncedAt: data.detailSyncedAt.present
+          ? data.detailSyncedAt.value
+          : this.detailSyncedAt,
       syncedAt: data.syncedAt.present ? data.syncedAt.value : this.syncedAt,
     );
   }
@@ -290,14 +399,26 @@ class PokemonRow extends DataClass implements Insertable<PokemonRow> {
           ..write('nameEs: $nameEs, ')
           ..write('generationId: $generationId, ')
           ..write('baseStatTotal: $baseStatTotal, ')
+          ..write('height: $height, ')
+          ..write('weight: $weight, ')
+          ..write('detailSyncedAt: $detailSyncedAt, ')
           ..write('syncedAt: $syncedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, nameEn, nameEs, generationId, baseStatTotal, syncedAt);
+  int get hashCode => Object.hash(
+    id,
+    nameEn,
+    nameEs,
+    generationId,
+    baseStatTotal,
+    height,
+    weight,
+    detailSyncedAt,
+    syncedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -307,6 +428,9 @@ class PokemonRow extends DataClass implements Insertable<PokemonRow> {
           other.nameEs == this.nameEs &&
           other.generationId == this.generationId &&
           other.baseStatTotal == this.baseStatTotal &&
+          other.height == this.height &&
+          other.weight == this.weight &&
+          other.detailSyncedAt == this.detailSyncedAt &&
           other.syncedAt == this.syncedAt);
 }
 
@@ -316,6 +440,9 @@ class PokemonsCompanion extends UpdateCompanion<PokemonRow> {
   final Value<String?> nameEs;
   final Value<int> generationId;
   final Value<int?> baseStatTotal;
+  final Value<int?> height;
+  final Value<int?> weight;
+  final Value<DateTime?> detailSyncedAt;
   final Value<DateTime> syncedAt;
   const PokemonsCompanion({
     this.id = const Value.absent(),
@@ -323,6 +450,9 @@ class PokemonsCompanion extends UpdateCompanion<PokemonRow> {
     this.nameEs = const Value.absent(),
     this.generationId = const Value.absent(),
     this.baseStatTotal = const Value.absent(),
+    this.height = const Value.absent(),
+    this.weight = const Value.absent(),
+    this.detailSyncedAt = const Value.absent(),
     this.syncedAt = const Value.absent(),
   });
   PokemonsCompanion.insert({
@@ -331,6 +461,9 @@ class PokemonsCompanion extends UpdateCompanion<PokemonRow> {
     this.nameEs = const Value.absent(),
     required int generationId,
     this.baseStatTotal = const Value.absent(),
+    this.height = const Value.absent(),
+    this.weight = const Value.absent(),
+    this.detailSyncedAt = const Value.absent(),
     required DateTime syncedAt,
   }) : nameEn = Value(nameEn),
        generationId = Value(generationId),
@@ -341,6 +474,9 @@ class PokemonsCompanion extends UpdateCompanion<PokemonRow> {
     Expression<String>? nameEs,
     Expression<int>? generationId,
     Expression<int>? baseStatTotal,
+    Expression<int>? height,
+    Expression<int>? weight,
+    Expression<DateTime>? detailSyncedAt,
     Expression<DateTime>? syncedAt,
   }) {
     return RawValuesInsertable({
@@ -349,6 +485,9 @@ class PokemonsCompanion extends UpdateCompanion<PokemonRow> {
       if (nameEs != null) 'name_es': nameEs,
       if (generationId != null) 'generation_id': generationId,
       if (baseStatTotal != null) 'base_stat_total': baseStatTotal,
+      if (height != null) 'height': height,
+      if (weight != null) 'weight': weight,
+      if (detailSyncedAt != null) 'detail_synced_at': detailSyncedAt,
       if (syncedAt != null) 'synced_at': syncedAt,
     });
   }
@@ -359,6 +498,9 @@ class PokemonsCompanion extends UpdateCompanion<PokemonRow> {
     Value<String?>? nameEs,
     Value<int>? generationId,
     Value<int?>? baseStatTotal,
+    Value<int?>? height,
+    Value<int?>? weight,
+    Value<DateTime?>? detailSyncedAt,
     Value<DateTime>? syncedAt,
   }) {
     return PokemonsCompanion(
@@ -367,6 +509,9 @@ class PokemonsCompanion extends UpdateCompanion<PokemonRow> {
       nameEs: nameEs ?? this.nameEs,
       generationId: generationId ?? this.generationId,
       baseStatTotal: baseStatTotal ?? this.baseStatTotal,
+      height: height ?? this.height,
+      weight: weight ?? this.weight,
+      detailSyncedAt: detailSyncedAt ?? this.detailSyncedAt,
       syncedAt: syncedAt ?? this.syncedAt,
     );
   }
@@ -389,6 +534,15 @@ class PokemonsCompanion extends UpdateCompanion<PokemonRow> {
     if (baseStatTotal.present) {
       map['base_stat_total'] = Variable<int>(baseStatTotal.value);
     }
+    if (height.present) {
+      map['height'] = Variable<int>(height.value);
+    }
+    if (weight.present) {
+      map['weight'] = Variable<int>(weight.value);
+    }
+    if (detailSyncedAt.present) {
+      map['detail_synced_at'] = Variable<DateTime>(detailSyncedAt.value);
+    }
     if (syncedAt.present) {
       map['synced_at'] = Variable<DateTime>(syncedAt.value);
     }
@@ -403,6 +557,9 @@ class PokemonsCompanion extends UpdateCompanion<PokemonRow> {
           ..write('nameEs: $nameEs, ')
           ..write('generationId: $generationId, ')
           ..write('baseStatTotal: $baseStatTotal, ')
+          ..write('height: $height, ')
+          ..write('weight: $weight, ')
+          ..write('detailSyncedAt: $detailSyncedAt, ')
           ..write('syncedAt: $syncedAt')
           ..write(')'))
         .toString();
@@ -1118,6 +1275,1134 @@ class PokemonStatsCompanion extends UpdateCompanion<PokemonStatRow> {
           ..write('pokemonId: $pokemonId, ')
           ..write('statId: $statId, ')
           ..write('baseStat: $baseStat, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $AbilitiesTable extends Abilities
+    with TableInfo<$AbilitiesTable, AbilityRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AbilitiesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _slugMeta = const VerificationMeta('slug');
+  @override
+  late final GeneratedColumn<String> slug = GeneratedColumn<String>(
+    'slug',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameEnMeta = const VerificationMeta('nameEn');
+  @override
+  late final GeneratedColumn<String> nameEn = GeneratedColumn<String>(
+    'name_en',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameEsMeta = const VerificationMeta('nameEs');
+  @override
+  late final GeneratedColumn<String> nameEs = GeneratedColumn<String>(
+    'name_es',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _effectEnMeta = const VerificationMeta(
+    'effectEn',
+  );
+  @override
+  late final GeneratedColumn<String> effectEn = GeneratedColumn<String>(
+    'effect_en',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _effectEsMeta = const VerificationMeta(
+    'effectEs',
+  );
+  @override
+  late final GeneratedColumn<String> effectEs = GeneratedColumn<String>(
+    'effect_es',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    slug,
+    nameEn,
+    nameEs,
+    effectEn,
+    effectEs,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'ability';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AbilityRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('slug')) {
+      context.handle(
+        _slugMeta,
+        slug.isAcceptableOrUnknown(data['slug']!, _slugMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_slugMeta);
+    }
+    if (data.containsKey('name_en')) {
+      context.handle(
+        _nameEnMeta,
+        nameEn.isAcceptableOrUnknown(data['name_en']!, _nameEnMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameEnMeta);
+    }
+    if (data.containsKey('name_es')) {
+      context.handle(
+        _nameEsMeta,
+        nameEs.isAcceptableOrUnknown(data['name_es']!, _nameEsMeta),
+      );
+    }
+    if (data.containsKey('effect_en')) {
+      context.handle(
+        _effectEnMeta,
+        effectEn.isAcceptableOrUnknown(data['effect_en']!, _effectEnMeta),
+      );
+    }
+    if (data.containsKey('effect_es')) {
+      context.handle(
+        _effectEsMeta,
+        effectEs.isAcceptableOrUnknown(data['effect_es']!, _effectEsMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AbilityRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AbilityRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      slug: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}slug'],
+      )!,
+      nameEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name_en'],
+      )!,
+      nameEs: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name_es'],
+      ),
+      effectEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}effect_en'],
+      ),
+      effectEs: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}effect_es'],
+      ),
+    );
+  }
+
+  @override
+  $AbilitiesTable createAlias(String alias) {
+    return $AbilitiesTable(attachedDatabase, alias);
+  }
+}
+
+class AbilityRow extends DataClass implements Insertable<AbilityRow> {
+  final int id;
+  final String slug;
+  final String nameEn;
+  final String? nameEs;
+  final String? effectEn;
+  final String? effectEs;
+  const AbilityRow({
+    required this.id,
+    required this.slug,
+    required this.nameEn,
+    this.nameEs,
+    this.effectEn,
+    this.effectEs,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['slug'] = Variable<String>(slug);
+    map['name_en'] = Variable<String>(nameEn);
+    if (!nullToAbsent || nameEs != null) {
+      map['name_es'] = Variable<String>(nameEs);
+    }
+    if (!nullToAbsent || effectEn != null) {
+      map['effect_en'] = Variable<String>(effectEn);
+    }
+    if (!nullToAbsent || effectEs != null) {
+      map['effect_es'] = Variable<String>(effectEs);
+    }
+    return map;
+  }
+
+  AbilitiesCompanion toCompanion(bool nullToAbsent) {
+    return AbilitiesCompanion(
+      id: Value(id),
+      slug: Value(slug),
+      nameEn: Value(nameEn),
+      nameEs: nameEs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nameEs),
+      effectEn: effectEn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(effectEn),
+      effectEs: effectEs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(effectEs),
+    );
+  }
+
+  factory AbilityRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AbilityRow(
+      id: serializer.fromJson<int>(json['id']),
+      slug: serializer.fromJson<String>(json['slug']),
+      nameEn: serializer.fromJson<String>(json['nameEn']),
+      nameEs: serializer.fromJson<String?>(json['nameEs']),
+      effectEn: serializer.fromJson<String?>(json['effectEn']),
+      effectEs: serializer.fromJson<String?>(json['effectEs']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'slug': serializer.toJson<String>(slug),
+      'nameEn': serializer.toJson<String>(nameEn),
+      'nameEs': serializer.toJson<String?>(nameEs),
+      'effectEn': serializer.toJson<String?>(effectEn),
+      'effectEs': serializer.toJson<String?>(effectEs),
+    };
+  }
+
+  AbilityRow copyWith({
+    int? id,
+    String? slug,
+    String? nameEn,
+    Value<String?> nameEs = const Value.absent(),
+    Value<String?> effectEn = const Value.absent(),
+    Value<String?> effectEs = const Value.absent(),
+  }) => AbilityRow(
+    id: id ?? this.id,
+    slug: slug ?? this.slug,
+    nameEn: nameEn ?? this.nameEn,
+    nameEs: nameEs.present ? nameEs.value : this.nameEs,
+    effectEn: effectEn.present ? effectEn.value : this.effectEn,
+    effectEs: effectEs.present ? effectEs.value : this.effectEs,
+  );
+  AbilityRow copyWithCompanion(AbilitiesCompanion data) {
+    return AbilityRow(
+      id: data.id.present ? data.id.value : this.id,
+      slug: data.slug.present ? data.slug.value : this.slug,
+      nameEn: data.nameEn.present ? data.nameEn.value : this.nameEn,
+      nameEs: data.nameEs.present ? data.nameEs.value : this.nameEs,
+      effectEn: data.effectEn.present ? data.effectEn.value : this.effectEn,
+      effectEs: data.effectEs.present ? data.effectEs.value : this.effectEs,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AbilityRow(')
+          ..write('id: $id, ')
+          ..write('slug: $slug, ')
+          ..write('nameEn: $nameEn, ')
+          ..write('nameEs: $nameEs, ')
+          ..write('effectEn: $effectEn, ')
+          ..write('effectEs: $effectEs')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, slug, nameEn, nameEs, effectEn, effectEs);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AbilityRow &&
+          other.id == this.id &&
+          other.slug == this.slug &&
+          other.nameEn == this.nameEn &&
+          other.nameEs == this.nameEs &&
+          other.effectEn == this.effectEn &&
+          other.effectEs == this.effectEs);
+}
+
+class AbilitiesCompanion extends UpdateCompanion<AbilityRow> {
+  final Value<int> id;
+  final Value<String> slug;
+  final Value<String> nameEn;
+  final Value<String?> nameEs;
+  final Value<String?> effectEn;
+  final Value<String?> effectEs;
+  const AbilitiesCompanion({
+    this.id = const Value.absent(),
+    this.slug = const Value.absent(),
+    this.nameEn = const Value.absent(),
+    this.nameEs = const Value.absent(),
+    this.effectEn = const Value.absent(),
+    this.effectEs = const Value.absent(),
+  });
+  AbilitiesCompanion.insert({
+    this.id = const Value.absent(),
+    required String slug,
+    required String nameEn,
+    this.nameEs = const Value.absent(),
+    this.effectEn = const Value.absent(),
+    this.effectEs = const Value.absent(),
+  }) : slug = Value(slug),
+       nameEn = Value(nameEn);
+  static Insertable<AbilityRow> custom({
+    Expression<int>? id,
+    Expression<String>? slug,
+    Expression<String>? nameEn,
+    Expression<String>? nameEs,
+    Expression<String>? effectEn,
+    Expression<String>? effectEs,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (slug != null) 'slug': slug,
+      if (nameEn != null) 'name_en': nameEn,
+      if (nameEs != null) 'name_es': nameEs,
+      if (effectEn != null) 'effect_en': effectEn,
+      if (effectEs != null) 'effect_es': effectEs,
+    });
+  }
+
+  AbilitiesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? slug,
+    Value<String>? nameEn,
+    Value<String?>? nameEs,
+    Value<String?>? effectEn,
+    Value<String?>? effectEs,
+  }) {
+    return AbilitiesCompanion(
+      id: id ?? this.id,
+      slug: slug ?? this.slug,
+      nameEn: nameEn ?? this.nameEn,
+      nameEs: nameEs ?? this.nameEs,
+      effectEn: effectEn ?? this.effectEn,
+      effectEs: effectEs ?? this.effectEs,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (slug.present) {
+      map['slug'] = Variable<String>(slug.value);
+    }
+    if (nameEn.present) {
+      map['name_en'] = Variable<String>(nameEn.value);
+    }
+    if (nameEs.present) {
+      map['name_es'] = Variable<String>(nameEs.value);
+    }
+    if (effectEn.present) {
+      map['effect_en'] = Variable<String>(effectEn.value);
+    }
+    if (effectEs.present) {
+      map['effect_es'] = Variable<String>(effectEs.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AbilitiesCompanion(')
+          ..write('id: $id, ')
+          ..write('slug: $slug, ')
+          ..write('nameEn: $nameEn, ')
+          ..write('nameEs: $nameEs, ')
+          ..write('effectEn: $effectEn, ')
+          ..write('effectEs: $effectEs')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PokemonAbilitiesTable extends PokemonAbilities
+    with TableInfo<$PokemonAbilitiesTable, PokemonAbilityRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PokemonAbilitiesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _pokemonIdMeta = const VerificationMeta(
+    'pokemonId',
+  );
+  @override
+  late final GeneratedColumn<int> pokemonId = GeneratedColumn<int>(
+    'pokemon_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES pokemon (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _slotMeta = const VerificationMeta('slot');
+  @override
+  late final GeneratedColumn<int> slot = GeneratedColumn<int>(
+    'slot',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _abilityIdMeta = const VerificationMeta(
+    'abilityId',
+  );
+  @override
+  late final GeneratedColumn<int> abilityId = GeneratedColumn<int>(
+    'ability_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES ability (id)',
+    ),
+  );
+  static const VerificationMeta _isHiddenMeta = const VerificationMeta(
+    'isHidden',
+  );
+  @override
+  late final GeneratedColumn<bool> isHidden = GeneratedColumn<bool>(
+    'is_hidden',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_hidden" IN (0, 1))',
+    ),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [pokemonId, slot, abilityId, isHidden];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'pokemon_ability';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PokemonAbilityRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('pokemon_id')) {
+      context.handle(
+        _pokemonIdMeta,
+        pokemonId.isAcceptableOrUnknown(data['pokemon_id']!, _pokemonIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pokemonIdMeta);
+    }
+    if (data.containsKey('slot')) {
+      context.handle(
+        _slotMeta,
+        slot.isAcceptableOrUnknown(data['slot']!, _slotMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_slotMeta);
+    }
+    if (data.containsKey('ability_id')) {
+      context.handle(
+        _abilityIdMeta,
+        abilityId.isAcceptableOrUnknown(data['ability_id']!, _abilityIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_abilityIdMeta);
+    }
+    if (data.containsKey('is_hidden')) {
+      context.handle(
+        _isHiddenMeta,
+        isHidden.isAcceptableOrUnknown(data['is_hidden']!, _isHiddenMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_isHiddenMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {pokemonId, slot};
+  @override
+  PokemonAbilityRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PokemonAbilityRow(
+      pokemonId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}pokemon_id'],
+      )!,
+      slot: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}slot'],
+      )!,
+      abilityId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}ability_id'],
+      )!,
+      isHidden: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_hidden'],
+      )!,
+    );
+  }
+
+  @override
+  $PokemonAbilitiesTable createAlias(String alias) {
+    return $PokemonAbilitiesTable(attachedDatabase, alias);
+  }
+}
+
+class PokemonAbilityRow extends DataClass
+    implements Insertable<PokemonAbilityRow> {
+  final int pokemonId;
+  final int slot;
+  final int abilityId;
+  final bool isHidden;
+  const PokemonAbilityRow({
+    required this.pokemonId,
+    required this.slot,
+    required this.abilityId,
+    required this.isHidden,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['pokemon_id'] = Variable<int>(pokemonId);
+    map['slot'] = Variable<int>(slot);
+    map['ability_id'] = Variable<int>(abilityId);
+    map['is_hidden'] = Variable<bool>(isHidden);
+    return map;
+  }
+
+  PokemonAbilitiesCompanion toCompanion(bool nullToAbsent) {
+    return PokemonAbilitiesCompanion(
+      pokemonId: Value(pokemonId),
+      slot: Value(slot),
+      abilityId: Value(abilityId),
+      isHidden: Value(isHidden),
+    );
+  }
+
+  factory PokemonAbilityRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PokemonAbilityRow(
+      pokemonId: serializer.fromJson<int>(json['pokemonId']),
+      slot: serializer.fromJson<int>(json['slot']),
+      abilityId: serializer.fromJson<int>(json['abilityId']),
+      isHidden: serializer.fromJson<bool>(json['isHidden']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'pokemonId': serializer.toJson<int>(pokemonId),
+      'slot': serializer.toJson<int>(slot),
+      'abilityId': serializer.toJson<int>(abilityId),
+      'isHidden': serializer.toJson<bool>(isHidden),
+    };
+  }
+
+  PokemonAbilityRow copyWith({
+    int? pokemonId,
+    int? slot,
+    int? abilityId,
+    bool? isHidden,
+  }) => PokemonAbilityRow(
+    pokemonId: pokemonId ?? this.pokemonId,
+    slot: slot ?? this.slot,
+    abilityId: abilityId ?? this.abilityId,
+    isHidden: isHidden ?? this.isHidden,
+  );
+  PokemonAbilityRow copyWithCompanion(PokemonAbilitiesCompanion data) {
+    return PokemonAbilityRow(
+      pokemonId: data.pokemonId.present ? data.pokemonId.value : this.pokemonId,
+      slot: data.slot.present ? data.slot.value : this.slot,
+      abilityId: data.abilityId.present ? data.abilityId.value : this.abilityId,
+      isHidden: data.isHidden.present ? data.isHidden.value : this.isHidden,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PokemonAbilityRow(')
+          ..write('pokemonId: $pokemonId, ')
+          ..write('slot: $slot, ')
+          ..write('abilityId: $abilityId, ')
+          ..write('isHidden: $isHidden')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(pokemonId, slot, abilityId, isHidden);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PokemonAbilityRow &&
+          other.pokemonId == this.pokemonId &&
+          other.slot == this.slot &&
+          other.abilityId == this.abilityId &&
+          other.isHidden == this.isHidden);
+}
+
+class PokemonAbilitiesCompanion extends UpdateCompanion<PokemonAbilityRow> {
+  final Value<int> pokemonId;
+  final Value<int> slot;
+  final Value<int> abilityId;
+  final Value<bool> isHidden;
+  final Value<int> rowid;
+  const PokemonAbilitiesCompanion({
+    this.pokemonId = const Value.absent(),
+    this.slot = const Value.absent(),
+    this.abilityId = const Value.absent(),
+    this.isHidden = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PokemonAbilitiesCompanion.insert({
+    required int pokemonId,
+    required int slot,
+    required int abilityId,
+    required bool isHidden,
+    this.rowid = const Value.absent(),
+  }) : pokemonId = Value(pokemonId),
+       slot = Value(slot),
+       abilityId = Value(abilityId),
+       isHidden = Value(isHidden);
+  static Insertable<PokemonAbilityRow> custom({
+    Expression<int>? pokemonId,
+    Expression<int>? slot,
+    Expression<int>? abilityId,
+    Expression<bool>? isHidden,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (pokemonId != null) 'pokemon_id': pokemonId,
+      if (slot != null) 'slot': slot,
+      if (abilityId != null) 'ability_id': abilityId,
+      if (isHidden != null) 'is_hidden': isHidden,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PokemonAbilitiesCompanion copyWith({
+    Value<int>? pokemonId,
+    Value<int>? slot,
+    Value<int>? abilityId,
+    Value<bool>? isHidden,
+    Value<int>? rowid,
+  }) {
+    return PokemonAbilitiesCompanion(
+      pokemonId: pokemonId ?? this.pokemonId,
+      slot: slot ?? this.slot,
+      abilityId: abilityId ?? this.abilityId,
+      isHidden: isHidden ?? this.isHidden,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (pokemonId.present) {
+      map['pokemon_id'] = Variable<int>(pokemonId.value);
+    }
+    if (slot.present) {
+      map['slot'] = Variable<int>(slot.value);
+    }
+    if (abilityId.present) {
+      map['ability_id'] = Variable<int>(abilityId.value);
+    }
+    if (isHidden.present) {
+      map['is_hidden'] = Variable<bool>(isHidden.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PokemonAbilitiesCompanion(')
+          ..write('pokemonId: $pokemonId, ')
+          ..write('slot: $slot, ')
+          ..write('abilityId: $abilityId, ')
+          ..write('isHidden: $isHidden, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $EggGroupsTable extends EggGroups
+    with TableInfo<$EggGroupsTable, EggGroupRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $EggGroupsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _slugMeta = const VerificationMeta('slug');
+  @override
+  late final GeneratedColumn<String> slug = GeneratedColumn<String>(
+    'slug',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, slug];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'egg_group';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<EggGroupRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('slug')) {
+      context.handle(
+        _slugMeta,
+        slug.isAcceptableOrUnknown(data['slug']!, _slugMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_slugMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  EggGroupRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return EggGroupRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      slug: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}slug'],
+      )!,
+    );
+  }
+
+  @override
+  $EggGroupsTable createAlias(String alias) {
+    return $EggGroupsTable(attachedDatabase, alias);
+  }
+}
+
+class EggGroupRow extends DataClass implements Insertable<EggGroupRow> {
+  final int id;
+  final String slug;
+  const EggGroupRow({required this.id, required this.slug});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['slug'] = Variable<String>(slug);
+    return map;
+  }
+
+  EggGroupsCompanion toCompanion(bool nullToAbsent) {
+    return EggGroupsCompanion(id: Value(id), slug: Value(slug));
+  }
+
+  factory EggGroupRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return EggGroupRow(
+      id: serializer.fromJson<int>(json['id']),
+      slug: serializer.fromJson<String>(json['slug']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'slug': serializer.toJson<String>(slug),
+    };
+  }
+
+  EggGroupRow copyWith({int? id, String? slug}) =>
+      EggGroupRow(id: id ?? this.id, slug: slug ?? this.slug);
+  EggGroupRow copyWithCompanion(EggGroupsCompanion data) {
+    return EggGroupRow(
+      id: data.id.present ? data.id.value : this.id,
+      slug: data.slug.present ? data.slug.value : this.slug,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EggGroupRow(')
+          ..write('id: $id, ')
+          ..write('slug: $slug')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, slug);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is EggGroupRow && other.id == this.id && other.slug == this.slug);
+}
+
+class EggGroupsCompanion extends UpdateCompanion<EggGroupRow> {
+  final Value<int> id;
+  final Value<String> slug;
+  const EggGroupsCompanion({
+    this.id = const Value.absent(),
+    this.slug = const Value.absent(),
+  });
+  EggGroupsCompanion.insert({
+    this.id = const Value.absent(),
+    required String slug,
+  }) : slug = Value(slug);
+  static Insertable<EggGroupRow> custom({
+    Expression<int>? id,
+    Expression<String>? slug,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (slug != null) 'slug': slug,
+    });
+  }
+
+  EggGroupsCompanion copyWith({Value<int>? id, Value<String>? slug}) {
+    return EggGroupsCompanion(id: id ?? this.id, slug: slug ?? this.slug);
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (slug.present) {
+      map['slug'] = Variable<String>(slug.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EggGroupsCompanion(')
+          ..write('id: $id, ')
+          ..write('slug: $slug')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PokemonEggGroupsTable extends PokemonEggGroups
+    with TableInfo<$PokemonEggGroupsTable, PokemonEggGroupRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PokemonEggGroupsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _pokemonIdMeta = const VerificationMeta(
+    'pokemonId',
+  );
+  @override
+  late final GeneratedColumn<int> pokemonId = GeneratedColumn<int>(
+    'pokemon_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES pokemon (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _eggGroupIdMeta = const VerificationMeta(
+    'eggGroupId',
+  );
+  @override
+  late final GeneratedColumn<int> eggGroupId = GeneratedColumn<int>(
+    'egg_group_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES egg_group (id)',
+    ),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [pokemonId, eggGroupId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'pokemon_egg_group';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PokemonEggGroupRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('pokemon_id')) {
+      context.handle(
+        _pokemonIdMeta,
+        pokemonId.isAcceptableOrUnknown(data['pokemon_id']!, _pokemonIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pokemonIdMeta);
+    }
+    if (data.containsKey('egg_group_id')) {
+      context.handle(
+        _eggGroupIdMeta,
+        eggGroupId.isAcceptableOrUnknown(
+          data['egg_group_id']!,
+          _eggGroupIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_eggGroupIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {pokemonId, eggGroupId};
+  @override
+  PokemonEggGroupRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PokemonEggGroupRow(
+      pokemonId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}pokemon_id'],
+      )!,
+      eggGroupId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}egg_group_id'],
+      )!,
+    );
+  }
+
+  @override
+  $PokemonEggGroupsTable createAlias(String alias) {
+    return $PokemonEggGroupsTable(attachedDatabase, alias);
+  }
+}
+
+class PokemonEggGroupRow extends DataClass
+    implements Insertable<PokemonEggGroupRow> {
+  final int pokemonId;
+  final int eggGroupId;
+  const PokemonEggGroupRow({required this.pokemonId, required this.eggGroupId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['pokemon_id'] = Variable<int>(pokemonId);
+    map['egg_group_id'] = Variable<int>(eggGroupId);
+    return map;
+  }
+
+  PokemonEggGroupsCompanion toCompanion(bool nullToAbsent) {
+    return PokemonEggGroupsCompanion(
+      pokemonId: Value(pokemonId),
+      eggGroupId: Value(eggGroupId),
+    );
+  }
+
+  factory PokemonEggGroupRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PokemonEggGroupRow(
+      pokemonId: serializer.fromJson<int>(json['pokemonId']),
+      eggGroupId: serializer.fromJson<int>(json['eggGroupId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'pokemonId': serializer.toJson<int>(pokemonId),
+      'eggGroupId': serializer.toJson<int>(eggGroupId),
+    };
+  }
+
+  PokemonEggGroupRow copyWith({int? pokemonId, int? eggGroupId}) =>
+      PokemonEggGroupRow(
+        pokemonId: pokemonId ?? this.pokemonId,
+        eggGroupId: eggGroupId ?? this.eggGroupId,
+      );
+  PokemonEggGroupRow copyWithCompanion(PokemonEggGroupsCompanion data) {
+    return PokemonEggGroupRow(
+      pokemonId: data.pokemonId.present ? data.pokemonId.value : this.pokemonId,
+      eggGroupId: data.eggGroupId.present
+          ? data.eggGroupId.value
+          : this.eggGroupId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PokemonEggGroupRow(')
+          ..write('pokemonId: $pokemonId, ')
+          ..write('eggGroupId: $eggGroupId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(pokemonId, eggGroupId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PokemonEggGroupRow &&
+          other.pokemonId == this.pokemonId &&
+          other.eggGroupId == this.eggGroupId);
+}
+
+class PokemonEggGroupsCompanion extends UpdateCompanion<PokemonEggGroupRow> {
+  final Value<int> pokemonId;
+  final Value<int> eggGroupId;
+  final Value<int> rowid;
+  const PokemonEggGroupsCompanion({
+    this.pokemonId = const Value.absent(),
+    this.eggGroupId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PokemonEggGroupsCompanion.insert({
+    required int pokemonId,
+    required int eggGroupId,
+    this.rowid = const Value.absent(),
+  }) : pokemonId = Value(pokemonId),
+       eggGroupId = Value(eggGroupId);
+  static Insertable<PokemonEggGroupRow> custom({
+    Expression<int>? pokemonId,
+    Expression<int>? eggGroupId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (pokemonId != null) 'pokemon_id': pokemonId,
+      if (eggGroupId != null) 'egg_group_id': eggGroupId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PokemonEggGroupsCompanion copyWith({
+    Value<int>? pokemonId,
+    Value<int>? eggGroupId,
+    Value<int>? rowid,
+  }) {
+    return PokemonEggGroupsCompanion(
+      pokemonId: pokemonId ?? this.pokemonId,
+      eggGroupId: eggGroupId ?? this.eggGroupId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (pokemonId.present) {
+      map['pokemon_id'] = Variable<int>(pokemonId.value);
+    }
+    if (eggGroupId.present) {
+      map['egg_group_id'] = Variable<int>(eggGroupId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PokemonEggGroupsCompanion(')
+          ..write('pokemonId: $pokemonId, ')
+          ..write('eggGroupId: $eggGroupId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2387,6 +3672,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $TypesTable types = $TypesTable(this);
   late final $PokemonTypesTable pokemonTypes = $PokemonTypesTable(this);
   late final $PokemonStatsTable pokemonStats = $PokemonStatsTable(this);
+  late final $AbilitiesTable abilities = $AbilitiesTable(this);
+  late final $PokemonAbilitiesTable pokemonAbilities = $PokemonAbilitiesTable(
+    this,
+  );
+  late final $EggGroupsTable eggGroups = $EggGroupsTable(this);
+  late final $PokemonEggGroupsTable pokemonEggGroups = $PokemonEggGroupsTable(
+    this,
+  );
   late final $FavoritesTable favorites = $FavoritesTable(this);
   late final $SyncMetadataEntriesTable syncMetadataEntries =
       $SyncMetadataEntriesTable(this);
@@ -2419,6 +3712,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     types,
     pokemonTypes,
     pokemonStats,
+    abilities,
+    pokemonAbilities,
+    eggGroups,
+    pokemonEggGroups,
     favorites,
     syncMetadataEntries,
     userPreferences,
@@ -2444,6 +3741,20 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       ),
       result: [TableUpdate('pokemon_stat', kind: UpdateKind.delete)],
     ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'pokemon',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('pokemon_ability', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'pokemon',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('pokemon_egg_group', kind: UpdateKind.delete)],
+    ),
   ]);
 }
 
@@ -2453,6 +3764,9 @@ typedef $$PokemonsTableCreateCompanionBuilder = PokemonsCompanion Function({
   Value<String?> nameEs,
   required int generationId,
   Value<int?> baseStatTotal,
+  Value<int?> height,
+  Value<int?> weight,
+  Value<DateTime?> detailSyncedAt,
   required DateTime syncedAt,
 });
 typedef $$PokemonsTableUpdateCompanionBuilder = PokemonsCompanion Function({
@@ -2461,6 +3775,9 @@ typedef $$PokemonsTableUpdateCompanionBuilder = PokemonsCompanion Function({
   Value<String?> nameEs,
   Value<int> generationId,
   Value<int?> baseStatTotal,
+  Value<int?> height,
+  Value<int?> weight,
+  Value<DateTime?> detailSyncedAt,
   Value<DateTime> syncedAt,
 });
 
@@ -2503,6 +3820,46 @@ final class $$PokemonsTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$PokemonAbilitiesTable, List<PokemonAbilityRow>>
+  _pokemonAbilitiesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.pokemonAbilities,
+    aliasName: 'pokemon__id__pokemon_ability__pokemon_id',
+  );
+
+  $$PokemonAbilitiesTableProcessedTableManager get pokemonAbilitiesRefs {
+    final manager = $$PokemonAbilitiesTableTableManager(
+      $_db,
+      $_db.pokemonAbilities,
+    ).filter((f) => f.pokemonId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _pokemonAbilitiesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$PokemonEggGroupsTable, List<PokemonEggGroupRow>>
+  _pokemonEggGroupsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.pokemonEggGroups,
+    aliasName: 'pokemon__id__pokemon_egg_group__pokemon_id',
+  );
+
+  $$PokemonEggGroupsTableProcessedTableManager get pokemonEggGroupsRefs {
+    final manager = $$PokemonEggGroupsTableTableManager(
+      $_db,
+      $_db.pokemonEggGroups,
+    ).filter((f) => f.pokemonId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _pokemonEggGroupsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$PokemonsTableFilterComposer
@@ -2536,6 +3893,21 @@ class $$PokemonsTableFilterComposer
 
   ColumnFilters<int> get baseStatTotal => $composableBuilder(
     column: $table.baseStatTotal,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get height => $composableBuilder(
+    column: $table.height,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get weight => $composableBuilder(
+    column: $table.weight,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get detailSyncedAt => $composableBuilder(
+    column: $table.detailSyncedAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2593,6 +3965,56 @@ class $$PokemonsTableFilterComposer
     );
     return f(composer);
   }
+
+  Expression<bool> pokemonAbilitiesRefs(
+    Expression<bool> Function($$PokemonAbilitiesTableFilterComposer f) f,
+  ) {
+    final $$PokemonAbilitiesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.pokemonAbilities,
+      getReferencedColumn: (t) => t.pokemonId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PokemonAbilitiesTableFilterComposer(
+            $db: $db,
+            $table: $db.pokemonAbilities,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> pokemonEggGroupsRefs(
+    Expression<bool> Function($$PokemonEggGroupsTableFilterComposer f) f,
+  ) {
+    final $$PokemonEggGroupsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.pokemonEggGroups,
+      getReferencedColumn: (t) => t.pokemonId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PokemonEggGroupsTableFilterComposer(
+            $db: $db,
+            $table: $db.pokemonEggGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$PokemonsTableOrderingComposer
@@ -2629,6 +4051,21 @@ class $$PokemonsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get height => $composableBuilder(
+    column: $table.height,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get weight => $composableBuilder(
+    column: $table.weight,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get detailSyncedAt => $composableBuilder(
+    column: $table.detailSyncedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get syncedAt => $composableBuilder(
     column: $table.syncedAt,
     builder: (column) => ColumnOrderings(column),
@@ -2660,6 +4097,17 @@ class $$PokemonsTableAnnotationComposer
 
   GeneratedColumn<int> get baseStatTotal => $composableBuilder(
     column: $table.baseStatTotal,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get height =>
+      $composableBuilder(column: $table.height, builder: (column) => column);
+
+  GeneratedColumn<int> get weight =>
+      $composableBuilder(column: $table.weight, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get detailSyncedAt => $composableBuilder(
+    column: $table.detailSyncedAt,
     builder: (column) => column,
   );
 
@@ -2715,6 +4163,56 @@ class $$PokemonsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> pokemonAbilitiesRefs<T extends Object>(
+    Expression<T> Function($$PokemonAbilitiesTableAnnotationComposer a) f,
+  ) {
+    final $$PokemonAbilitiesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.pokemonAbilities,
+      getReferencedColumn: (t) => t.pokemonId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PokemonAbilitiesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.pokemonAbilities,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> pokemonEggGroupsRefs<T extends Object>(
+    Expression<T> Function($$PokemonEggGroupsTableAnnotationComposer a) f,
+  ) {
+    final $$PokemonEggGroupsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.pokemonEggGroups,
+      getReferencedColumn: (t) => t.pokemonId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PokemonEggGroupsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.pokemonEggGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$PokemonsTableTableManager
@@ -2730,7 +4228,12 @@ class $$PokemonsTableTableManager
           $$PokemonsTableUpdateCompanionBuilder,
           (PokemonRow, $$PokemonsTableReferences),
           PokemonRow,
-          PrefetchHooks Function({bool pokemonTypesRefs, bool pokemonStatsRefs})
+          PrefetchHooks Function({
+            bool pokemonTypesRefs,
+            bool pokemonStatsRefs,
+            bool pokemonAbilitiesRefs,
+            bool pokemonEggGroupsRefs,
+          })
         > {
   $$PokemonsTableTableManager(_$AppDatabase db, $PokemonsTable table)
     : super(
@@ -2750,6 +4253,9 @@ class $$PokemonsTableTableManager
                 Value<String?> nameEs = const Value.absent(),
                 Value<int> generationId = const Value.absent(),
                 Value<int?> baseStatTotal = const Value.absent(),
+                Value<int?> height = const Value.absent(),
+                Value<int?> weight = const Value.absent(),
+                Value<DateTime?> detailSyncedAt = const Value.absent(),
                 Value<DateTime> syncedAt = const Value.absent(),
               }) => PokemonsCompanion(
                 id: id,
@@ -2757,6 +4263,9 @@ class $$PokemonsTableTableManager
                 nameEs: nameEs,
                 generationId: generationId,
                 baseStatTotal: baseStatTotal,
+                height: height,
+                weight: weight,
+                detailSyncedAt: detailSyncedAt,
                 syncedAt: syncedAt,
               ),
           createCompanionCallback:
@@ -2766,6 +4275,9 @@ class $$PokemonsTableTableManager
                 Value<String?> nameEs = const Value.absent(),
                 required int generationId,
                 Value<int?> baseStatTotal = const Value.absent(),
+                Value<int?> height = const Value.absent(),
+                Value<int?> weight = const Value.absent(),
+                Value<DateTime?> detailSyncedAt = const Value.absent(),
                 required DateTime syncedAt,
               }) => PokemonsCompanion.insert(
                 id: id,
@@ -2773,6 +4285,9 @@ class $$PokemonsTableTableManager
                 nameEs: nameEs,
                 generationId: generationId,
                 baseStatTotal: baseStatTotal,
+                height: height,
+                weight: weight,
+                detailSyncedAt: detailSyncedAt,
                 syncedAt: syncedAt,
               ),
           withReferenceMapper: (p0) => p0
@@ -2784,12 +4299,19 @@ class $$PokemonsTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({pokemonTypesRefs = false, pokemonStatsRefs = false}) {
+              ({
+                pokemonTypesRefs = false,
+                pokemonStatsRefs = false,
+                pokemonAbilitiesRefs = false,
+                pokemonEggGroupsRefs = false,
+              }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (pokemonTypesRefs) db.pokemonTypes,
                     if (pokemonStatsRefs) db.pokemonStats,
+                    if (pokemonAbilitiesRefs) db.pokemonAbilities,
+                    if (pokemonEggGroupsRefs) db.pokemonEggGroups,
                   ],
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
@@ -2834,6 +4356,46 @@ class $$PokemonsTableTableManager
                           referencedColumn: 'pokemon_id',
                           typedResults: items,
                         ),
+                      if (pokemonAbilitiesRefs)
+                        await $_getPrefetchedDataByColumns<
+                          PokemonRow,
+                          $PokemonsTable,
+                          PokemonAbilityRow,
+                          $PokemonAbilitiesTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$PokemonsTableReferences
+                              ._pokemonAbilitiesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$PokemonsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).pokemonAbilitiesRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'pokemon_id',
+                          typedResults: items,
+                        ),
+                      if (pokemonEggGroupsRefs)
+                        await $_getPrefetchedDataByColumns<
+                          PokemonRow,
+                          $PokemonsTable,
+                          PokemonEggGroupRow,
+                          $PokemonEggGroupsTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$PokemonsTableReferences
+                              ._pokemonEggGroupsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$PokemonsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).pokemonEggGroupsRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'pokemon_id',
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -2854,7 +4416,12 @@ typedef $$PokemonsTableProcessedTableManager =
       $$PokemonsTableUpdateCompanionBuilder,
       (PokemonRow, $$PokemonsTableReferences),
       PokemonRow,
-      PrefetchHooks Function({bool pokemonTypesRefs, bool pokemonStatsRefs})
+      PrefetchHooks Function({
+        bool pokemonTypesRefs,
+        bool pokemonStatsRefs,
+        bool pokemonAbilitiesRefs,
+        bool pokemonEggGroupsRefs,
+      })
     >;
 typedef $$TypesTableCreateCompanionBuilder = TypesCompanion Function({
   Value<int> id,
@@ -3721,6 +5288,1302 @@ typedef $$PokemonStatsTableProcessedTableManager =
       PokemonStatRow,
       PrefetchHooks Function({bool pokemonId})
     >;
+typedef $$AbilitiesTableCreateCompanionBuilder = AbilitiesCompanion Function({
+  Value<int> id,
+  required String slug,
+  required String nameEn,
+  Value<String?> nameEs,
+  Value<String?> effectEn,
+  Value<String?> effectEs,
+});
+typedef $$AbilitiesTableUpdateCompanionBuilder = AbilitiesCompanion Function({
+  Value<int> id,
+  Value<String> slug,
+  Value<String> nameEn,
+  Value<String?> nameEs,
+  Value<String?> effectEn,
+  Value<String?> effectEs,
+});
+
+final class $$AbilitiesTableReferences
+    extends BaseReferences<_$AppDatabase, $AbilitiesTable, AbilityRow> {
+  $$AbilitiesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$PokemonAbilitiesTable, List<PokemonAbilityRow>>
+  _pokemonAbilitiesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.pokemonAbilities,
+    aliasName: 'ability__id__pokemon_ability__ability_id',
+  );
+
+  $$PokemonAbilitiesTableProcessedTableManager get pokemonAbilitiesRefs {
+    final manager = $$PokemonAbilitiesTableTableManager(
+      $_db,
+      $_db.pokemonAbilities,
+    ).filter((f) => f.abilityId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _pokemonAbilitiesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$AbilitiesTableFilterComposer
+    extends Composer<_$AppDatabase, $AbilitiesTable> {
+  $$AbilitiesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get slug => $composableBuilder(
+    column: $table.slug,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nameEn => $composableBuilder(
+    column: $table.nameEn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nameEs => $composableBuilder(
+    column: $table.nameEs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get effectEn => $composableBuilder(
+    column: $table.effectEn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get effectEs => $composableBuilder(
+    column: $table.effectEs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> pokemonAbilitiesRefs(
+    Expression<bool> Function($$PokemonAbilitiesTableFilterComposer f) f,
+  ) {
+    final $$PokemonAbilitiesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.pokemonAbilities,
+      getReferencedColumn: (t) => t.abilityId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PokemonAbilitiesTableFilterComposer(
+            $db: $db,
+            $table: $db.pokemonAbilities,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$AbilitiesTableOrderingComposer
+    extends Composer<_$AppDatabase, $AbilitiesTable> {
+  $$AbilitiesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get slug => $composableBuilder(
+    column: $table.slug,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nameEn => $composableBuilder(
+    column: $table.nameEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nameEs => $composableBuilder(
+    column: $table.nameEs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get effectEn => $composableBuilder(
+    column: $table.effectEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get effectEs => $composableBuilder(
+    column: $table.effectEs,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AbilitiesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AbilitiesTable> {
+  $$AbilitiesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get slug =>
+      $composableBuilder(column: $table.slug, builder: (column) => column);
+
+  GeneratedColumn<String> get nameEn =>
+      $composableBuilder(column: $table.nameEn, builder: (column) => column);
+
+  GeneratedColumn<String> get nameEs =>
+      $composableBuilder(column: $table.nameEs, builder: (column) => column);
+
+  GeneratedColumn<String> get effectEn =>
+      $composableBuilder(column: $table.effectEn, builder: (column) => column);
+
+  GeneratedColumn<String> get effectEs =>
+      $composableBuilder(column: $table.effectEs, builder: (column) => column);
+
+  Expression<T> pokemonAbilitiesRefs<T extends Object>(
+    Expression<T> Function($$PokemonAbilitiesTableAnnotationComposer a) f,
+  ) {
+    final $$PokemonAbilitiesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.pokemonAbilities,
+      getReferencedColumn: (t) => t.abilityId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PokemonAbilitiesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.pokemonAbilities,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$AbilitiesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AbilitiesTable,
+          AbilityRow,
+          $$AbilitiesTableFilterComposer,
+          $$AbilitiesTableOrderingComposer,
+          $$AbilitiesTableAnnotationComposer,
+          $$AbilitiesTableCreateCompanionBuilder,
+          $$AbilitiesTableUpdateCompanionBuilder,
+          (AbilityRow, $$AbilitiesTableReferences),
+          AbilityRow,
+          PrefetchHooks Function({bool pokemonAbilitiesRefs})
+        > {
+  $$AbilitiesTableTableManager(_$AppDatabase db, $AbilitiesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AbilitiesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AbilitiesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AbilitiesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> slug = const Value.absent(),
+                Value<String> nameEn = const Value.absent(),
+                Value<String?> nameEs = const Value.absent(),
+                Value<String?> effectEn = const Value.absent(),
+                Value<String?> effectEs = const Value.absent(),
+              }) => AbilitiesCompanion(
+                id: id,
+                slug: slug,
+                nameEn: nameEn,
+                nameEs: nameEs,
+                effectEn: effectEn,
+                effectEs: effectEs,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String slug,
+                required String nameEn,
+                Value<String?> nameEs = const Value.absent(),
+                Value<String?> effectEn = const Value.absent(),
+                Value<String?> effectEs = const Value.absent(),
+              }) => AbilitiesCompanion.insert(
+                id: id,
+                slug: slug,
+                nameEn: nameEn,
+                nameEs: nameEs,
+                effectEn: effectEn,
+                effectEs: effectEs,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$AbilitiesTable, AbilityRow>(table),
+                  $$AbilitiesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({pokemonAbilitiesRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (pokemonAbilitiesRefs) db.pokemonAbilities,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (pokemonAbilitiesRefs)
+                    await $_getPrefetchedDataByColumns<
+                      AbilityRow,
+                      $AbilitiesTable,
+                      PokemonAbilityRow,
+                      $PokemonAbilitiesTable
+                    >(
+                      currentTable: table,
+                      referencedTable: $$AbilitiesTableReferences
+                          ._pokemonAbilitiesRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$AbilitiesTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).pokemonAbilitiesRefs,
+                      currentColumn: 'id',
+                      referencedColumn: 'ability_id',
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$AbilitiesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AbilitiesTable,
+      AbilityRow,
+      $$AbilitiesTableFilterComposer,
+      $$AbilitiesTableOrderingComposer,
+      $$AbilitiesTableAnnotationComposer,
+      $$AbilitiesTableCreateCompanionBuilder,
+      $$AbilitiesTableUpdateCompanionBuilder,
+      (AbilityRow, $$AbilitiesTableReferences),
+      AbilityRow,
+      PrefetchHooks Function({bool pokemonAbilitiesRefs})
+    >;
+typedef $$PokemonAbilitiesTableCreateCompanionBuilder =
+    PokemonAbilitiesCompanion Function({
+      required int pokemonId,
+      required int slot,
+      required int abilityId,
+      required bool isHidden,
+      Value<int> rowid,
+    });
+typedef $$PokemonAbilitiesTableUpdateCompanionBuilder =
+    PokemonAbilitiesCompanion Function({
+      Value<int> pokemonId,
+      Value<int> slot,
+      Value<int> abilityId,
+      Value<bool> isHidden,
+      Value<int> rowid,
+    });
+
+final class $$PokemonAbilitiesTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $PokemonAbilitiesTable,
+          PokemonAbilityRow
+        > {
+  $$PokemonAbilitiesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $PokemonsTable _pokemonIdTable(_$AppDatabase db) =>
+      db.pokemons.createAlias('pokemon_ability__pokemon_id__pokemon__id');
+
+  $$PokemonsTableProcessedTableManager get pokemonId {
+    final $_column = $_itemColumn<int>('pokemon_id')!;
+
+    final manager = $$PokemonsTableTableManager(
+      $_db,
+      $_db.pokemons,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_pokemonIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $AbilitiesTable _abilityIdTable(_$AppDatabase db) =>
+      db.abilities.createAlias('pokemon_ability__ability_id__ability__id');
+
+  $$AbilitiesTableProcessedTableManager get abilityId {
+    final $_column = $_itemColumn<int>('ability_id')!;
+
+    final manager = $$AbilitiesTableTableManager(
+      $_db,
+      $_db.abilities,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_abilityIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$PokemonAbilitiesTableFilterComposer
+    extends Composer<_$AppDatabase, $PokemonAbilitiesTable> {
+  $$PokemonAbilitiesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get slot => $composableBuilder(
+    column: $table.slot,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isHidden => $composableBuilder(
+    column: $table.isHidden,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$PokemonsTableFilterComposer get pokemonId {
+    final $$PokemonsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pokemonId,
+      referencedTable: $db.pokemons,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PokemonsTableFilterComposer(
+            $db: $db,
+            $table: $db.pokemons,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AbilitiesTableFilterComposer get abilityId {
+    final $$AbilitiesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.abilityId,
+      referencedTable: $db.abilities,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AbilitiesTableFilterComposer(
+            $db: $db,
+            $table: $db.abilities,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PokemonAbilitiesTableOrderingComposer
+    extends Composer<_$AppDatabase, $PokemonAbilitiesTable> {
+  $$PokemonAbilitiesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get slot => $composableBuilder(
+    column: $table.slot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isHidden => $composableBuilder(
+    column: $table.isHidden,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$PokemonsTableOrderingComposer get pokemonId {
+    final $$PokemonsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pokemonId,
+      referencedTable: $db.pokemons,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PokemonsTableOrderingComposer(
+            $db: $db,
+            $table: $db.pokemons,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AbilitiesTableOrderingComposer get abilityId {
+    final $$AbilitiesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.abilityId,
+      referencedTable: $db.abilities,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AbilitiesTableOrderingComposer(
+            $db: $db,
+            $table: $db.abilities,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PokemonAbilitiesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PokemonAbilitiesTable> {
+  $$PokemonAbilitiesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get slot =>
+      $composableBuilder(column: $table.slot, builder: (column) => column);
+
+  GeneratedColumn<bool> get isHidden =>
+      $composableBuilder(column: $table.isHidden, builder: (column) => column);
+
+  $$PokemonsTableAnnotationComposer get pokemonId {
+    final $$PokemonsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pokemonId,
+      referencedTable: $db.pokemons,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PokemonsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.pokemons,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AbilitiesTableAnnotationComposer get abilityId {
+    final $$AbilitiesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.abilityId,
+      referencedTable: $db.abilities,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AbilitiesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.abilities,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PokemonAbilitiesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PokemonAbilitiesTable,
+          PokemonAbilityRow,
+          $$PokemonAbilitiesTableFilterComposer,
+          $$PokemonAbilitiesTableOrderingComposer,
+          $$PokemonAbilitiesTableAnnotationComposer,
+          $$PokemonAbilitiesTableCreateCompanionBuilder,
+          $$PokemonAbilitiesTableUpdateCompanionBuilder,
+          (PokemonAbilityRow, $$PokemonAbilitiesTableReferences),
+          PokemonAbilityRow,
+          PrefetchHooks Function({bool pokemonId, bool abilityId})
+        > {
+  $$PokemonAbilitiesTableTableManager(
+    _$AppDatabase db,
+    $PokemonAbilitiesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PokemonAbilitiesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PokemonAbilitiesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PokemonAbilitiesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> pokemonId = const Value.absent(),
+                Value<int> slot = const Value.absent(),
+                Value<int> abilityId = const Value.absent(),
+                Value<bool> isHidden = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PokemonAbilitiesCompanion(
+                pokemonId: pokemonId,
+                slot: slot,
+                abilityId: abilityId,
+                isHidden: isHidden,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required int pokemonId,
+                required int slot,
+                required int abilityId,
+                required bool isHidden,
+                Value<int> rowid = const Value.absent(),
+              }) => PokemonAbilitiesCompanion.insert(
+                pokemonId: pokemonId,
+                slot: slot,
+                abilityId: abilityId,
+                isHidden: isHidden,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$PokemonAbilitiesTable, PokemonAbilityRow>(table),
+                  $$PokemonAbilitiesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({pokemonId = false, abilityId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (pokemonId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.pokemonId,
+                        referencedTable: $$PokemonAbilitiesTableReferences
+                            ._pokemonIdTable(db),
+                        referencedColumn: $$PokemonAbilitiesTableReferences
+                            ._pokemonIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+                    if (abilityId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.abilityId,
+                        referencedTable: $$PokemonAbilitiesTableReferences
+                            ._abilityIdTable(db),
+                        referencedColumn: $$PokemonAbilitiesTableReferences
+                            ._abilityIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$PokemonAbilitiesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PokemonAbilitiesTable,
+      PokemonAbilityRow,
+      $$PokemonAbilitiesTableFilterComposer,
+      $$PokemonAbilitiesTableOrderingComposer,
+      $$PokemonAbilitiesTableAnnotationComposer,
+      $$PokemonAbilitiesTableCreateCompanionBuilder,
+      $$PokemonAbilitiesTableUpdateCompanionBuilder,
+      (PokemonAbilityRow, $$PokemonAbilitiesTableReferences),
+      PokemonAbilityRow,
+      PrefetchHooks Function({bool pokemonId, bool abilityId})
+    >;
+typedef $$EggGroupsTableCreateCompanionBuilder = EggGroupsCompanion Function({
+  Value<int> id,
+  required String slug,
+});
+typedef $$EggGroupsTableUpdateCompanionBuilder = EggGroupsCompanion Function({
+  Value<int> id,
+  Value<String> slug,
+});
+
+final class $$EggGroupsTableReferences
+    extends BaseReferences<_$AppDatabase, $EggGroupsTable, EggGroupRow> {
+  $$EggGroupsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$PokemonEggGroupsTable, List<PokemonEggGroupRow>>
+  _pokemonEggGroupsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.pokemonEggGroups,
+    aliasName: 'egg_group__id__pokemon_egg_group__egg_group_id',
+  );
+
+  $$PokemonEggGroupsTableProcessedTableManager get pokemonEggGroupsRefs {
+    final manager = $$PokemonEggGroupsTableTableManager(
+      $_db,
+      $_db.pokemonEggGroups,
+    ).filter((f) => f.eggGroupId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _pokemonEggGroupsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$EggGroupsTableFilterComposer
+    extends Composer<_$AppDatabase, $EggGroupsTable> {
+  $$EggGroupsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get slug => $composableBuilder(
+    column: $table.slug,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> pokemonEggGroupsRefs(
+    Expression<bool> Function($$PokemonEggGroupsTableFilterComposer f) f,
+  ) {
+    final $$PokemonEggGroupsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.pokemonEggGroups,
+      getReferencedColumn: (t) => t.eggGroupId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PokemonEggGroupsTableFilterComposer(
+            $db: $db,
+            $table: $db.pokemonEggGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$EggGroupsTableOrderingComposer
+    extends Composer<_$AppDatabase, $EggGroupsTable> {
+  $$EggGroupsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get slug => $composableBuilder(
+    column: $table.slug,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$EggGroupsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $EggGroupsTable> {
+  $$EggGroupsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get slug =>
+      $composableBuilder(column: $table.slug, builder: (column) => column);
+
+  Expression<T> pokemonEggGroupsRefs<T extends Object>(
+    Expression<T> Function($$PokemonEggGroupsTableAnnotationComposer a) f,
+  ) {
+    final $$PokemonEggGroupsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.pokemonEggGroups,
+      getReferencedColumn: (t) => t.eggGroupId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PokemonEggGroupsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.pokemonEggGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$EggGroupsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $EggGroupsTable,
+          EggGroupRow,
+          $$EggGroupsTableFilterComposer,
+          $$EggGroupsTableOrderingComposer,
+          $$EggGroupsTableAnnotationComposer,
+          $$EggGroupsTableCreateCompanionBuilder,
+          $$EggGroupsTableUpdateCompanionBuilder,
+          (EggGroupRow, $$EggGroupsTableReferences),
+          EggGroupRow,
+          PrefetchHooks Function({bool pokemonEggGroupsRefs})
+        > {
+  $$EggGroupsTableTableManager(_$AppDatabase db, $EggGroupsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$EggGroupsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$EggGroupsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$EggGroupsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String> slug = const Value.absent(),
+          }) => EggGroupsCompanion(id: id, slug: slug),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required String slug,
+          }) => EggGroupsCompanion.insert(id: id, slug: slug),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$EggGroupsTable, EggGroupRow>(table),
+                  $$EggGroupsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({pokemonEggGroupsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (pokemonEggGroupsRefs) db.pokemonEggGroups,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (pokemonEggGroupsRefs)
+                    await $_getPrefetchedDataByColumns<
+                      EggGroupRow,
+                      $EggGroupsTable,
+                      PokemonEggGroupRow,
+                      $PokemonEggGroupsTable
+                    >(
+                      currentTable: table,
+                      referencedTable: $$EggGroupsTableReferences
+                          ._pokemonEggGroupsRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$EggGroupsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).pokemonEggGroupsRefs,
+                      currentColumn: 'id',
+                      referencedColumn: 'egg_group_id',
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$EggGroupsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $EggGroupsTable,
+      EggGroupRow,
+      $$EggGroupsTableFilterComposer,
+      $$EggGroupsTableOrderingComposer,
+      $$EggGroupsTableAnnotationComposer,
+      $$EggGroupsTableCreateCompanionBuilder,
+      $$EggGroupsTableUpdateCompanionBuilder,
+      (EggGroupRow, $$EggGroupsTableReferences),
+      EggGroupRow,
+      PrefetchHooks Function({bool pokemonEggGroupsRefs})
+    >;
+typedef $$PokemonEggGroupsTableCreateCompanionBuilder =
+    PokemonEggGroupsCompanion Function({
+      required int pokemonId,
+      required int eggGroupId,
+      Value<int> rowid,
+    });
+typedef $$PokemonEggGroupsTableUpdateCompanionBuilder =
+    PokemonEggGroupsCompanion Function({
+      Value<int> pokemonId,
+      Value<int> eggGroupId,
+      Value<int> rowid,
+    });
+
+final class $$PokemonEggGroupsTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $PokemonEggGroupsTable,
+          PokemonEggGroupRow
+        > {
+  $$PokemonEggGroupsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $PokemonsTable _pokemonIdTable(_$AppDatabase db) =>
+      db.pokemons.createAlias('pokemon_egg_group__pokemon_id__pokemon__id');
+
+  $$PokemonsTableProcessedTableManager get pokemonId {
+    final $_column = $_itemColumn<int>('pokemon_id')!;
+
+    final manager = $$PokemonsTableTableManager(
+      $_db,
+      $_db.pokemons,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_pokemonIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $EggGroupsTable _eggGroupIdTable(_$AppDatabase db) => db.eggGroups
+      .createAlias('pokemon_egg_group__egg_group_id__egg_group__id');
+
+  $$EggGroupsTableProcessedTableManager get eggGroupId {
+    final $_column = $_itemColumn<int>('egg_group_id')!;
+
+    final manager = $$EggGroupsTableTableManager(
+      $_db,
+      $_db.eggGroups,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_eggGroupIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$PokemonEggGroupsTableFilterComposer
+    extends Composer<_$AppDatabase, $PokemonEggGroupsTable> {
+  $$PokemonEggGroupsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$PokemonsTableFilterComposer get pokemonId {
+    final $$PokemonsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pokemonId,
+      referencedTable: $db.pokemons,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PokemonsTableFilterComposer(
+            $db: $db,
+            $table: $db.pokemons,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$EggGroupsTableFilterComposer get eggGroupId {
+    final $$EggGroupsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.eggGroupId,
+      referencedTable: $db.eggGroups,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EggGroupsTableFilterComposer(
+            $db: $db,
+            $table: $db.eggGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PokemonEggGroupsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PokemonEggGroupsTable> {
+  $$PokemonEggGroupsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$PokemonsTableOrderingComposer get pokemonId {
+    final $$PokemonsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pokemonId,
+      referencedTable: $db.pokemons,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PokemonsTableOrderingComposer(
+            $db: $db,
+            $table: $db.pokemons,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$EggGroupsTableOrderingComposer get eggGroupId {
+    final $$EggGroupsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.eggGroupId,
+      referencedTable: $db.eggGroups,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EggGroupsTableOrderingComposer(
+            $db: $db,
+            $table: $db.eggGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PokemonEggGroupsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PokemonEggGroupsTable> {
+  $$PokemonEggGroupsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$PokemonsTableAnnotationComposer get pokemonId {
+    final $$PokemonsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pokemonId,
+      referencedTable: $db.pokemons,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PokemonsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.pokemons,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$EggGroupsTableAnnotationComposer get eggGroupId {
+    final $$EggGroupsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.eggGroupId,
+      referencedTable: $db.eggGroups,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EggGroupsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.eggGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PokemonEggGroupsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PokemonEggGroupsTable,
+          PokemonEggGroupRow,
+          $$PokemonEggGroupsTableFilterComposer,
+          $$PokemonEggGroupsTableOrderingComposer,
+          $$PokemonEggGroupsTableAnnotationComposer,
+          $$PokemonEggGroupsTableCreateCompanionBuilder,
+          $$PokemonEggGroupsTableUpdateCompanionBuilder,
+          (PokemonEggGroupRow, $$PokemonEggGroupsTableReferences),
+          PokemonEggGroupRow,
+          PrefetchHooks Function({bool pokemonId, bool eggGroupId})
+        > {
+  $$PokemonEggGroupsTableTableManager(
+    _$AppDatabase db,
+    $PokemonEggGroupsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PokemonEggGroupsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PokemonEggGroupsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PokemonEggGroupsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> pokemonId = const Value.absent(),
+                Value<int> eggGroupId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PokemonEggGroupsCompanion(
+                pokemonId: pokemonId,
+                eggGroupId: eggGroupId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required int pokemonId,
+                required int eggGroupId,
+                Value<int> rowid = const Value.absent(),
+              }) => PokemonEggGroupsCompanion.insert(
+                pokemonId: pokemonId,
+                eggGroupId: eggGroupId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$PokemonEggGroupsTable, PokemonEggGroupRow>(
+                    table,
+                  ),
+                  $$PokemonEggGroupsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({pokemonId = false, eggGroupId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (pokemonId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.pokemonId,
+                        referencedTable: $$PokemonEggGroupsTableReferences
+                            ._pokemonIdTable(db),
+                        referencedColumn: $$PokemonEggGroupsTableReferences
+                            ._pokemonIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+                    if (eggGroupId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.eggGroupId,
+                        referencedTable: $$PokemonEggGroupsTableReferences
+                            ._eggGroupIdTable(db),
+                        referencedColumn: $$PokemonEggGroupsTableReferences
+                            ._eggGroupIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$PokemonEggGroupsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PokemonEggGroupsTable,
+      PokemonEggGroupRow,
+      $$PokemonEggGroupsTableFilterComposer,
+      $$PokemonEggGroupsTableOrderingComposer,
+      $$PokemonEggGroupsTableAnnotationComposer,
+      $$PokemonEggGroupsTableCreateCompanionBuilder,
+      $$PokemonEggGroupsTableUpdateCompanionBuilder,
+      (PokemonEggGroupRow, $$PokemonEggGroupsTableReferences),
+      PokemonEggGroupRow,
+      PrefetchHooks Function({bool pokemonId, bool eggGroupId})
+    >;
 typedef $$FavoritesTableCreateCompanionBuilder = FavoritesCompanion Function({
   Value<int> pokemonId,
   required DateTime createdAt,
@@ -4496,6 +7359,14 @@ class $AppDatabaseManager {
       $$PokemonTypesTableTableManager(_db, _db.pokemonTypes);
   $$PokemonStatsTableTableManager get pokemonStats =>
       $$PokemonStatsTableTableManager(_db, _db.pokemonStats);
+  $$AbilitiesTableTableManager get abilities =>
+      $$AbilitiesTableTableManager(_db, _db.abilities);
+  $$PokemonAbilitiesTableTableManager get pokemonAbilities =>
+      $$PokemonAbilitiesTableTableManager(_db, _db.pokemonAbilities);
+  $$EggGroupsTableTableManager get eggGroups =>
+      $$EggGroupsTableTableManager(_db, _db.eggGroups);
+  $$PokemonEggGroupsTableTableManager get pokemonEggGroups =>
+      $$PokemonEggGroupsTableTableManager(_db, _db.pokemonEggGroups);
   $$FavoritesTableTableManager get favorites =>
       $$FavoritesTableTableManager(_db, _db.favorites);
   $$SyncMetadataEntriesTableTableManager get syncMetadataEntries =>

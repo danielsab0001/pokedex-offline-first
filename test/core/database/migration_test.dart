@@ -5,23 +5,24 @@ import 'package:pokedex/core/database/app_database.dart';
 import '../../generated_migrations/schema.dart';
 import '../../generated_migrations/schema_v1.dart' as v1;
 import '../../generated_migrations/schema_v3.dart' as v3;
+import '../../generated_migrations/schema_v4.dart' as v4;
 
 void main() {
   late SchemaVerifier verifier;
 
   setUpAll(() => verifier = SchemaVerifier(GeneratedHelper()));
 
-  for (final from in [1, 2, 3]) {
-    test('migrar de v$from a v4 deja el esquema esperado', () async {
+  for (final from in [1, 2, 3, 4]) {
+    test('migrar de v$from a v5 deja el esquema esperado', () async {
       final connection = await verifier.startAt(from);
       final db = AppDatabase(connection);
       addTearDown(db.close);
 
-      await verifier.migrateAndValidate(db, 4);
+      await verifier.migrateAndValidate(db, 5);
     });
   }
 
-  test('migrar de v1 a v4 conserva favoritos y metadatos', () async {
+  test('migrar de v1 conserva favoritos y metadatos', () async {
     final schema = await verifier.schemaAt(1);
     final oldDb = v1.DatabaseAtV1(schema.newConnection());
     await oldDb.customStatement(
@@ -35,7 +36,7 @@ void main() {
 
     final db = AppDatabase(schema.newConnection());
     addTearDown(db.close);
-    await verifier.migrateAndValidate(db, 4);
+    await verifier.migrateAndValidate(db, 5);
 
     final favorite = await db.select(db.favorites).getSingle();
     final meta = await db.select(db.syncMetadataEntries).getSingle();
@@ -45,7 +46,7 @@ void main() {
     expect(await db.select(db.apiCalls).get(), isEmpty);
   });
 
-  test('migrar de v3 a v4 conserva el catálogo y reinicia la descarga', () async {
+  test('migrar de v3 conserva el catálogo y reinicia la descarga', () async {
     final schema = await verifier.schemaAt(3);
     final oldDb = v3.DatabaseAtV3(schema.newConnection());
     await oldDb.customStatement(
@@ -62,7 +63,7 @@ void main() {
 
     final db = AppDatabase(schema.newConnection());
     addTearDown(db.close);
-    await verifier.migrateAndValidate(db, 4);
+    await verifier.migrateAndValidate(db, 5);
 
     final pokemon = await db.select(db.pokemons).getSingle();
     expect(pokemon.nameEn, 'pikachu');
@@ -79,5 +80,38 @@ void main() {
     }
     expect(rows['api_gate']!.status, 'idle');
     expect(await db.select(db.pokemonStats).get(), isEmpty);
+  });
+
+  test('migrar de v4 conserva catálogo, estadísticas y favoritos', () async {
+    final schema = await verifier.schemaAt(4);
+    final oldDb = v4.DatabaseAtV4(schema.newConnection());
+    await oldDb.customStatement(
+      'INSERT INTO pokemon (id, name_en, generation_id, base_stat_total, '
+      "synced_at) VALUES (25, 'pikachu', 1, 320, 1700000000)",
+    );
+    await oldDb.customStatement(
+      'INSERT INTO pokemon_stat (pokemon_id, stat_id, base_stat) '
+      'VALUES (25, 1, 35)',
+    );
+    await oldDb.customStatement(
+      'INSERT INTO favorite (pokemon_id, created_at) VALUES (25, 1700000000)',
+    );
+    await oldDb.close();
+
+    final db = AppDatabase(schema.newConnection());
+    addTearDown(db.close);
+    await verifier.migrateAndValidate(db, 5);
+
+    final pokemon = await db.select(db.pokemons).getSingle();
+    expect(pokemon.baseStatTotal, 320);
+    expect(pokemon.height, isNull);
+    expect(pokemon.weight, isNull);
+    expect(pokemon.detailSyncedAt, isNull);
+    expect(await db.select(db.pokemonStats).get(), hasLength(1));
+    expect((await db.select(db.favorites).getSingle()).pokemonId, 25);
+    expect(await db.select(db.abilities).get(), isEmpty);
+    expect(await db.select(db.pokemonAbilities).get(), isEmpty);
+    expect(await db.select(db.eggGroups).get(), isEmpty);
+    expect(await db.select(db.pokemonEggGroups).get(), isEmpty);
   });
 }
