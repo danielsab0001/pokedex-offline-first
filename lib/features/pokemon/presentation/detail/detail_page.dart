@@ -15,12 +15,21 @@ import 'package:pokedex/features/pokemon/presentation/detail/detail_refresh_noti
 import 'package:pokedex/features/pokemon/presentation/detail/detail_share_button.dart';
 import 'package:pokedex/features/pokemon/presentation/detail/detail_state.dart';
 import 'package:pokedex/features/pokemon/presentation/detail/detail_stats_section.dart';
+import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_hero.dart';
+import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_thumbnail.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
 
 class PokemonDetailPage extends ConsumerWidget {
-  const PokemonDetailPage({super.key, required this.pokemonId});
+  const PokemonDetailPage({
+    super.key,
+    required this.pokemonId,
+    this.heroOrigin,
+  });
 
   final int pokemonId;
+
+  /// Desde dónde se abrió el detalle; null desactiva el Hero.
+  final String? heroOrigin;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -46,8 +55,9 @@ class PokemonDetailPage extends ConsumerWidget {
         ],
       ),
       body: switch (state) {
-        DetailLoading() => Center(
-          child: CircularProgressIndicator(semanticsLabel: l10n.detailLoading),
+        DetailLoading() => _DetailLoadingBody(
+          pokemonId: pokemonId,
+          heroOrigin: heroOrigin,
         ),
         DetailUnavailable(:final error) => StateMessage(
           icon: Icons.cloud_off_outlined,
@@ -59,6 +69,7 @@ class PokemonDetailPage extends ConsumerWidget {
         DetailContent(:final detail, :final refresh) => _DetailBody(
           detail: detail,
           refresh: refresh,
+          heroOrigin: heroOrigin,
           onRetry: retry,
         ),
       },
@@ -70,11 +81,13 @@ class _DetailBody extends StatefulWidget {
   const _DetailBody({
     required this.detail,
     required this.refresh,
+    required this.heroOrigin,
     required this.onRetry,
   });
 
   final PokemonDetail detail;
   final DetailRefresh refresh;
+  final String? heroOrigin;
   final VoidCallback onRetry;
 
   @override
@@ -106,6 +119,7 @@ class _DetailBodyState extends State<_DetailBody> {
                     DetailHeader(
                       pokemon: detail.pokemon,
                       shiny: _shiny,
+                      heroOrigin: widget.heroOrigin,
                       onShinyChanged: (value) => setState(() => _shiny = value),
                     ),
                     if (detail.stats.isNotEmpty) ...[
@@ -131,6 +145,52 @@ class _DetailBodyState extends State<_DetailBody> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Mientras carga muestra ya el marco con el sprite: el Hero necesita su
+/// destino desde el primer fotograma de la transición.
+class _DetailLoadingBody extends ConsumerWidget {
+  const _DetailLoadingBody({required this.pokemonId, required this.heroOrigin});
+
+  final int pokemonId;
+  final String? heroOrigin;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final label = AppLocalizations.of(context).detailLoading;
+    final spinner = CircularProgressIndicator(semanticsLabel: label);
+    final origin = heroOrigin;
+    if (origin == null) return Center(child: spinner);
+
+    final buildThumbnail = ref.watch(pokemonThumbnailBuilderProvider);
+
+    return Align(
+      alignment: Alignment.topCenter,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        child: Column(
+          children: [
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: const BorderRadius.all(Radius.circular(24)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: PokemonHero(
+                  origin: origin,
+                  pokemonId: pokemonId,
+                  child: buildThumbnail(pokemonId, detailArtworkSize),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            spinner,
+          ],
         ),
       ),
     );

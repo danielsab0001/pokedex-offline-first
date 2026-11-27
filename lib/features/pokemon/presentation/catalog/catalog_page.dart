@@ -12,6 +12,7 @@ import 'package:pokedex/features/pokemon/presentation/catalog/catalog_state.dart
 import 'package:pokedex/features/pokemon/presentation/catalog/catalog_toolbar.dart';
 import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_list_item.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
+import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_hero.dart';
 
 /// Se pide más a la base cuando quedan menos de estos píxeles por recorrer.
 const _loadMoreThreshold = 800.0;
@@ -148,7 +149,11 @@ class _CatalogList extends ConsumerWidget {
         itemCount: content.pokemons.length,
         itemBuilder: (context, index) {
           final pokemon = content.pokemons[index];
-          return PokemonListItem(key: ValueKey(pokemon.id), pokemon: pokemon);
+          return PokemonListItem(
+            key: ValueKey(pokemon.id),
+            pokemon: pokemon,
+            heroOrigin: heroOriginCatalog,
+          );
         },
       ),
     );

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon.dart';
 import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_artwork.dart';
 import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_card.dart';
+import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_hero.dart';
 import 'package:pokedex/features/pokemon/presentation/widgets/type_chip.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
 
@@ -15,11 +16,15 @@ class DetailHeader extends ConsumerWidget {
     required this.pokemon,
     required this.shiny,
     required this.onShinyChanged,
+    this.heroOrigin,
   });
 
   final Pokemon pokemon;
   final bool shiny;
   final ValueChanged<bool> onShinyChanged;
+
+  /// Desde dónde se abrió el detalle; null desactiva el Hero.
+  final String? heroOrigin;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -43,10 +48,14 @@ class DetailHeader extends ConsumerWidget {
             ),
             child: Padding(
               padding: const EdgeInsets.all(12),
-              child: buildArtwork(
-                pokemon.id,
-                shiny: shiny,
-                size: detailArtworkSize,
+              child: PokemonHero(
+                origin: heroOrigin,
+                pokemonId: pokemon.id,
+                child: buildArtwork(
+                  pokemon.id,
+                  shiny: shiny,
+                  size: detailArtworkSize,
+                ),
               ),
             ),
           ),

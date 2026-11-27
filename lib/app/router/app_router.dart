@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pokedex/app/router/app_shell.dart';
@@ -6,8 +7,18 @@ import 'package:pokedex/features/debug_tools/presentation/debug_tools_page.dart'
 import 'package:pokedex/features/favorites/presentation/favorites_page.dart';
 import 'package:pokedex/features/pokemon/presentation/catalog/catalog_page.dart';
 import 'package:pokedex/features/pokemon/presentation/detail/detail_page.dart';
+import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_hero.dart';
 import 'package:pokedex/features/trivia/presentation/trivia_home_page.dart';
 import 'package:pokedex/features/trivia/presentation/trivia_play_page.dart';
+
+// Un número inválido en la ruta lleva al catálogo.
+String? _redirectInvalidId(GoRouterState state) =>
+    int.tryParse(state.pathParameters['id'] ?? '') == null ? '/' : null;
+
+Widget _detailPage(GoRouterState state, String origin) => PokemonDetailPage(
+  pokemonId: int.parse(state.pathParameters['id']!),
+  heroOrigin: origin,
+);
 
 final routerProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
@@ -21,6 +32,14 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/',
                 builder: (context, state) => const CatalogPage(),
+                routes: [
+                  GoRoute(
+                    path: 'pokemon/:id',
+                    redirect: (context, state) => _redirectInvalidId(state),
+                    builder: (context, state) =>
+                        _detailPage(state, heroOriginCatalog),
+                  ),
+                ],
               ),
             ],
           ),
@@ -29,6 +48,14 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/favorites',
                 builder: (context, state) => const FavoritesPage(),
+                routes: [
+                  GoRoute(
+                    path: 'pokemon/:id',
+                    redirect: (context, state) => _redirectInvalidId(state),
+                    builder: (context, state) =>
+                        _detailPage(state, heroOriginFavorites),
+                  ),
+                ],
               ),
             ],
           ),
@@ -41,14 +68,6 @@ final routerProvider = Provider<GoRouter>((ref) {
             ],
           ),
         ],
-      ),
-      GoRoute(
-        path: '/pokemon/:id',
-        redirect: (context, state) =>
-            int.tryParse(state.pathParameters['id'] ?? '') == null ? '/' : null,
-        builder: (context, state) => PokemonDetailPage(
-          pokemonId: int.parse(state.pathParameters['id']!),
-        ),
       ),
       GoRoute(
         path: '/trivia/play',

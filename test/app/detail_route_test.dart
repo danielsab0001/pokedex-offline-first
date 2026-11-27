@@ -60,7 +60,7 @@ GoRouter routerOf(WidgetTester tester) {
 
 void main() {
   testWidgets(
-    'el detalle se abre sobre el shell y al volver reaparecen las pestañas',
+    'el detalle se abre dentro de la pestaña y al volver reaparece la lista',
     (tester) async {
       await tester.pumpWidget(app());
       await tester.pumpAndSettle();
@@ -68,16 +68,31 @@ void main() {
       unawaited(routerOf(tester).push('/pokemon/25'));
       await tester.pumpAndSettle();
 
+      // La barra inferior sigue visible: el detalle vive en el shell.
       expect(find.byType(PokemonDetailPage), findsOneWidget);
-      expect(find.byType(NavigationBar), findsNothing);
+      expect(find.byType(NavigationBar), findsOneWidget);
 
       routerOf(tester).pop();
       await tester.pumpAndSettle();
 
       expect(find.byType(PokemonDetailPage), findsNothing);
+      expect(find.byType(CatalogPage), findsOneWidget);
       expect(find.byType(NavigationBar), findsOneWidget);
     },
   );
+
+  testWidgets('el detalle también se abre desde la pestaña de favoritos', (
+    tester,
+  ) async {
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+
+    routerOf(tester).go('/favorites/pokemon/25');
+    await tester.pumpAndSettle();
+
+    expect(find.byType(PokemonDetailPage), findsOneWidget);
+    expect(find.byType(NavigationBar), findsOneWidget);
+  });
 
   testWidgets('el detalle lleva el indicador de conectividad', (tester) async {
     await tester.pumpWidget(app());

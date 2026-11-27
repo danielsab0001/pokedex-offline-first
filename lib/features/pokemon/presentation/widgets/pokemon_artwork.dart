@@ -11,7 +11,6 @@ typedef PokemonArtworkBuilder = Widget Function(
   required double size,
 });
 
-/// Punto de sustitución para los tests de widgets, que no deben bajar imágenes.
 final pokemonArtworkBuilderProvider = Provider<PokemonArtworkBuilder>(
   (ref) =>
       (int pokemonId, {required bool shiny, required double size}) =>
@@ -42,6 +41,15 @@ class PokemonArtwork extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pixelRatio = MediaQuery.devicePixelRatioOf(context);
+    final fade = MediaQuery.disableAnimationsOf(context)
+        ? Duration.zero
+        : const Duration(milliseconds: 300);
+    // El sprite ya está en disco: es la imagen que el Hero trae de la lista.
+    final sprite = PokemonThumbnail(
+      pokemonId: pokemonId,
+      size: size,
+      shiny: shiny,
+    );
 
     // La pantalla de detalle ya describe la imagen con su etiqueta.
     return ExcludeSemantics(
@@ -52,11 +60,10 @@ class PokemonArtwork extends StatelessWidget {
           cacheManager: _artworkCache,
           memCacheWidth: (size * pixelRatio).round(),
           fit: BoxFit.contain,
-          placeholder: (_, _) =>
-              const Center(child: CircularProgressIndicator()),
-          // Sin ilustración se usa el sprite, que suele estar ya en disco.
-          errorWidget: (_, _, _) =>
-              PokemonThumbnail(pokemonId: pokemonId, size: size, shiny: shiny),
+          fadeInDuration: fade,
+          fadeOutDuration: fade,
+          placeholder: (_, _) => sprite,
+          errorWidget: (_, _, _) => sprite,
         ),
       ),
     );

@@ -7,6 +7,7 @@ import 'package:pokedex/features/favorites/presentation/favorite_providers.dart'
 import 'package:pokedex/features/pokemon/domain/pokemon.dart';
 import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_list_item.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
+import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_hero.dart';
 
 class FavoritesPage extends ConsumerWidget {
   const FavoritesPage({super.key});
@@ -60,6 +61,7 @@ class _FavoritesList extends StatelessWidget {
               return PokemonListItem(
                 key: ValueKey(pokemon.id),
                 pokemon: pokemon,
+                heroOrigin: heroOriginFavorites,
               );
             },
           ),
