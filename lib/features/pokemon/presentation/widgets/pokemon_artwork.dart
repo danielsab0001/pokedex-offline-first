@@ -26,6 +26,12 @@ final _artworkCache = CacheManager(
   ),
 );
 
+/// La misma imagen y caché que usa [PokemonArtwork], para precargarla.
+ImageProvider artworkImageProvider(int pokemonId) => CachedNetworkImageProvider(
+  pokemonArtworkUrl(pokemonId),
+  cacheManager: _artworkCache,
+);
+
 class PokemonArtwork extends StatelessWidget {
   const PokemonArtwork({
     super.key,

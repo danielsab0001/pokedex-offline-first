@@ -323,7 +323,23 @@
                         "triviaHistoryError": "No se pudo leer tu historial de partidas.",
                         "achievementUnlocked": "Desbloqueado",
                         "achievementLocked": "Bloqueado",
-                        "detailShareTextNoTypes": "{name} {number}",
+                            "detailShareTextNoTypes": "{name} {number}",
+                            "@detailShareTextNoTypes": {
+                              "placeholders": {
+                                "name": {"type": "String"},
+                                "number": {"type": "String"}
+                              }
+                            },
+                            "cardTitle": "Tarjeta de {name}",
+                            "@cardTitle": {
+                              "placeholders": {
+                                "name": {"type": "String"}
+                              }
+                            },
+                            "cardShareImage": "Compartir imagen",
+                            "cardShareText": "Compartir texto",
+                            "cardShareImageFailed": "No se pudo crear la imagen.",
+                            "cardFooter": "Pokédex",
                 "@detailShareTextNoTypes": {
                   "placeholders": {
                     "name": {"type": "String"},

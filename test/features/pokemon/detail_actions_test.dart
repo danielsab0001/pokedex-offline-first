@@ -7,9 +7,12 @@ import 'package:pokedex/features/connectivity/presentation/connectivity_provider
 import 'package:pokedex/features/favorites/presentation/favorite_button.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon_detail.dart';
+import 'package:pokedex/features/pokemon/presentation/card/card_providers.dart';
+import 'package:pokedex/features/pokemon/presentation/card/pokemon_card_page.dart';
 import 'package:pokedex/features/pokemon/presentation/detail/detail_page.dart';
 import 'package:pokedex/features/pokemon/presentation/detail/share_providers.dart';
 import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_artwork.dart';
+import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_thumbnail.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
 
 import '../../support/fake_favorites_repository.dart';
@@ -42,6 +45,10 @@ Widget app({
         (id, {required shiny, required size}) =>
             SizedBox.square(dimension: size),
       ),
+      pokemonThumbnailBuilderProvider.overrideWithValue(
+        (id, size) => SizedBox.square(dimension: size),
+      ),
+      cardArtworkLoaderProvider.overrideWithValue((context, id) async => null),
       connectivityIndicatorProvider.overrideWithValue(
         const ConnectivityIndicator(
           kind: IndicatorKind.online,
@@ -81,12 +88,29 @@ void main() {
     expect(find.byIcon(Icons.favorite), findsOneWidget);
   });
 
-  testWidgets('compartir envía nombre, número y tipos', (tester) async {
+  testWidgets('el icono de compartir abre la tarjeta del Pokémon', (
+    tester,
+  ) async {
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Compartir'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(PokemonCardPage), findsOneWidget);
+    expect(find.text('Compartir imagen'), findsOneWidget);
+  });
+
+  testWidgets('compartir texto desde la tarjeta envía nombre, número y tipos', (
+    tester,
+  ) async {
     final shared = <String>[];
     await tester.pumpWidget(app(shared: shared));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byTooltip('Compartir'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Compartir texto'));
     await tester.pumpAndSettle();
 
     expect(shared, ['Pikachu #0025 · Tipo: Eléctrico']);
@@ -98,6 +122,8 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.tap(find.byTooltip('Share'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Share text'));
     await tester.pumpAndSettle();
 
     expect(shared, ['Pikachu #0025 · Type: Electric']);
@@ -112,6 +138,8 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.tap(find.byTooltip('Compartir'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Compartir texto'));
     await tester.pumpAndSettle();
 
     expect(find.text('No se pudo compartir.'), findsOneWidget);

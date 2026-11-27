@@ -258,7 +258,23 @@
                         "triviaHistoryError": "Couldn't read your game history.",
                         "achievementUnlocked": "Unlocked",
                         "achievementLocked": "Locked",
-                        "detailShareTextNoTypes": "{name} {number}",
+                            "detailShareTextNoTypes": "{name} {number}",
+                            "@detailShareTextNoTypes": {
+                              "placeholders": {
+                                "name": {"type": "String"},
+                                "number": {"type": "String"}
+                              }
+                            },
+                            "cardTitle": "{name} card",
+                            "@cardTitle": {
+                              "placeholders": {
+                                "name": {"type": "String"}
+                              }
+                            },
+                            "cardShareImage": "Share image",
+                            "cardShareText": "Share text",
+                            "cardShareImageFailed": "Couldn't create the image.",
+                            "cardFooter": "Pokédex",
                 "@detailShareTextNoTypes": {
                   "placeholders": {
                     "name": {"type": "String"},
