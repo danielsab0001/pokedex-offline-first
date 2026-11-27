@@ -53,6 +53,7 @@ void main() {
       await tester.pumpWidget(
         host(const DetailStatsSection(stats: _stats, total: 320)),
       );
+      await tester.pumpAndSettle();
 
       final bars = tester
           .widgetList<LinearProgressIndicator>(
@@ -62,6 +63,51 @@ void main() {
 
       expect(bars, hasLength(6));
       expect(bars.last.value, closeTo(90 / 255, 0.0001));
+    });
+
+    testWidgets('las barras empiezan vacías y se llenan con animación', (
+      tester,
+    ) async {
+      double? lastBar() => tester
+          .widgetList<LinearProgressIndicator>(
+            find.byType(LinearProgressIndicator),
+          )
+          .last
+          .value;
+
+      await tester.pumpWidget(
+        host(const DetailStatsSection(stats: _stats, total: 320)),
+      );
+      expect(lastBar(), closeTo(0, 0.0001));
+
+      await tester.pump();
+      await tester.pump(statBarFillDuration ~/ 2);
+      expect(lastBar(), allOf(greaterThan(0), lessThan(90 / 255)));
+
+      await tester.pumpAndSettle();
+      expect(lastBar(), closeTo(90 / 255, 0.0001));
+    });
+
+    testWidgets('con «Quitar animaciones» las barras salen ya llenas', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        host(
+          Builder(
+            builder: (context) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(disableAnimations: true),
+              child: const DetailStatsSection(stats: _stats, total: 320),
+            ),
+          ),
+        ),
+      );
+
+      final bar = tester
+          .widgetList<LinearProgressIndicator>(
+            find.byType(LinearProgressIndicator),
+          )
+          .last;
+      expect(bar.value, closeTo(90 / 255, 0.0001));
     });
 
     testWidgets('cada fila se lee con valor y porcentaje', (tester) async {

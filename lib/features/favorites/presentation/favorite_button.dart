@@ -20,13 +20,14 @@ class FavoriteButton extends ConsumerStatefulWidget {
 }
 
 class _FavoriteButtonState extends ConsumerState<FavoriteButton>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
+    with TickerProviderStateMixin {
+  // Al marcar: el corazón crece y vuelve a su tamaño.
+  late final AnimationController _pop = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 350),
   );
 
-  late final Animation<double> _scale = TweenSequence<double>([
+  late final Animation<double> _popScale = TweenSequence<double>([
     TweenSequenceItem(
       tween: Tween(
         begin: 1.0,
@@ -41,11 +42,38 @@ class _FavoriteButtonState extends ConsumerState<FavoriteButton>
       ).chain(CurveTween(curve: Curves.easeIn)),
       weight: 60,
     ),
-  ]).animate(_controller);
+  ]).animate(_pop);
+
+  // Al quitar: el corazón relleno se encoge y se desvanece.
+  late final AnimationController _removal = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 200),
+  );
+
+  late final Animation<double> _removalScale = _removal
+      .drive(CurveTween(curve: Curves.easeIn))
+      .drive(Tween<double>(begin: 1.0, end: 0.4));
+
+  late final Animation<double> _removalOpacity = _removal
+      .drive(CurveTween(curve: Curves.easeIn))
+      .drive(Tween<double>(begin: 1.0, end: 0.0));
+
+  bool _removing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _removal.addStatusListener((status) {
+      if (status == AnimationStatus.completed && mounted) {
+        setState(() => _removing = false);
+      }
+    });
+  }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _pop.dispose();
+    _removal.dispose();
     super.dispose();
   }
 
@@ -54,13 +82,16 @@ class _FavoriteButtonState extends ConsumerState<FavoriteButton>
     final l10n = AppLocalizations.of(context);
     final pokemonId = widget.pokemonId;
     final isFavorite = ref.watch(isFavoriteProvider(pokemonId));
+    final heartColor = Theme.of(context).colorScheme.error;
 
-    // Solo anima al marcar: al abrir una lista con favoritos ya guardados no.
+    // Solo anima los cambios: al abrir una lista con favoritos ya guardados no.
     ref.listen(isFavoriteProvider(pokemonId), (previous, next) {
-      if (previous == false &&
-          next &&
-          !MediaQuery.disableAnimationsOf(context)) {
-        unawaited(_controller.forward(from: 0));
+      if (MediaQuery.disableAnimationsOf(context)) return;
+      if (previous == false && next) {
+        unawaited(_pop.forward(from: 0));
+      } else if (previous == true && !next) {
+        setState(() => _removing = true);
+        unawaited(_removal.forward(from: 0));
       }
     });
 
@@ -69,11 +100,26 @@ class _FavoriteButtonState extends ConsumerState<FavoriteButton>
       tooltip: isFavorite
           ? l10n.favoriteRemove(widget.pokemonName)
           : l10n.favoriteAdd(widget.pokemonName),
-      icon: const Icon(Icons.favorite_border),
+      icon: _removing
+          ? Stack(
+              alignment: Alignment.center,
+              children: [
+                const Icon(Icons.favorite_border),
+                FadeTransition(
+                  opacity: _removalOpacity,
+                  child: ScaleTransition(
+                    key: const ValueKey('favorite-heart-shrink'),
+                    scale: _removalScale,
+                    child: Icon(Icons.favorite, color: heartColor),
+                  ),
+                ),
+              ],
+            )
+          : const Icon(Icons.favorite_border),
       selectedIcon: ScaleTransition(
         key: const ValueKey('favorite-heart-scale'),
-        scale: _scale,
-        child: Icon(Icons.favorite, color: Theme.of(context).colorScheme.error),
+        scale: _popScale,
+        child: Icon(Icons.favorite, color: heartColor),
       ),
       onPressed: () => unawaited(
         setFavorite(ref, pokemonId: pokemonId, isFavorite: !isFavorite),

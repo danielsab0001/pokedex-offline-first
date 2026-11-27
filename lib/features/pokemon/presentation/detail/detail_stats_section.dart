@@ -12,6 +12,8 @@ String statLabel(AppLocalizations l10n, StatKind kind) => switch (kind) {
   StatKind.speed => l10n.detailStatSpeed,
 };
 
+const statBarFillDuration = Duration(milliseconds: 600);
+
 /// Barras de estadísticas base con valor, porcentaje y total (RF-DET-02).
 class DetailStatsSection extends StatelessWidget {
   const DetailStatsSection({
@@ -92,14 +94,33 @@ class _StatRow extends StatelessWidget {
             const SizedBox(height: 4),
             ClipRRect(
               borderRadius: const BorderRadius.all(Radius.circular(4)),
-              child: LinearProgressIndicator(
-                value: stat.fraction,
-                minHeight: 8,
-              ),
+              child: _StatBar(fraction: stat.fraction),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Barra que se llena de 0 a su valor; con «Quitar animaciones» sale ya llena.
+class _StatBar extends StatelessWidget {
+  const _StatBar({required this.fraction});
+
+  final double fraction;
+
+  @override
+  Widget build(BuildContext context) {
+    if (MediaQuery.disableAnimationsOf(context)) {
+      return LinearProgressIndicator(value: fraction, minHeight: 8);
+    }
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: fraction),
+      duration: statBarFillDuration,
+      curve: Curves.easeOutCubic,
+      builder: (context, value, _) =>
+          LinearProgressIndicator(value: value, minHeight: 8),
     );
   }
 }

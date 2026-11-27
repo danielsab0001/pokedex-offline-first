@@ -32,6 +32,9 @@ class DetailHeader extends ConsumerWidget {
     final theme = Theme.of(context);
     final name = pokemon.nameFor(Localizations.localeOf(context).languageCode);
     final buildArtwork = ref.watch(pokemonArtworkBuilderProvider);
+    final switchDuration = MediaQuery.disableAnimationsOf(context)
+        ? Duration.zero
+        : const Duration(milliseconds: 300);
 
     return Column(
       children: [
@@ -51,10 +54,16 @@ class DetailHeader extends ConsumerWidget {
               child: PokemonHero(
                 origin: heroOrigin,
                 pokemonId: pokemon.id,
-                child: buildArtwork(
-                  pokemon.id,
-                  shiny: shiny,
-                  size: detailArtworkSize,
+                child: AnimatedSwitcher(
+                  duration: switchDuration,
+                  child: KeyedSubtree(
+                    key: ValueKey(shiny),
+                    child: buildArtwork(
+                      pokemon.id,
+                      shiny: shiny,
+                      size: detailArtworkSize,
+                    ),
+                  ),
                 ),
               ),
             ),
