@@ -13,6 +13,7 @@ import 'package:pokedex/features/pokemon/presentation/catalog/catalog_state.dart
 import 'package:pokedex/features/trivia/presentation/trivia_home_page.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
 
+import '../support/fake_trivia_repository.dart';
 import '../support/fake_favorites_repository.dart';
 
 Widget _app() {
@@ -20,6 +21,7 @@ Widget _app() {
     overrides: [
       catalogStateProvider.overrideWithValue(const CatalogEmpty()),
       favoritesRepositoryProvider.overrideWithValue(FakeFavoritesRepository()),
+      triviaRepositoryProvider.overrideWithValue(FakeTriviaRepository()),
       connectivityIndicatorProvider.overrideWithValue(
         const ConnectivityIndicator(
           kind: IndicatorKind.online,

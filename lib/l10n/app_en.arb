@@ -251,7 +251,14 @@
                     "achievementCollectorTitle": "Collector",
                     "achievementCollectorDescription": "Identify {count} different Pokémon",
                     "@achievementCollectorDescription": {"placeholders": {"count": {"type": "int"}}},
-                    "detailShareTextNoTypes": "{name} {number}",
+                    "triviaRankingTitle": "Best games",
+                        "triviaRankingEmpty": "You haven't played yet. Your best games will show up here.",
+                        "triviaAchievementsTitle": "Achievements ({unlocked} of {total})",
+                        "@triviaAchievementsTitle": {"placeholders": {"unlocked": {"type": "int"}, "total": {"type": "int"}}},
+                        "triviaHistoryError": "Couldn't read your game history.",
+                        "achievementUnlocked": "Unlocked",
+                        "achievementLocked": "Locked",
+                        "detailShareTextNoTypes": "{name} {number}",
                 "@detailShareTextNoTypes": {
                   "placeholders": {
                     "name": {"type": "String"},

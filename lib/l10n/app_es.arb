@@ -316,7 +316,14 @@
                     "achievementCollectorTitle": "Coleccionista",
                     "achievementCollectorDescription": "Acierta {count} Pokémon distintos",
                     "@achievementCollectorDescription": {"placeholders": {"count": {"type": "int"}}},
-                    "detailShareTextNoTypes": "{name} {number}",
+                    "triviaRankingTitle": "Mejores partidas",
+                        "triviaRankingEmpty": "Todavía no has jugado. Tus mejores partidas aparecerán aquí.",
+                        "triviaAchievementsTitle": "Logros ({unlocked} de {total})",
+                        "@triviaAchievementsTitle": {"placeholders": {"unlocked": {"type": "int"}, "total": {"type": "int"}}},
+                        "triviaHistoryError": "No se pudo leer tu historial de partidas.",
+                        "achievementUnlocked": "Desbloqueado",
+                        "achievementLocked": "Bloqueado",
+                        "detailShareTextNoTypes": "{name} {number}",
                 "@detailShareTextNoTypes": {
                   "placeholders": {
                     "name": {"type": "String"},
