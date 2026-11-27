@@ -176,3 +176,29 @@ class PokemonEggGroups extends Table {
   @override
   Set<Column> get primaryKey => {pokemonId, eggGroupId};
 }
+
+@DataClassName('TriviaResultRow')
+class TriviaResults extends Table {
+  @override
+  String get tableName => 'trivia_result';
+
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get score => integer()();
+  IntColumn get correctAnswers => integer()();
+  IntColumn get totalQuestions => integer()();
+  DateTimeColumn get playedAt => dateTime()();
+}
+
+@DataClassName('TriviaAnswerRow')
+class TriviaAnswers extends Table {
+  @override
+  String get tableName => 'trivia_answer';
+
+  // El orden de los id es el orden en que se respondió.
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get triviaResultId =>
+      integer().references(TriviaResults, #id, onDelete: KeyAction.cascade)();
+  // Sin cascada: ninguna acción sobre el catálogo borra el historial (PS-11).
+  IntColumn get pokemonId => integer().references(Pokemons, #id)();
+  BoolColumn get correct => boolean()();
+}
