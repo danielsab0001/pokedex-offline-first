@@ -10,6 +10,7 @@ import 'package:pokedex/features/favorites/presentation/favorites_page.dart';
 import 'package:pokedex/features/pokemon/presentation/catalog/catalog_page.dart';
 import 'package:pokedex/features/pokemon/presentation/catalog/catalog_providers.dart';
 import 'package:pokedex/features/pokemon/presentation/catalog/catalog_state.dart';
+import 'package:pokedex/features/trivia/presentation/trivia_home_page.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
 
 import '../support/fake_favorites_repository.dart';
@@ -39,7 +40,7 @@ Widget _app() {
 }
 
 void main() {
-  testWidgets('arranca en el catálogo con las dos pestañas', (tester) async {
+  testWidgets('arranca en el catálogo con las tres pestañas', (tester) async {
     await tester.pumpWidget(_app());
     await tester.pumpAndSettle();
 
@@ -47,6 +48,7 @@ void main() {
     expect(find.byType(NavigationBar), findsOneWidget);
     expect(find.text('Catálogo'), findsOneWidget);
     expect(find.text('Favoritos'), findsOneWidget);
+    expect(find.text('Trivia'), findsOneWidget);
   });
 
   testWidgets('cambia entre pestañas y el indicador está en las dos', (
@@ -65,6 +67,20 @@ void main() {
     await tester.tap(find.text('Catálogo'));
     await tester.pumpAndSettle();
     expect(find.byType(CatalogPage), findsOneWidget);
+    expect(find.byType(ConnectivityChip), findsOneWidget);
+  });
+
+  testWidgets('la pestaña Trivia muestra su inicio con el indicador', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_app());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Trivia'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(TriviaHomePage), findsOneWidget);
+    expect(find.text('Jugar'), findsOneWidget);
     expect(find.byType(ConnectivityChip), findsOneWidget);
   });
 

@@ -6,6 +6,8 @@ import 'package:pokedex/features/debug_tools/presentation/debug_tools_page.dart'
 import 'package:pokedex/features/favorites/presentation/favorites_page.dart';
 import 'package:pokedex/features/pokemon/presentation/catalog/catalog_page.dart';
 import 'package:pokedex/features/pokemon/presentation/detail/detail_page.dart';
+import 'package:pokedex/features/trivia/presentation/trivia_home_page.dart';
+import 'package:pokedex/features/trivia/presentation/trivia_play_page.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
@@ -30,6 +32,14 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/trivia',
+                builder: (context, state) => const TriviaHomePage(),
+              ),
+            ],
+          ),
         ],
       ),
       GoRoute(
@@ -39,6 +49,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => PokemonDetailPage(
           pokemonId: int.parse(state.pathParameters['id']!),
         ),
+      ),
+      GoRoute(
+        path: '/trivia/play',
+        builder: (context, state) => const TriviaPlayPage(),
       ),
       if (debugToolsEnabled)
         GoRoute(

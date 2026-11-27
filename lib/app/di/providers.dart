@@ -38,6 +38,13 @@ import 'package:pokedex/features/pokemon/domain/catalog_filters_repository.dart'
 import 'package:pokedex/features/pokemon/data/pokemon_detail_repository_impl.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_detail_sync.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon_detail_repository.dart';
+import 'package:pokedex/core/images/sprite_cache.dart';
+import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_image_urls.dart';
+import 'package:pokedex/features/trivia/data/cache_sprite_availability.dart';
+import 'package:pokedex/features/trivia/data/trivia_local_data_source.dart';
+import 'package:pokedex/features/trivia/data/trivia_repository_impl.dart';
+import 'package:pokedex/features/trivia/domain/sprite_availability.dart';
+import 'package:pokedex/features/trivia/domain/trivia_repository.dart';
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase.defaults();
@@ -221,5 +228,20 @@ final userPreferencesLocalDataSourceProvider =
 final catalogFiltersRepositoryProvider = Provider<CatalogFiltersRepository>(
   (ref) => CatalogFiltersRepositoryImpl(
     ref.watch(userPreferencesLocalDataSourceProvider),
+  ),
+);
+
+final spriteAvailabilityProvider = Provider<SpriteAvailability>(
+  (ref) => CacheSpriteAvailability(spriteCache, pokemonSpriteUrl),
+);
+
+final triviaLocalDataSourceProvider = Provider<TriviaLocalDataSource>(
+  (ref) => TriviaLocalDataSource(ref.watch(appDatabaseProvider)),
+);
+
+final triviaRepositoryProvider = Provider<TriviaRepository>(
+  (ref) => TriviaRepositoryImpl(
+    ref.watch(triviaLocalDataSourceProvider),
+    ref.watch(spriteAvailabilityProvider),
   ),
 );
