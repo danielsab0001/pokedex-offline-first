@@ -9,11 +9,14 @@ import 'package:pokedex/app/router/app_router.dart';
 import 'package:pokedex/features/connectivity/domain/connectivity_models.dart';
 import 'package:pokedex/features/connectivity/presentation/connectivity_chip.dart';
 import 'package:pokedex/features/connectivity/presentation/connectivity_providers.dart';
+import 'package:pokedex/features/pokemon/presentation/card/card_providers.dart';
+import 'package:pokedex/features/pokemon/presentation/card/pokemon_card_page.dart';
 import 'package:pokedex/features/pokemon/presentation/catalog/catalog_page.dart';
 import 'package:pokedex/features/pokemon/presentation/catalog/catalog_providers.dart';
 import 'package:pokedex/features/pokemon/presentation/catalog/catalog_state.dart';
 import 'package:pokedex/features/pokemon/presentation/detail/detail_page.dart';
 import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_artwork.dart';
+import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_thumbnail.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
 
 import '../support/fake_favorites_repository.dart';
@@ -32,6 +35,10 @@ Widget app() {
         (id, {required shiny, required size}) =>
             SizedBox.square(dimension: size),
       ),
+      pokemonThumbnailBuilderProvider.overrideWithValue(
+        (id, size) => SizedBox.square(dimension: size),
+      ),
+      cardArtworkLoaderProvider.overrideWithValue((context, id) async => null),
       connectivityIndicatorProvider.overrideWithValue(
         const ConnectivityIndicator(
           kind: IndicatorKind.online,
@@ -93,6 +100,28 @@ void main() {
     expect(find.byType(PokemonDetailPage), findsOneWidget);
     expect(find.byType(NavigationBar), findsOneWidget);
   });
+
+  testWidgets(
+    'la tarjeta se abre sobre el detalle y al volver reaparece el detalle',
+    (tester) async {
+      await tester.pumpWidget(app());
+      await tester.pumpAndSettle();
+
+      routerOf(tester).go('/pokemon/25');
+      await tester.pumpAndSettle();
+      unawaited(routerOf(tester).push('/pokemon/25/card'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(PokemonCardPage), findsOneWidget);
+      expect(find.byType(NavigationBar), findsOneWidget);
+
+      routerOf(tester).pop();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(PokemonCardPage), findsNothing);
+      expect(find.byType(PokemonDetailPage), findsOneWidget);
+    },
+  );
 
   testWidgets('el detalle lleva el indicador de conectividad', (tester) async {
     await tester.pumpWidget(app());

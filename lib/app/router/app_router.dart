@@ -5,6 +5,7 @@ import 'package:pokedex/app/router/app_shell.dart';
 import 'package:pokedex/core/debug/debug_flags.dart';
 import 'package:pokedex/features/debug_tools/presentation/debug_tools_page.dart';
 import 'package:pokedex/features/favorites/presentation/favorites_page.dart';
+import 'package:pokedex/features/pokemon/presentation/card/pokemon_card_page.dart';
 import 'package:pokedex/features/pokemon/presentation/catalog/catalog_page.dart';
 import 'package:pokedex/features/pokemon/presentation/detail/detail_page.dart';
 import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_hero.dart';
@@ -15,10 +16,13 @@ import 'package:pokedex/features/trivia/presentation/trivia_play_page.dart';
 String? _redirectInvalidId(GoRouterState state) =>
     int.tryParse(state.pathParameters['id'] ?? '') == null ? '/' : null;
 
-Widget _detailPage(GoRouterState state, String origin) => PokemonDetailPage(
-  pokemonId: int.parse(state.pathParameters['id']!),
-  heroOrigin: origin,
-);
+int _idOf(GoRouterState state) => int.parse(state.pathParameters['id']!);
+
+Widget _detailPage(GoRouterState state, String origin) =>
+    PokemonDetailPage(pokemonId: _idOf(state), heroOrigin: origin);
+
+Widget _cardPage(GoRouterState state) =>
+    PokemonCardPage(pokemonId: _idOf(state));
 
 final routerProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
@@ -38,6 +42,12 @@ final routerProvider = Provider<GoRouter>((ref) {
                     redirect: (context, state) => _redirectInvalidId(state),
                     builder: (context, state) =>
                         _detailPage(state, heroOriginCatalog),
+                    routes: [
+                      GoRoute(
+                        path: 'card',
+                        builder: (context, state) => _cardPage(state),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -54,6 +64,12 @@ final routerProvider = Provider<GoRouter>((ref) {
                     redirect: (context, state) => _redirectInvalidId(state),
                     builder: (context, state) =>
                         _detailPage(state, heroOriginFavorites),
+                    routes: [
+                      GoRoute(
+                        path: 'card',
+                        builder: (context, state) => _cardPage(state),
+                      ),
+                    ],
                   ),
                 ],
               ),

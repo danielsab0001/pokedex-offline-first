@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -6,17 +9,18 @@ import 'package:pokedex/core/database/app_database.dart';
 import 'package:pokedex/core/network/graphql_client.dart';
 import 'package:pokedex/core/sync/api_call_log.dart';
 import 'package:pokedex/core/sync/api_gate.dart';
+import 'package:pokedex/core/sync/sync_error_kind.dart';
 import 'package:pokedex/core/sync/sync_metadata_local_data_source.dart';
 import 'package:pokedex/core/sync/sync_status.dart';
 import 'package:pokedex/features/debug_tools/data/debug_tools_repository_impl.dart';
 import 'package:pokedex/features/debug_tools/domain/debug_tools_repository.dart';
 import 'package:pokedex/features/pokemon/data/catalog_sync.dart';
+import 'package:pokedex/features/pokemon/data/pokemon_detail_sync.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_local_data_source.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_remote_data_source.dart';
-import 'package:drift/drift.dart' show Value;
-import 'package:pokedex/core/sync/sync_error_kind.dart';
 
-import '../pokemon/catalog_sync_test.dart' show FakePokeApi;
+import '../pokemon/catalog_sync_test.dart'
+    show FakePokeApi, jsonResponse, species;
 
 void main() {
   late AppDatabase db;
@@ -25,22 +29,50 @@ void main() {
   late ApiCallLog callLog;
   late CatalogSync sync;
   late DebugToolsRepositoryImpl repo;
+  final detailIds = <int>[];
+  var detailFails = false;
+
+  // Sirve la consulta de detalle (lleva `id`) y deja el catálogo a FakePokeApi.
+  Future<http.Response> handle(http.Request request) async {
+    final body = jsonDecode(request.body) as Map<String, dynamic>;
+    final variables = body['variables'] as Map<String, dynamic>;
+    if (!variables.containsKey('id')) return api.handle(request);
+
+    final id = variables['id'] as int;
+    detailIds.add(id);
+    if (detailFails) throw http.ClientException('sin red');
+    return jsonResponse({
+      'data': {
+        'pokemonspecies': [if (id <= api.total) species(id)],
+      },
+    });
+  }
 
   // 25 especies en páginas de 10: una ronda completa son 3 llamadas.
   setUp(() {
+    detailIds.clear();
+    detailFails = false;
     db = AppDatabase(NativeDatabase.memory());
     meta = SyncMetadataLocalDataSource(db);
     api = FakePokeApi();
     callLog = ApiCallLog(db);
-    final client = createPokeApiClient(httpClient: MockClient(api.handle));
+    final remote = PokemonRemoteDataSource(
+      createPokeApiClient(httpClient: MockClient(handle)),
+    );
+    final local = PokemonLocalDataSource(db, meta);
     sync = CatalogSync(
-      PokemonRemoteDataSource(client),
-      PokemonLocalDataSource(db, meta),
+      remote,
+      local,
       meta,
       ApiGate(meta, maxAttempts: 1),
       pageSize: 10,
     );
-    repo = DebugToolsRepositoryImpl(db, callLog, sync, meta);
+    final detailSync = PokemonDetailSync(
+      remote,
+      local,
+      ApiGate(meta, maxAttempts: 1),
+    );
+    repo = DebugToolsRepositoryImpl(db, callLog, sync, detailSync, meta);
   });
 
   tearDown(() => db.close());
@@ -175,7 +207,7 @@ void main() {
   });
 
   group('restaurar un Pokémon', () {
-    test('restaura nombre y tipo con una sola llamada', () async {
+    test('restaura nombre y tipo con una sola llamada de detalle', () async {
       await sync.start();
       await repo.renamePokemon(7, 'Alterado');
       await repo.setPrimaryType(7, 4);
@@ -186,14 +218,31 @@ void main() {
       final pokemon = (await repo.watchPokemon(7).first)!;
       expect(pokemon.nameEn, 'Mon 7');
       expect(pokemon.primaryTypeId, 12);
-      expect(api.cursors, [6]);
+      expect(detailIds, [7]);
+      expect(api.cursors, isEmpty);
+    });
+
+    test('recupera un Pokémon borrado de la base local (PA-02)', () async {
+      await sync.start();
+      await (db.delete(
+        db.pokemonTypes,
+      )..where((t) => t.pokemonId.equals(7))).go();
+      await (db.delete(
+        db.pokemonStats,
+      )..where((s) => s.pokemonId.equals(7))).go();
+      await (db.delete(db.pokemons)..where((p) => p.id.equals(7))).go();
+      expect(await repo.watchPokemon(7).first, isNull);
+
+      expect(await repo.restorePokemon(7), isNull);
+
+      final pokemon = (await repo.watchPokemon(7).first)!;
+      expect(pokemon.nameEn, 'Mon 7');
+      expect(pokemon.primaryTypeId, 12);
     });
 
     test('devuelve el tipo de error si falla', () async {
       await sync.start();
-      api.intercept = (call) {
-        throw http.ClientException('sin red');
-      };
+      detailFails = true;
 
       expect(await repo.restorePokemon(7), SyncErrorKind.network);
     });

@@ -58,12 +58,16 @@ void main() {
 
   tearDown(() => db.close());
 
+  // Siembra la especie por la vía pública del catálogo.
+  Future<void> saveCore() =>
+      source.savePage([_core], resourceKey: 'catalog_index', nextCursor: 25);
+
   test('emite null si la especie no está en la base', () async {
     expect(await source.watchDetail(25).first, isNull);
   });
 
   test('con solo el catálogo trae tipos y estadísticas, sin detalle', () async {
-    await source.saveSpecies(_core);
+    await saveCore();
 
     final record = (await source.watchDetail(25).first)!;
 
@@ -90,7 +94,7 @@ void main() {
   });
 
   test('vuelve a emitir cuando se guarda el detalle', () async {
-    await source.saveSpecies(_core);
+    await saveCore();
     final emissions = StreamIterator(source.watchDetail(25));
     addTearDown(emissions.cancel);
 
@@ -104,7 +108,7 @@ void main() {
   });
 
   test('vuelve a emitir cuando cambia solo un tipo', () async {
-    await source.saveSpecies(_core);
+    await saveCore();
     await db
         .into(db.types)
         .insert(TypesCompanion.insert(id: const Value(12), slug: 'grass'));

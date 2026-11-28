@@ -1,3 +1,5 @@
+import 'package:pokedex/core/localization/localized_name.dart';
+
 class PokemonType {
   const PokemonType({required this.id, required this.slug, required this.slot});
 
@@ -22,12 +24,9 @@ class Pokemon {
   final int generationId;
   final List<PokemonType> types;
 
-  /// Nombre a mostrar según el idioma; si no hay traducción, cae al inglés.
-  String nameFor(String languageCode) {
-    if (languageCode == 'es') {
-      final spanish = nameEs;
-      if (spanish != null && spanish.isNotEmpty) return spanish;
-    }
-    return nameEn;
-  }
+  String nameFor(String languageCode) => localizedName(
+    languageCode: languageCode,
+    english: nameEn,
+    spanish: nameEs,
+  );
 }

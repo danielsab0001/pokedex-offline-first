@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-/// Título de sección más su contenido, común a todo el detalle.
-class DetailSection extends StatelessWidget {
-  const DetailSection({super.key, required this.title, required this.child});
+/// Título de sección más su contenido, común al detalle y a la trivia.
+class TitledSection extends StatelessWidget {
+  const TitledSection({super.key, required this.title, required this.child});
 
   final String title;
   final Widget child;

@@ -14,6 +14,10 @@ String pokemonDetailLocation(int pokemonId, {String? origin}) =>
     ? '/favorites/pokemon/$pokemonId'
     : '/pokemon/$pokemonId';
 
+/// La tarjeta cuelga del detalle: se abre en la misma pestaña.
+String pokemonCardLocation(int pokemonId, {String? origin}) =>
+    '${pokemonDetailLocation(pokemonId, origin: origin)}/card';
+
 /// Anima la imagen del Pokémon entre la lista y el detalle. Sin [origin] no
 /// hay Hero; con «Quitar animaciones» del sistema tampoco.
 class PokemonHero extends StatelessWidget {

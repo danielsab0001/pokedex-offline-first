@@ -14,7 +14,6 @@ import 'package:pokedex/features/connectivity/domain/connectivity_models.dart';
 import 'package:pokedex/features/connectivity/presentation/connectivity_providers.dart';
 import 'package:pokedex/core/sync/call_budget.dart';
 import 'package:pokedex/app/sync/periodic_sync_trigger.dart';
-import 'package:pokedex/core/error/failure.dart';
 
 class FakeCatalogSync implements CatalogSync {
   FakeCatalogSync({this.onStart});
@@ -46,9 +45,6 @@ class FakeCatalogSync implements CatalogSync {
 
   @override
   Future<void> verifyAll() async {}
-
-  @override
-  Future<Failure?> refreshSpecies(int id) async => null;
 }
 
 class _InertTimer implements Timer {

@@ -1,3 +1,4 @@
+import 'package:pokedex/core/localization/localized_name.dart';
 import 'package:pokedex/features/pokemon/domain/effect_summary.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon.dart';
 
@@ -60,13 +61,11 @@ class PokemonAbility {
   final String? effectEn;
   final String? effectEs;
 
-  String nameFor(String languageCode) {
-    final spanish = nameEs;
-    if (languageCode == 'es' && spanish != null && spanish.isNotEmpty) {
-      return spanish;
-    }
-    return nameEn;
-  }
+  String nameFor(String languageCode) => localizedName(
+    languageCode: languageCode,
+    english: nameEn,
+    spanish: nameEs,
+  );
 
   /// Efecto resumido. PokeAPI no trae el efecto técnico en español: ahí sale
   /// el texto descriptivo de la habilidad.

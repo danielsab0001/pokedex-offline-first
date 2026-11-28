@@ -188,6 +188,7 @@ final debugToolsRepositoryProvider = Provider<DebugToolsRepository>(
     ref.watch(appDatabaseProvider),
     ref.watch(apiCallLogProvider),
     ref.watch(catalogSyncProvider),
+    ref.watch(pokemonDetailSyncProvider),
     ref.watch(syncMetadataLocalDataSourceProvider),
   ),
 );

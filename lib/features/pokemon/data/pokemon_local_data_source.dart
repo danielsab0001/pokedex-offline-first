@@ -71,10 +71,6 @@ class PokemonLocalDataSource {
     });
   }
 
-  Future<void> saveSpecies(PokemonRecord record) {
-    return _db.transaction(() => _upsert([record]));
-  }
-
   /// Emite de nuevo cuando cambia cualquiera de las tablas del detalle. La
   /// consulta solo avisa de los cambios; los datos se leen en [_readDetail].
   Stream<PokemonDetailRecord?> watchDetail(int id) {

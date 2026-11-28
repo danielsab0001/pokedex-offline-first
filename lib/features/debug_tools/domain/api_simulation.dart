@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'package:pokedex/core/live_value.dart';
 
 /// Cómo se comporta la API simulada.
 enum SimulationMode {
@@ -19,23 +19,14 @@ enum SimulationMode {
 }
 
 class ApiSimulation {
-  final _changes = StreamController<SimulationMode>.broadcast(sync: true);
-  SimulationMode _mode = SimulationMode.off;
+  final _mode = LiveValue(SimulationMode.off);
 
-  SimulationMode get mode => _mode;
+  SimulationMode get mode => _mode.value;
 
-  set mode(SimulationMode value) {
-    if (value == _mode) return;
-    _mode = value;
-    _changes.add(value);
-  }
+  set mode(SimulationMode value) => _mode.value = value;
 
   /// Emite el modo actual al suscribirse y después cada cambio.
-  Stream<SimulationMode> watch() => Stream.multi((controller) {
-    controller.add(_mode);
-    final subscription = _changes.stream.listen(controller.add);
-    controller.onCancel = subscription.cancel;
-  }, isBroadcast: true);
+  Stream<SimulationMode> watch() => _mode.watch();
 
-  Future<void> dispose() => _changes.close();
+  Future<void> dispose() => _mode.dispose();
 }

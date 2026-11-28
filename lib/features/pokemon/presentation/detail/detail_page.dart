@@ -50,7 +50,7 @@ class PokemonDetailPage extends ConsumerWidget {
               pokemonId: pokemonId,
               pokemonName: detail.pokemon.nameFor(languageCode),
             ),
-            DetailShareButton(pokemon: detail.pokemon),
+            DetailShareButton(pokemon: detail.pokemon, heroOrigin: heroOrigin),
           ],
         ],
       ),

@@ -8,6 +8,7 @@ import 'package:pokedex/features/trivia/domain/trivia_config.dart';
 import 'package:pokedex/features/trivia/presentation/trivia_achievement_tile.dart';
 import 'package:pokedex/features/trivia/presentation/trivia_providers.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
+import 'package:pokedex/core/widgets/titled_section.dart';
 
 class TriviaHomePage extends ConsumerWidget {
   const TriviaHomePage({super.key});
@@ -65,7 +66,7 @@ class TriviaHomePage extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 32),
-                  _Section(
+                  TitledSection(
                     title: l10n.triviaRankingTitle,
                     child: switch (ranking) {
                       AsyncData(:final value) when value.isEmpty => Text(
@@ -82,7 +83,7 @@ class TriviaHomePage extends ConsumerWidget {
                     },
                   ),
                   const SizedBox(height: 32),
-                  _Section(
+                  TitledSection(
                     title: l10n.triviaAchievementsTitle(
                       unlocked.length,
                       TriviaAchievement.values.length,
@@ -106,28 +107,6 @@ class TriviaHomePage extends ConsumerWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _Section extends StatelessWidget {
-  const _Section({required this.title, required this.child});
-
-  final String title;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Semantics(
-          header: true,
-          child: Text(title, style: Theme.of(context).textTheme.titleLarge),
-        ),
-        const SizedBox(height: 8),
-        child,
-      ],
     );
   }
 }

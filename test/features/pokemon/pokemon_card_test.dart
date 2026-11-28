@@ -17,6 +17,7 @@ import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_card.dart'
 import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_thumbnail.dart';
 import 'package:pokedex/features/pokemon/presentation/widgets/type_chip.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
+import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_hero.dart';
 
 import '../../support/fake_pokemon_detail_repository.dart';
 import '../../support/pokemon_detail_fixtures.dart';
@@ -91,6 +92,14 @@ Widget pageHost({
 }
 
 void main() {
+  test('la ruta de la tarjeta cuelga de la del detalle', () {
+    expect(pokemonCardLocation(25), '/pokemon/25/card');
+    expect(
+      pokemonCardLocation(25, origin: heroOriginFavorites),
+      '/favorites/pokemon/25/card',
+    );
+  });
+
   group('PokemonShareCard', () {
     testWidgets('mide 360×504 y muestra los datos del Pokémon', (tester) async {
       await tester.pumpWidget(cardHost());

@@ -6,15 +6,23 @@ import 'package:pokedex/core/sync/sync_metadata_local_data_source.dart';
 import 'package:pokedex/core/sync/sync_status.dart';
 import 'package:pokedex/features/debug_tools/domain/debug_tools_repository.dart';
 import 'package:pokedex/features/pokemon/data/catalog_sync.dart';
+import 'package:pokedex/features/pokemon/data/pokemon_detail_sync.dart';
 
 const _assumedCatalogTotal = 1025;
 
 class DebugToolsRepositoryImpl implements DebugToolsRepository {
-  DebugToolsRepositoryImpl(this._db, this._callLog, this._sync, this._metadata);
+  DebugToolsRepositoryImpl(
+    this._db,
+    this._callLog,
+    this._sync,
+    this._detailSync,
+    this._metadata,
+  );
 
   final AppDatabase _db;
   final ApiCallLog _callLog;
   final CatalogSync _sync;
+  final PokemonDetailSync _detailSync;
   final SyncMetadataLocalDataSource _metadata;
 
   @override
@@ -122,7 +130,7 @@ class DebugToolsRepositoryImpl implements DebugToolsRepository {
 
   @override
   Future<SyncErrorKind?> restorePokemon(int id) async {
-    final failure = await _sync.refreshSpecies(id);
+    final failure = await _detailSync.refresh(id);
     if (failure == null) return null;
     return SyncErrorKind.fromCode(failure.code) ?? SyncErrorKind.unknown;
   }

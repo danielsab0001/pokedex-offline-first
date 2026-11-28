@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:ui' show PlatformDispatcher;
+import 'dart:ui' show Locale, PlatformDispatcher;
 
 import 'package:flutter/widgets.dart' show TextEditingController;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -120,9 +120,21 @@ void clearCatalogFilters(WidgetRef ref) {
 
 /// Los idiomas de la app son español e inglés; cualquier otro cae a inglés,
 /// igual que la localización.
-final catalogLanguageCodeProvider = Provider<String>((ref) {
-  return PlatformDispatcher.instance.locale.languageCode == 'es' ? 'es' : 'en';
-});
+String catalogLanguageFor(Locale locale) =>
+    locale.languageCode == 'es' ? 'es' : 'en';
+
+/// Idioma con el que se ordena el catálogo; sigue al del sistema.
+class CatalogLanguage extends Notifier<String> {
+  @override
+  String build() => catalogLanguageFor(PlatformDispatcher.instance.locale);
+
+  /// Se llama cuando el sistema cambia de idioma con la app abierta.
+  void update(Locale locale) => state = catalogLanguageFor(locale);
+}
+
+final catalogLanguageCodeProvider = NotifierProvider<CatalogLanguage, String>(
+  CatalogLanguage.new,
+);
 
 final _catalogPokemonsProvider = StreamProvider<List<Pokemon>>((ref) async* {
   final limit = ref.watch(catalogLimitProvider);
@@ -148,19 +160,19 @@ final catalogLocalCountProvider = StreamProvider<int>(
   (ref) => ref.watch(pokemonRepositoryProvider).watchLocalCount(),
 );
 
-final _catalogSyncInfoProvider = StreamProvider<CatalogSyncInfo>(
+final catalogSyncInfoProvider = StreamProvider<CatalogSyncInfo>(
   (ref) => ref.watch(pokemonRepositoryProvider).watchSyncInfo(),
 );
 
 final catalogRemoteTotalProvider = Provider<int?>(
-  (ref) => ref.watch(_catalogSyncInfoProvider).value?.catalogTotalCount,
+  (ref) => ref.watch(catalogSyncInfoProvider).value?.catalogTotalCount,
 );
 
 /// Lo único que lee la pantalla del catálogo.
 final catalogStateProvider = Provider<CatalogState>((ref) {
   final limit = ref.watch(catalogLimitProvider);
   final pokemons = ref.watch(_catalogPokemonsProvider);
-  final syncInfo = ref.watch(_catalogSyncInfoProvider);
+  final syncInfo = ref.watch(catalogSyncInfoProvider);
   final filters = ref.watch(catalogFiltersProvider).value;
   final localCount = ref.watch(catalogLocalCountProvider).value;
 

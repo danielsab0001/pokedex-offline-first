@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:pokedex/app/di/providers.dart';
 import 'package:pokedex/features/connectivity/domain/connectivity_models.dart';
 import 'package:pokedex/features/connectivity/presentation/connectivity_providers.dart';
@@ -32,6 +33,27 @@ Widget app({
   TextSharer? sharer,
   Locale locale = const Locale('es'),
 }) {
+  final router = GoRouter(
+    initialLocation: '/pokemon/25',
+    routes: [
+      GoRoute(
+        path: '/pokemon/:id',
+        builder: (_, state) => PokemonDetailPage(
+          pokemonId: int.parse(state.pathParameters['id']!),
+        ),
+        routes: [
+          GoRoute(
+            path: 'card',
+            builder: (_, state) => PokemonCardPage(
+              pokemonId: int.parse(state.pathParameters['id']!),
+            ),
+          ),
+        ],
+      ),
+    ],
+  );
+  addTearDown(router.dispose);
+
   return ProviderScope(
     overrides: [
       pokemonDetailRepositoryProvider.overrideWithValue(
@@ -57,11 +79,11 @@ Widget app({
         ),
       ),
     ],
-    child: MaterialApp(
+    child: MaterialApp.router(
+      routerConfig: router,
       locale: locale,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const PokemonDetailPage(pokemonId: 25),
     ),
   );
 }

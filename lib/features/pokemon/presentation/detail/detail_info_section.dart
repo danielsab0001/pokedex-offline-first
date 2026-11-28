@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon_detail.dart';
-import 'package:pokedex/features/pokemon/presentation/detail/detail_section.dart';
+import 'package:pokedex/core/widgets/titled_section.dart';
 import 'package:pokedex/features/pokemon/presentation/detail/egg_group_labels.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
 
@@ -24,7 +24,7 @@ class DetailInfoSection extends StatelessWidget {
     final height = detail.heightMeters;
     final weight = detail.weightKilograms;
 
-    return DetailSection(
+    return TitledSection(
       title: l10n.detailInfoTitle,
       child: Column(
         children: [

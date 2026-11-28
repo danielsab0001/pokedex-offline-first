@@ -8,27 +8,38 @@ import 'package:pokedex/core/network/graphql_client.dart';
 import 'package:pokedex/core/sync/api_gate.dart';
 import 'package:pokedex/core/sync/sync_metadata_local_data_source.dart';
 import 'package:pokedex/features/pokemon/data/catalog_sync.dart';
+import 'package:pokedex/features/pokemon/data/pokemon_detail_sync.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_local_data_source.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_remote_data_source.dart';
 
+import '../../support/fake_detail_api.dart';
 import 'catalog_sync_test.dart' show FakePokeApi;
 
 void main() {
   late AppDatabase db;
   late FakePokeApi api;
   late CatalogSync sync;
+  late PokemonDetailSync detailSync;
 
   setUp(() {
     db = AppDatabase(NativeDatabase.memory());
     final meta = SyncMetadataLocalDataSource(db);
+    final local = PokemonLocalDataSource(db, meta);
     api = FakePokeApi();
     final client = createPokeApiClient(httpClient: MockClient(api.handle));
     sync = CatalogSync(
       PokemonRemoteDataSource(client),
-      PokemonLocalDataSource(db, meta),
+      local,
       meta,
       ApiGate(meta, maxAttempts: 1),
       pageSize: 10,
+    );
+    detailSync = PokemonDetailSync(
+      PokemonRemoteDataSource(
+        createPokeApiClient(httpClient: MockClient(FakeDetailApi().handle)),
+      ),
+      local,
+      ApiGate(meta, maxAttempts: 1),
     );
   });
 
@@ -85,9 +96,9 @@ void main() {
       await sync.start();
       await sync.verifyAll();
     },
-    'el refresco de una especie': () async {
+    'el refresco del detalle de una especie': () async {
       await sync.start();
-      await sync.refreshSpecies(7);
+      await detailSync.refresh(7);
     },
     'un fallo de red': () async {
       await sync.start();

@@ -1,22 +1,16 @@
-import 'dart:async';
-
 import 'package:pokedex/core/error/failure.dart';
+import 'package:pokedex/core/live_value.dart';
 
 /// Qué sabemos de PokeAPI según nuestra última llamada real.
 enum ServiceOutcome { unknown, reachable, noConnection, serviceFailure }
 
 class ServiceHealth {
-  final _changes = StreamController<ServiceOutcome>.broadcast(sync: true);
-  ServiceOutcome _current = ServiceOutcome.unknown;
+  final _outcome = LiveValue(ServiceOutcome.unknown);
 
-  ServiceOutcome get current => _current;
+  ServiceOutcome get current => _outcome.value;
 
   /// Emite el valor actual al suscribirse y después cada cambio.
-  Stream<ServiceOutcome> watch() => Stream.multi((controller) {
-    controller.add(_current);
-    final subscription = _changes.stream.listen(controller.add);
-    controller.onCancel = subscription.cancel;
-  }, isBroadcast: true);
+  Stream<ServiceOutcome> watch() => _outcome.watch();
 
   void reportSuccess() => _update(ServiceOutcome.reachable);
 
@@ -37,11 +31,7 @@ class ServiceHealth {
   /// Tras recuperar la red hay que volver a comprobar la API.
   void reset() => _update(ServiceOutcome.unknown);
 
-  Future<void> dispose() => _changes.close();
+  Future<void> dispose() => _outcome.dispose();
 
-  void _update(ServiceOutcome outcome) {
-    if (outcome == _current) return;
-    _current = outcome;
-    _changes.add(outcome);
-  }
+  void _update(ServiceOutcome outcome) => _outcome.value = outcome;
 }

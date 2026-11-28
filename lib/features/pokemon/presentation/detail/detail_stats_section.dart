@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon_detail.dart';
-import 'package:pokedex/features/pokemon/presentation/detail/detail_section.dart';
+import 'package:pokedex/core/widgets/titled_section.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
 
 String statLabel(AppLocalizations l10n, StatKind kind) => switch (kind) {
@@ -30,7 +30,7 @@ class DetailStatsSection extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
-    return DetailSection(
+    return TitledSection(
       title: l10n.detailStatsTitle,
       child: Column(
         children: [

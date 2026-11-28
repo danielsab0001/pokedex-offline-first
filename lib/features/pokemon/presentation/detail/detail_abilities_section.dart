@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon_detail.dart';
-import 'package:pokedex/features/pokemon/presentation/detail/detail_section.dart';
+import 'package:pokedex/core/widgets/titled_section.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
 
 /// Habilidades con su marca de oculta y un efecto resumido (RF-DET-03).
@@ -13,7 +13,7 @@ class DetailAbilitiesSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    return DetailSection(
+    return TitledSection(
       title: l10n.detailAbilitiesTitle,
       child: Column(
         children: [

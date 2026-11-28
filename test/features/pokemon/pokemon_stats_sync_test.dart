@@ -7,10 +7,12 @@ import 'package:pokedex/core/network/graphql_client.dart';
 import 'package:pokedex/core/sync/api_gate.dart';
 import 'package:pokedex/core/sync/sync_metadata_local_data_source.dart';
 import 'package:pokedex/features/pokemon/data/catalog_sync.dart';
+import 'package:pokedex/features/pokemon/data/pokemon_detail_sync.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_local_data_source.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_record.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_remote_data_source.dart';
 
+import '../../support/fake_detail_api.dart';
 import 'catalog_sync_test.dart' show FakePokeApi;
 
 PokemonRecord _record(int id, {List<int>? values}) {
@@ -40,6 +42,13 @@ void main() {
 
   tearDown(() => db.close());
 
+  // Guarda una sola especie por la vía pública del catálogo.
+  Future<void> save(PokemonRecord record) => local.savePage(
+    [record],
+    resourceKey: 'catalog_index',
+    nextCursor: record.id,
+  );
+
   Future<int?> totalOf(int id) async {
     final row = await (db.select(
       db.pokemons,
@@ -56,30 +65,30 @@ void main() {
 
   group('guardado', () {
     test('guarda las seis estadísticas y el total', () async {
-      await local.saveSpecies(_record(1, values: [45, 49, 49, 65, 65, 45]));
+      await save(_record(1, values: [45, 49, 49, 65, 65, 45]));
 
       expect(await totalOf(1), 318);
       expect(await statRows(1), 6);
     });
 
     test('guardar otra vez reemplaza sin duplicar', () async {
-      await local.saveSpecies(_record(1, values: [45, 49, 49, 65, 65, 45]));
-      await local.saveSpecies(_record(1, values: [50, 49, 49, 65, 65, 45]));
+      await save(_record(1, values: [45, 49, 49, 65, 65, 45]));
+      await save(_record(1, values: [50, 49, 49, 65, 65, 45]));
 
       expect(await totalOf(1), 323);
       expect(await statRows(1), 6);
     });
 
     test('sin estadísticas el total queda null y no hay filas', () async {
-      await local.saveSpecies(_record(1, values: [45, 49, 49, 65, 65, 45]));
-      await local.saveSpecies(_record(1));
+      await save(_record(1, values: [45, 49, 49, 65, 65, 45]));
+      await save(_record(1));
 
       expect(await totalOf(1), isNull);
       expect(await statRows(1), 0);
     });
 
     test('con estadísticas incompletas el total queda null', () async {
-      await local.saveSpecies(_record(1, values: [45, 49]));
+      await save(_record(1, values: [45, 49]));
 
       expect(await totalOf(1), isNull);
       expect(await statRows(1), 2);
@@ -124,7 +133,15 @@ void main() {
       },
     );
 
-    test('refreshSpecies restaura una estadística alterada', () async {
+    test('el refresco del detalle restaura una estadística alterada', () async {
+      final detailApi = FakeDetailApi();
+      final detailSync = PokemonDetailSync(
+        PokemonRemoteDataSource(
+          createPokeApiClient(httpClient: MockClient(detailApi.handle)),
+        ),
+        local,
+        ApiGate(meta, maxAttempts: 1),
+      );
       await sync.start();
       await (db.update(db.pokemonStats)
             ..where((s) => s.pokemonId.equals(7))
@@ -134,7 +151,7 @@ void main() {
         const PokemonsCompanion(baseStatTotal: Value(1149)),
       );
 
-      await sync.refreshSpecies(7);
+      await detailSync.refresh(7);
 
       expect(await totalOf(7), 157);
       final speed =
