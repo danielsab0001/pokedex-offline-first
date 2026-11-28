@@ -7,19 +7,39 @@ import '../../generated_migrations/schema_v1.dart' as v1;
 import '../../generated_migrations/schema_v3.dart' as v3;
 import '../../generated_migrations/schema_v4.dart' as v4;
 import '../../generated_migrations/schema_v5.dart' as v5;
+import '../../generated_migrations/schema_v6.dart' as v6;
+
+const _tablesOfV7 = [
+  'type_efficacy',
+  'version_group',
+  'move',
+  'pokemon_variant',
+  'pokemon_variant_type',
+  'pokemon_variant_stat',
+  'evolution',
+  'pokemon_game',
+  'pokemon_move',
+];
 
 void main() {
   late SchemaVerifier verifier;
 
   setUpAll(() => verifier = SchemaVerifier(GeneratedHelper()));
 
-  for (final from in [1, 2, 3, 4, 5]) {
-    test('migrar de v$from a v6 deja el esquema esperado', () async {
+  Future<int> count(AppDatabase db, String table) async {
+    final row = await db
+        .customSelect('SELECT COUNT(*) AS n FROM $table')
+        .getSingle();
+    return row.read<int>('n');
+  }
+
+  for (final from in [1, 2, 3, 4, 5, 6]) {
+    test('migrar de v$from a v7 deja el esquema esperado', () async {
       final connection = await verifier.startAt(from);
       final db = AppDatabase(connection);
       addTearDown(db.close);
 
-      await verifier.migrateAndValidate(db, 6);
+      await verifier.migrateAndValidate(db, 7);
     });
   }
 
@@ -37,7 +57,7 @@ void main() {
 
     final db = AppDatabase(schema.newConnection());
     addTearDown(db.close);
-    await verifier.migrateAndValidate(db, 6);
+    await verifier.migrateAndValidate(db, 7);
 
     final favorite = await db.select(db.favorites).getSingle();
     final meta = await db.select(db.syncMetadataEntries).getSingle();
@@ -64,7 +84,7 @@ void main() {
 
     final db = AppDatabase(schema.newConnection());
     addTearDown(db.close);
-    await verifier.migrateAndValidate(db, 6);
+    await verifier.migrateAndValidate(db, 7);
 
     final pokemon = await db.select(db.pokemons).getSingle();
     expect(pokemon.nameEn, 'pikachu');
@@ -101,7 +121,7 @@ void main() {
 
     final db = AppDatabase(schema.newConnection());
     addTearDown(db.close);
-    await verifier.migrateAndValidate(db, 6);
+    await verifier.migrateAndValidate(db, 7);
 
     final pokemon = await db.select(db.pokemons).getSingle();
     expect(pokemon.baseStatTotal, 320);
@@ -131,7 +151,7 @@ void main() {
 
     final db = AppDatabase(schema.newConnection());
     addTearDown(db.close);
-    await verifier.migrateAndValidate(db, 6);
+    await verifier.migrateAndValidate(db, 7);
 
     final pokemon = await db.select(db.pokemons).getSingle();
     expect(pokemon.baseStatTotal, 320);
@@ -140,5 +160,44 @@ void main() {
     expect((await db.select(db.favorites).getSingle()).pokemonId, 25);
     expect(await db.select(db.triviaResults).get(), isEmpty);
     expect(await db.select(db.triviaAnswers).get(), isEmpty);
+  });
+
+  test('migrar de v6 conserva catálogo, detalle, favoritos y trivia', () async {
+    final schema = await verifier.schemaAt(6);
+    final oldDb = v6.DatabaseAtV6(schema.newConnection());
+    await oldDb.customStatement(
+      'INSERT INTO pokemon (id, name_en, generation_id, base_stat_total, '
+      'height, weight, detail_synced_at, synced_at) '
+      "VALUES (25, 'pikachu', 1, 320, 4, 60, 1700000100, 1700000000)",
+    );
+    await oldDb.customStatement(
+      'INSERT INTO favorite (pokemon_id, created_at) VALUES (25, 1700000000)',
+    );
+    await oldDb.customStatement(
+      'INSERT INTO trivia_result '
+      '(id, score, correct_answers, total_questions, played_at) '
+      'VALUES (1, 750, 6, 10, 1700000200)',
+    );
+    await oldDb.customStatement(
+      'INSERT INTO trivia_answer (trivia_result_id, pokemon_id, correct) '
+      'VALUES (1, 25, 1)',
+    );
+    await oldDb.close();
+
+    final db = AppDatabase(schema.newConnection());
+    addTearDown(db.close);
+    await verifier.migrateAndValidate(db, 7);
+
+    final pokemon = await db.select(db.pokemons).getSingle();
+    expect(pokemon.height, 4);
+    expect(pokemon.weight, 60);
+    expect(pokemon.detailSyncedAt, isNotNull);
+    expect(pokemon.evolutionChainId, isNull);
+    expect((await db.select(db.favorites).getSingle()).pokemonId, 25);
+    expect((await db.select(db.triviaResults).getSingle()).score, 750);
+    expect(await db.select(db.triviaAnswers).get(), hasLength(1));
+    for (final table in _tablesOfV7) {
+      expect(await count(db, table), 0, reason: table);
+    }
   });
 }

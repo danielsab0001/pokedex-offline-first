@@ -280,5 +280,11 @@
                     "name": {"type": "String"},
                     "number": {"type": "String"}
                   }
-                }
+                },
+                  "detailMatchupsTitle": "Weaknesses and resistances",
+                  "matchupQuadruple": "Very weak (×4)",
+                  "matchupDoubled": "Weak (×2)",
+                  "matchupHalf": "Resists (×0.5)",
+                  "matchupQuarter": "Strongly resists (×0.25)",
+                  "matchupImmune": "Immune (×0)"
 }

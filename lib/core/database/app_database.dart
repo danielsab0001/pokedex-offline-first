@@ -20,6 +20,15 @@ part 'app_database.g.dart';
     ApiCalls,
     TriviaResults,
     TriviaAnswers,
+    TypeEfficacies,
+    VersionGroups,
+    Moves,
+    PokemonVariants,
+    PokemonVariantTypes,
+    PokemonVariantStats,
+    Evolutions,
+    PokemonGames,
+    PokemonMoves,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -28,7 +37,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.defaults() : super(driftDatabase(name: 'pokedex'));
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -67,6 +76,20 @@ class AppDatabase extends _$AppDatabase {
       if (from < 6) {
         await m.createTable(triviaResults);
         await m.createTable(triviaAnswers);
+      }
+      if (from < 7) {
+        // Evolución, formas y juegos llegan al abrir cada detalle con conexión.
+        await m.addColumn(pokemons, pokemons.evolutionChainId);
+        await m.createTable(typeEfficacies);
+        await m.createTable(versionGroups);
+        await m.createTable(moves);
+        await m.createTable(pokemonVariants);
+        await m.createIndex(idxVariantSpecies);
+        await m.createTable(pokemonVariantTypes);
+        await m.createTable(pokemonVariantStats);
+        await m.createTable(evolutions);
+        await m.createTable(pokemonGames);
+        await m.createTable(pokemonMoves);
       }
     },
     beforeOpen: (details) async {

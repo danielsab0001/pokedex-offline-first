@@ -345,5 +345,11 @@
                     "name": {"type": "String"},
                     "number": {"type": "String"}
                   }
-                }
+                },
+                  "detailMatchupsTitle": "Debilidades y resistencias",
+                  "matchupQuadruple": "Muy débil (×4)",
+                  "matchupDoubled": "Débil (×2)",
+                  "matchupHalf": "Resiste (×0.5)",
+                  "matchupQuarter": "Resiste mucho (×0.25)",
+                  "matchupImmune": "Inmune (×0)"
 }

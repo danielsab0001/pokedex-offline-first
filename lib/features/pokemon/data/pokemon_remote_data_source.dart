@@ -8,6 +8,7 @@ import 'package:pokedex/core/network/graphql_client.dart';
 import 'package:pokedex/core/network/service_health.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_queries.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_species_dto.dart';
+import 'package:pokedex/features/pokemon/data/reference_dto.dart';
 
 const catalogPageSize = 100;
 
@@ -23,6 +24,7 @@ class PokemonRemoteDataSource {
   final ServiceHealth? health;
   final _catalogDocument = gql(catalogPageQuery);
   final _detailDocument = gql(pokemonDetailQuery);
+  final _referenceDocument = gql(referenceDataQuery);
 
   /// Pide las especies con id mayor que [afterId] (paginación por cursor).
   /// Con [includeTotal] pide además el total de especies de PokeAPI.
@@ -64,6 +66,19 @@ class PokemonRemoteDataSource {
         ),
       );
       return _parse(() => PokemonDetailDto.fromResponse(data));
+    });
+  }
+
+  /// Tabla de tipos y grupos de versión; no depende de ningún Pokémon.
+  Future<ReferenceDto> fetchReferenceData() {
+    return _reporting(() async {
+      final data = await _query(
+        QueryOptions(
+          document: _referenceDocument,
+          fetchPolicy: FetchPolicy.noCache,
+        ),
+      );
+      return _parse(() => ReferenceDto.fromJson(data));
     });
   }
 

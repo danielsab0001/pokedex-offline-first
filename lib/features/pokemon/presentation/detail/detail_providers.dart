@@ -3,6 +3,7 @@ import 'package:pokedex/app/di/providers.dart';
 import 'package:pokedex/core/sync/sync_error_kind.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon_detail.dart';
 import 'package:pokedex/features/pokemon/presentation/detail/detail_state.dart';
+import 'package:pokedex/features/pokemon/domain/type_matchups.dart';
 
 final pokemonDetailProvider = StreamProvider.autoDispose
     .family<PokemonDetail?, int>(
@@ -34,3 +35,8 @@ final detailStateProvider = Provider.autoDispose.family<DetailState, int>((
         : (refresh.hasError ? SyncErrorKind.unknown : refresh.value),
   );
 });
+
+/// La tabla de tipos de la referencia local; vacía hasta que se descargue.
+final typeChartProvider = StreamProvider.autoDispose<TypeChart>(
+  (ref) => ref.watch(pokemonDetailRepositoryProvider).watchTypeChart(),
+);

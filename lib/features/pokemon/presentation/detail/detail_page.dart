@@ -18,6 +18,7 @@ import 'package:pokedex/features/pokemon/presentation/detail/detail_stats_sectio
 import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_hero.dart';
 import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_thumbnail.dart';
 import 'package:pokedex/l10n/app_localizations.dart';
+import 'package:pokedex/features/pokemon/presentation/detail/detail_matchups_section.dart';
 
 class PokemonDetailPage extends ConsumerWidget {
   const PokemonDetailPage({
@@ -129,6 +130,7 @@ class _DetailBodyState extends State<_DetailBody> {
                         total: detail.baseStatTotal,
                       ),
                     ],
+                    DetailMatchupsSection(types: detail.pokemon.types),
                     const SizedBox(height: 24),
                     if (detail.hasDetail) ...[
                       if (detail.abilities.isNotEmpty) ...[

@@ -1,11 +1,11 @@
-import 'package:pokedex/core/error/failure.dart';
 import 'package:pokedex/core/sync/api_gate.dart';
 import 'package:pokedex/core/sync/call_budget.dart';
-import 'package:pokedex/core/sync/single_flight.dart';
 import 'package:pokedex/core/sync/sync_metadata_local_data_source.dart';
+import 'package:pokedex/core/sync/sync_runner.dart';
 import 'package:pokedex/core/sync/sync_status.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_local_data_source.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_remote_data_source.dart';
+import 'package:pokedex/features/pokemon/data/reference_sync.dart';
 
 typedef _PageResult = ({bool isLast, int nextCursor});
 
@@ -17,6 +17,7 @@ class CatalogSync {
     this._metadata,
     this._gate, {
     this.pageSize = catalogPageSize,
+    this._reference,
   });
 
   static const indexKey = 'catalog_index';
@@ -27,7 +28,8 @@ class CatalogSync {
   final SyncMetadataLocalDataSource _metadata;
   final ApiGate _gate;
   final int pageSize;
-  final _singleFlight = SingleFlight();
+  final ReferenceSync? _reference;
+  late final _runner = SyncRunner(_metadata);
 
   Future<void> start() async {
     await _metadata.markInterruptedOrphans();
@@ -43,10 +45,10 @@ class CatalogSync {
     } else {
       await syncIndex();
     }
+    await _reference?.syncNow(priority: priority);
   }
 
-  Future<void> syncIndex() =>
-      _singleFlight.run(indexKey, () => _guarded(indexKey, _downloadIndex));
+  Future<void> syncIndex() => _runner.run(indexKey, _downloadIndex);
 
   Future<void> verifyNextPage({
     CallPriority priority = CallPriority.interactive,
@@ -55,28 +57,11 @@ class CatalogSync {
         await _gate.blockedFor(priority) != null) {
       return;
     }
-    await _singleFlight.run(
-      verifyKey,
-      () => _guarded(verifyKey, () => _verifyOnePage(priority)),
-    );
+    await _runner.run(verifyKey, () => _verifyOnePage(priority));
   }
 
   /// Recorre todo el catálogo y restaura lo que se haya alterado en local
-  Future<void> verifyAll() =>
-      _singleFlight.run(verifyKey, () => _guarded(verifyKey, _verifyAllPages));
-
-  Future<void> _guarded(String key, Future<void> Function() body) async {
-    await _metadata.markStarted(key);
-    try {
-      await body();
-      await _metadata.markCompleted(key);
-    } on Failure catch (failure) {
-      await _metadata.markFailed(key, failure.code);
-    } catch (_) {
-      // Cualquier error que no sea un Failure se trata como fallo al guardar.
-      await _metadata.markFailed(key, FailureCode.storage);
-    }
-  }
+  Future<void> verifyAll() => _runner.run(verifyKey, _verifyAllPages);
 
   Future<void> _downloadIndex() async {
     var cursor = (await _metadata.read(indexKey))?.cursor ?? 0;

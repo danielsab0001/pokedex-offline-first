@@ -93,3 +93,30 @@ query PokemonDetail($id: Int!) {
 
 /// El núcleo de una especie más lo que solo necesita su pantalla de detalle.
 const pokemonDetailQuery = _pokemonDetailBody + speciesCoreFragment;
+
+/// Datos globales que no dependen de un Pokémon: tabla de tipos y juegos.
+const referenceDataQuery = r'''
+query ReferenceData {
+  typeefficacy {
+    damage_type_id
+    target_type_id
+    damage_factor
+  }
+  type(where: {id: {_lte: 18}}, order_by: {id: asc}) {
+    id
+    name
+  }
+  versiongroup(order_by: {order: asc}) {
+    id
+    name
+    order
+    generation_id
+    versions {
+      versionnames(where: {language_id: {_in: [7, 9]}}) {
+        language_id
+        name
+      }
+    }
+  }
+}
+''';

@@ -2,14 +2,18 @@ import 'package:pokedex/core/sync/sync_error_kind.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_detail_mapper.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_detail_sync.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_local_data_source.dart';
+import 'package:pokedex/features/pokemon/data/reference_local_data_source.dart';
+import 'package:pokedex/features/pokemon/data/reference_mapper.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon_detail.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon_detail_repository.dart';
+import 'package:pokedex/features/pokemon/domain/type_matchups.dart';
 
 class PokemonDetailRepositoryImpl implements PokemonDetailRepository {
-  PokemonDetailRepositoryImpl(this._local, this._sync);
+  PokemonDetailRepositoryImpl(this._local, this._sync, this._reference);
 
   final PokemonLocalDataSource _local;
   final PokemonDetailSync _sync;
+  final ReferenceLocalDataSource _reference;
 
   @override
   Stream<PokemonDetail?> watchDetail(int id) {
@@ -25,4 +29,8 @@ class PokemonDetailRepositoryImpl implements PokemonDetailRepository {
     final failure = await _sync.refresh(id);
     return SyncErrorKind.fromCode(failure?.code);
   }
+
+  @override
+  Stream<TypeChart> watchTypeChart() =>
+      _reference.watchReference().map(typeChartFromRecord);
 }

@@ -12,6 +12,7 @@ import 'package:pokedex/features/pokemon/data/pokemon_detail_sync.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_local_data_source.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_remote_data_source.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon_detail.dart';
+import 'package:pokedex/features/pokemon/data/reference_local_data_source.dart';
 
 import '../../support/fake_detail_api.dart';
 
@@ -34,6 +35,7 @@ void main() {
         local,
         ApiGate(meta, maxAttempts: 1),
       ),
+      ReferenceLocalDataSource(db, meta),
     );
   });
 

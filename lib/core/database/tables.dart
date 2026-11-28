@@ -17,6 +17,7 @@ class Pokemons extends Table {
   IntColumn get height => integer().nullable()();
   IntColumn get weight => integer().nullable()();
   DateTimeColumn get detailSyncedAt => dateTime().nullable()();
+  IntColumn get evolutionChainId => integer().nullable()();
   DateTimeColumn get syncedAt => dateTime()();
 
   @override
@@ -201,4 +202,156 @@ class TriviaAnswers extends Table {
   // Sin cascada: ninguna acción sobre el catálogo borra el historial (PS-11).
   IntColumn get pokemonId => integer().references(Pokemons, #id)();
   BoolColumn get correct => boolean()();
+}
+
+@DataClassName('TypeEfficacyRow')
+class TypeEfficacies extends Table {
+  @override
+  String get tableName => 'type_efficacy';
+
+  IntColumn get attackerTypeId => integer().references(Types, #id)();
+  IntColumn get defenderTypeId => integer().references(Types, #id)();
+  // PokeAPI lo entrega como 0, 50, 100 o 200.
+  IntColumn get damageFactor => integer()();
+
+  @override
+  Set<Column> get primaryKey => {attackerTypeId, defenderTypeId};
+}
+
+@DataClassName('VersionGroupRow')
+class VersionGroups extends Table {
+  @override
+  String get tableName => 'version_group';
+
+  IntColumn get id => integer()();
+  TextColumn get slug => text()();
+  IntColumn get generationId => integer()();
+  IntColumn get sortOrder => integer()();
+  TextColumn get nameEn => text()();
+  TextColumn get nameEs => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DataClassName('MoveRow')
+class Moves extends Table {
+  @override
+  String get tableName => 'move';
+
+  IntColumn get id => integer()();
+  TextColumn get slug => text()();
+  TextColumn get nameEn => text()();
+  TextColumn get nameEs => text().nullable()();
+  // Sin clave foránea: los movimientos pueden llegar antes que la referencia.
+  IntColumn get typeId => integer()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+// Solo formas distintas de la base: la base vive en las tablas de la especie.
+@DataClassName('PokemonVariantRow')
+@TableIndex(name: 'idx_variant_species', columns: {#speciesId})
+class PokemonVariants extends Table {
+  @override
+  String get tableName => 'pokemon_variant';
+
+  // Id del Pokémon en PokeAPI (por ejemplo 10100), no el de la especie.
+  IntColumn get id => integer()();
+  IntColumn get speciesId =>
+      integer().references(Pokemons, #id, onDelete: KeyAction.cascade)();
+  TextColumn get slug => text()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DataClassName('PokemonVariantTypeRow')
+class PokemonVariantTypes extends Table {
+  @override
+  String get tableName => 'pokemon_variant_type';
+
+  IntColumn get variantId =>
+      integer().references(PokemonVariants, #id, onDelete: KeyAction.cascade)();
+  IntColumn get slot => integer()();
+  IntColumn get typeId => integer().references(Types, #id)();
+
+  @override
+  Set<Column> get primaryKey => {variantId, slot};
+}
+
+@DataClassName('PokemonVariantStatRow')
+class PokemonVariantStats extends Table {
+  @override
+  String get tableName => 'pokemon_variant_stat';
+
+  IntColumn get variantId =>
+      integer().references(PokemonVariants, #id, onDelete: KeyAction.cascade)();
+  IntColumn get statId => integer()();
+  IntColumn get baseStat => integer()();
+
+  @override
+  Set<Column> get primaryKey => {variantId, statId};
+}
+
+// Una fila por especie evolucionada: solo tiene un padre.
+@DataClassName('EvolutionRow')
+class Evolutions extends Table {
+  @override
+  String get tableName => 'evolution';
+
+  IntColumn get toSpeciesId =>
+      integer().references(Pokemons, #id, onDelete: KeyAction.cascade)();
+  IntColumn get fromSpeciesId =>
+      integer().references(Pokemons, #id, onDelete: KeyAction.cascade)();
+  // No se llama trigger porque es palabra reservada de SQL.
+  TextColumn get triggerKind => text()();
+  IntColumn get minLevel => integer().nullable()();
+  IntColumn get minHappiness => integer().nullable()();
+  TextColumn get timeOfDay => text().nullable()();
+  TextColumn get itemSlug => text().nullable()();
+  TextColumn get itemNameEn => text().nullable()();
+  TextColumn get itemNameEs => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {toSpeciesId};
+}
+
+@DataClassName('PokemonGameRow')
+class PokemonGames extends Table {
+  @override
+  String get tableName => 'pokemon_game';
+
+  IntColumn get speciesId =>
+      integer().references(Pokemons, #id, onDelete: KeyAction.cascade)();
+  IntColumn get versionGroupId => integer()();
+
+  @override
+  Set<Column> get primaryKey => {speciesId, versionGroupId};
+}
+
+@DataClassName('PokemonMoveRow')
+class PokemonMoves extends Table {
+  @override
+  String get tableName => 'pokemon_move';
+
+  IntColumn get pokemonId => integer()();
+  IntColumn get versionGroupId => integer()();
+  // Ids de PokeAPI: 1 level-up, 2 egg, 3 tutor, 4 machine.
+  IntColumn get methodId => integer()();
+  // 0 cuando el método no tiene nivel.
+  IntColumn get level => integer()();
+  IntColumn get moveId => integer().references(Moves, #id)();
+  IntColumn get sortOrder => integer().nullable()();
+
+  // Este orden sirve a la lista: filtra por los tres primeros y sale ordenada por nivel.
+  @override
+  Set<Column> get primaryKey => {
+    pokemonId,
+    versionGroupId,
+    methodId,
+    level,
+    moveId,
+  };
 }

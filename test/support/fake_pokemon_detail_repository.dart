@@ -3,11 +3,16 @@ import 'dart:async';
 import 'package:pokedex/core/sync/sync_error_kind.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon_detail.dart';
 import 'package:pokedex/features/pokemon/domain/pokemon_detail_repository.dart';
+import 'package:pokedex/features/pokemon/domain/type_matchups.dart';
 
 class FakePokemonDetailRepository implements PokemonDetailRepository {
-  FakePokemonDetailRepository([this._current]);
+  FakePokemonDetailRepository([
+    this._current,
+    this.typeChart = const TypeChart(),
+  ]);
 
   PokemonDetail? _current;
+  final TypeChart typeChart;
   final _changes = StreamController<void>.broadcast();
   final refreshCalls = <int>[];
 
@@ -32,4 +37,7 @@ class FakePokemonDetailRepository implements PokemonDetailRepository {
     refreshCalls.add(id);
     return onRefresh(id);
   }
+
+  @override
+  Stream<TypeChart> watchTypeChart() => Stream.value(typeChart);
 }

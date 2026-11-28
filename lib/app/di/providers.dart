@@ -45,6 +45,8 @@ import 'package:pokedex/features/trivia/data/trivia_local_data_source.dart';
 import 'package:pokedex/features/trivia/data/trivia_repository_impl.dart';
 import 'package:pokedex/features/trivia/domain/sprite_availability.dart';
 import 'package:pokedex/features/trivia/domain/trivia_repository.dart';
+import 'package:pokedex/features/pokemon/data/reference_local_data_source.dart';
+import 'package:pokedex/features/pokemon/data/reference_sync.dart';
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase.defaults();
@@ -125,12 +127,29 @@ final pokemonRemoteDataSourceProvider = Provider<PokemonRemoteDataSource>(
   ),
 );
 
+final referenceLocalDataSourceProvider = Provider<ReferenceLocalDataSource>(
+  (ref) => ReferenceLocalDataSource(
+    ref.watch(appDatabaseProvider),
+    ref.watch(syncMetadataLocalDataSourceProvider),
+  ),
+);
+
+final referenceSyncProvider = Provider<ReferenceSync>(
+  (ref) => ReferenceSync(
+    ref.watch(pokemonRemoteDataSourceProvider),
+    ref.watch(referenceLocalDataSourceProvider),
+    ref.watch(syncMetadataLocalDataSourceProvider),
+    ref.watch(apiGateProvider),
+  ),
+);
+
 final catalogSyncProvider = Provider<CatalogSync>(
   (ref) => CatalogSync(
     ref.watch(pokemonRemoteDataSourceProvider),
     ref.watch(pokemonLocalDataSourceProvider),
     ref.watch(syncMetadataLocalDataSourceProvider),
     ref.watch(apiGateProvider),
+    reference: ref.watch(referenceSyncProvider),
   ),
 );
 
@@ -155,6 +174,7 @@ final pokemonDetailRepositoryProvider = Provider<PokemonDetailRepository>(
   (ref) => PokemonDetailRepositoryImpl(
     ref.watch(pokemonLocalDataSourceProvider),
     ref.watch(pokemonDetailSyncProvider),
+    ref.watch(referenceLocalDataSourceProvider),
   ),
 );
 

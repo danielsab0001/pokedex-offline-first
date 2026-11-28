@@ -61,4 +61,22 @@ void main() {
       expect(result, isNot(contains('SEARCH')));
     },
   );
+
+  test('las formas de una especie usan idx_variant_species', () async {
+    final result = await plan(
+      'SELECT id FROM pokemon_variant WHERE species_id = 26',
+    );
+    expect(result, contains('idx_variant_species'));
+  });
+
+  test('los movimientos de una forma salen ordenados por la clave', () async {
+    final result = await plan(
+      'SELECT move_id, level FROM pokemon_move '
+      'WHERE pokemon_id = 25 AND version_group_id = 25 AND method_id = 1 '
+      'ORDER BY level',
+    );
+    expect(result, contains('SEARCH'));
+    expect(result, isNot(contains('SCAN')));
+    expect(result, isNot(contains('TEMP B-TREE')));
+  });
 }
